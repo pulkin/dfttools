@@ -32,7 +32,7 @@ setup(
     url='http://pypi.python.org/pypi/DFTTools/',
     license='LICENSE.txt',
     description='Tools for parsing textual data from modern DFT codes',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     cmdclass = cmdclass,
     ext_modules=ext_modules,
     install_requires=[

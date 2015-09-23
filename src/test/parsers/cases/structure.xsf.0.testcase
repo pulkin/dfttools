@@ -1,0 +1,28 @@
+
+ # this is a specification 
+ # of ZnS crystal structure
+
+ CRYSTAL
+
+ # these are primitive lattice vectors (in Angstroms)
+
+ PRIMVEC
+    2.7100000000    2.7100000000    0.0000000000
+    2.7100000000    0.0000000000    2.7100000000
+    0.0000000000    2.7100000000    2.7100000000
+
+ # these are convetional lattice vectors (in Angstroms)
+
+ CONVVEC
+    5.4200000000    0.0000000000    0.0000000000
+    0.0000000000    5.4200000000    0.0000000000
+    0.0000000000    0.0000000000    5.4200000000
+
+ # these are atomic coordinates in a primitive unit cell 
+ # (in Angstroms)
+
+ PRIMCOORD
+ 2 1
+ 16      0.0000000000     0.0000000000     0.0000000000
+ 30      1.3550000000    -1.3550000000    -1.3550000000
+

@@ -1,0 +1,82 @@
+#
+# File Name      
+#
+
+System.CurrrentDirectory         ./    # default=./
+System.Name                      mos2_1l_lead
+level.of.stdout                   1    # default=1 (1-3)
+level.of.fileout                  1    # default=1 (0-2)
+
+#
+# Definition of Atomic Species
+#
+
+Species.Number       2
+<Definition.of.Atomic.Species
+ mo  Mo7.0-s2p1d1   Mo_PBE13
+ s   S7.0-s1p1    S_PBE13
+Definition.of.Atomic.Species>
+
+#
+# Atoms
+#
+
+Atoms.UnitVectors.Unit             Ang # Ang|AU
+<Atoms.UnitVectors
+ 5.499090828   0.000   0.000
+ 0.0 0.0 3.17490157
+ 0.0 20.0 0.0
+Atoms.UnitVectors>
+
+Atoms.Number         6
+
+Atoms.SpeciesAndCoordinates.Unit   Frac # Ang|AU
+<Atoms.SpeciesAndCoordinates  
+   1   mo    0.16666666666667    0.25000000000008    0.50000000000004     7     7
+   2    s    0.33333333333333    0.75000000000015    0.42115665000016     3     3
+   3    s    0.33333333333333    0.75000000000016    0.57884333999993     3     3
+   4   mo    0.66666666666667    0.75000000000019    0.50000000000004     7     7
+   5    s    0.83333333333333    0.24999999999993    0.42115665000016     3     3
+   6    s    0.83333333333333    0.24999999999993    0.57884333999993     3     3
+Atoms.SpeciesAndCoordinates>
+
+#
+# SCF or Electronic System
+#
+
+scf.XcType                 GGA-PBE     # LDA|LSDA-CA|LSDA-PW|GGA-PBE
+scf.SpinPolarization        nc         # On|Off|NC
+scf.ElectronicTemperature  300.0       # default=300 (K)
+scf.energycutoff           200.0       # default=150 (Ry)
+scf.maxIter                 100        # default=40
+scf.EigenvalueSolver        band    # DC|GDC|Cluster|Band
+scf.Kgrid                  6 9 1     # means n1 x n2 x n3
+scf.Mixing.Type           rmm-diis     # Simple|Rmm-Diis|Gr-Pulay|Kerker|Rmm-Diisk
+scf.Init.Mixing.Weight     0.30        # default=0.30 
+scf.Min.Mixing.Weight      0.001       # default=0.001 
+scf.Max.Mixing.Weight      0.400       # default=0.40 
+scf.Mixing.History          15          # default=5
+scf.Mixing.StartPulay       5          # default=6
+scf.criterion             1.0e-10      # default=1.0e-6 (Hartree) 
+scf.spinorbit.coupling       on
+
+#
+# MD or Geometry Optimization
+#
+
+MD.Type                     nomd        # Nomd|Opt|NVE|NVT_VS|NVT_NH
+                                       # Constraint_Opt|DIIS
+MD.maxIter                  100        # default=1
+MD.Opt.criterion         1.0e-6        # default=1.0e-4 (Hartree/bohr)
+
+Band.dispersion on
+Band.Nkpath 1
+
+<Band.kpath
+  100  0.0 -0.5 0.0  0.0 0.5 0.0  -Y Y
+Band.kpath>
+
+NEGF.output_hks    on
+NEGF.filename.hks  mos2_lead.hks
+
+HS.fileout on

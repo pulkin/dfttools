@@ -1,0 +1,59 @@
+#/************************************************************/
+#
+#  Current:
+#
+#    convert the unit from a.u to ampere
+#
+#    The unit of current is given by eEh/bar{h} in
+#    atomic unit, where e is the elementary charge,
+#    Eh Hartree, and bar{h} h/{2pi} given by
+#
+#    e = 1.60217653 * 10^{-19} C
+#    Eh = 4.35974417 * 10^{-18} J
+#    bar{h} = 1.05457168 * 10^{-34} J s
+#
+#    Therefore,
+#
+#    1 a.u.
+#    = 1.60217653 * 10^{-19} C * 4.35974417 * 10^{-18} J
+#    / (1.05457168 * 10^{-34} J s )
+#    = 6.6236178 * 10^{-3} [Cs^{-1}=ampere]
+#
+#  Electric potential:
+#
+#    convert the unit from a.u to volt
+#
+#    The unit of electric potential is given by Eh/e in
+#    atomic unit.
+#
+#    Therefore,
+#
+#    1 a.u.
+#    = 4.35974417 * 10^{-18} J/ (1.60217653 * 10^{-19} C)
+#    = 27.21138 [JC^{-1}=volt]
+#
+#    This allows us to consider that the difference of 1 eV in
+#    the chemical potential of leads can be regarded as 1 volt.
+#
+#***********************************************************/
+#
+# k2=  -0.3333  k3=  -0.0000
+# SpinP_switch= 3
+# Chemical potential (eV)      Left, Right Leads=-6.377668e+00 -6.377668e+00
+# Chemical potential (Hartree) Left, Right Leads=-2.343750e-01 -2.343750e-01
+# diff Chemical potential (eV)     = 0.000000e+00
+# diff Chemical potential (Hartree)= 0.000000e+00
+# tran_transmission_energydiv= 10
+#
+# iw  w.real(au)    w.imag(au)    w.real(eV)    w.imag(eV)   transmission       sx            sy            sz
+#
+  0 -2.939946e-02  3.674932e-10 -8.000000e-01  1.000000e-08  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+  1 -3.266607e-02  3.674932e-10 -8.888889e-01  1.000000e-08  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+  2 -3.593267e-02  3.674932e-10 -9.777778e-01  1.000000e-08  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+  3 -3.919928e-02  3.674932e-10 -1.066667e+00  1.000000e-08  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+  4 -4.246589e-02  3.674932e-10 -1.155556e+00  1.000000e-08  0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00
+  5 -4.573249e-02  3.674932e-10 -1.244444e+00  1.000000e-08  9.999952e-01  2.872600e-03  9.997217e-01  1.159900e-04
+  6 -4.899910e-02  3.674932e-10 -1.333333e+00  1.000000e-08  1.999979e+00  5.850681e-04  1.968756e-03 -3.392338e-05
+  7 -5.226571e-02  3.674932e-10 -1.422222e+00  1.000000e-08  1.999980e+00 -1.282421e-03  2.025179e-03 -5.591455e-05
+  8 -5.553231e-02  3.674932e-10 -1.511111e+00  1.000000e-08  2.999921e+00 -4.119572e-04  3.336693e-01 -2.017827e-03
+  9 -5.879892e-02  3.674932e-10 -1.600000e+00  1.000000e-08  3.999924e+00 -2.069544e-03  1.560022e-02  1.541096e-04

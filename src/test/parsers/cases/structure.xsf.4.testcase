@@ -1,0 +1,14 @@
+BEGIN_BLOCK_DATAGRID_2D                 
+   my_first_example_of_2D_datagrid      
+   DATAGRID_2D_this_is_2Dgrid#1           
+     5  5                                 
+     0.0 0.0 0.0                          
+     1.0 0.0 0.0                          
+     0.0 1.0 0.0                          
+       0.000  1.000  2.000  5.196  8.000  
+       1.000  1.414  2.236  5.292  8.062        
+       2.000  2.236  2.828  5.568  8.246        
+       3.000  3.162  3.606  6.000  8.544        
+       4.000  4.123  4.472  6.557  8.944        
+   END_DATAGRID_2D                      
+END_BLOCK_DATAGRID_2D                  

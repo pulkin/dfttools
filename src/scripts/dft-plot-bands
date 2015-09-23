@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+import argparse
+
+parser = argparse.ArgumentParser(description = "Plots a band structure from a supported file")
+parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure file name", metavar = "FILENAME")
+parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
+
+options = parser.parse_args()
+
+from dfttools.parsers.generic import ParseError
+from dfttools.simple import parse
+
+try:
+    
+    with open(options.file, 'r') as f:
+        
+        try:
+            bands = parse(f, 'band-structure')
+        except ParseError:
+            print("Could not parse file '{}'\n".format(options.file))
+            raise
+        
+        if isinstance(bands, (list, tuple)):
+            if len(bands) == 0:
+                print("No data found in '{}'".format(options.file))
+                exit(1)
+            else:
+                bands = bands[-1]
+        
+        try:
+            from matplotlib import pyplot
+            from dfttools.presentation import matplotlib_bands
+        except ImportError:
+            print("Could not import matplotlib\n")
+            raise
+        
+        matplotlib_bands(
+            bands,
+            pyplot.gca()
+        )
+        
+        if not options.output is None:
+            pyplot.savefig(options.output)
+        else:
+            pyplot.show()
+            
+except IOError:
+    print("Could no read file '{}'\n".format(options.file))
+    raise

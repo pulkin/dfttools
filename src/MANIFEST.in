@@ -1,0 +1,5 @@
+include *.txt
+recursive-include docs *
+recursive-include test/parsers/cases *
+recursive-include cython *
+

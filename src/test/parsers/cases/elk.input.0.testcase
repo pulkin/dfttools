@@ -1,0 +1,59 @@
+tasks
+  2
+
+latvopt
+  1
+
+rgkmax
+  9.0 !default 7.0
+gmaxvr
+  18.0 !default 12.0
+trimvg
+  .true. !default false
+lmaxapw
+  8
+lmaxvr
+  7
+lradstp
+  2   !default 4
+
+! PBE exchange-correlation functional
+xctype
+  20
+
+avec
+   11.05491144       0.000000000     -0.3046858492
+   0.000000000       6.194778086       0.000000000
+ -0.5392155159E-01   0.000000000       37.54668956
+
+atoms
+   2                                    : nspecies
+'W.in'                                  : spfname
+   2                                    : natoms; atpos, bfcmt below
+    0.18921564    0.25000000    0.49621428    0.00000000  0.00000000  0.00000000
+   -0.18921564   -0.25000000   -0.49621428    0.00000000  0.00000000  0.00000000
+'Se.in'                                 : spfname
+   4                                    : natoms; atpos, bfcmt below
+    0.43121489   -0.25000000   -0.42862875    0.00000000  0.00000000  0.00000000
+   -0.43121492    0.25000000    0.42862876    0.00000000  0.00000000  0.00000000
+   -0.07736811    0.25000000   -0.40435873    0.00000000  0.00000000  0.00000000
+    0.07736809   -0.25000000    0.40435874    0.00000000  0.00000000  0.00000000
+
+ngridk
+  11 18 1
+
+nempty
+  8
+
+epsengy
+  1e-4
+
+epspot
+  1e-6 !default 1e-6
+
+spinorb
+  .false.
+
+spinpol
+  .false.
+

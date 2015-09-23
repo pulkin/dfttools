@@ -1,0 +1,90 @@
+#
+# File Name      
+#
+
+System.CurrrentDirectory         ./    # default=./
+System.Name                      mos2_1l_scatter
+level.of.stdout                  1    # default=1 (1-3)
+level.of.fileout                 1    # default=1 (0-2)
+
+#
+# Definition of Atomic Species
+#
+
+Species.Number       2
+<Definition.of.Atomic.Species
+ mo  Mo7.0-s2p1d1   Mo_PBE13
+ s   S7.0-s1p1    S_PBE13
+Definition.of.Atomic.Species>
+
+#
+# Atoms
+#
+
+Atoms.Number         6
+
+Atoms.SpeciesAndCoordinates.Unit   Ang
+<Atoms.SpeciesAndCoordinates
+      1 mo 0.91651513800002 10.00000000000080 0.79372539250025 7 7
+      2  s 1.83303027599998 8.42313300000320 2.38117617750048 3 3
+      3  s 1.83303027599998 11.57686679999860 2.38117617750051 3 3
+      4 mo 3.66606055200002 10.00000000000080 2.38117617750060 7 7
+      5  s 4.58257568999998 8.42313300000320 0.79372539249978 3 3
+      6  s 4.58257568999998 11.57686679999860 0.79372539249978 3 3
+Atoms.SpeciesAndCoordinates>
+
+LeftLeadAtoms.Number         6
+<LeftLeadAtoms.SpeciesAndCoordinates
+      1 mo -4.58257568999998 10.00000000000080 0.79372539250025 7 7
+      2  s -3.66606055200002 8.42313300000320 2.38117617750048 3 3
+      3  s -3.66606055200002 11.57686679999860 2.38117617750051 3 3
+      4 mo -1.83303027599998 10.00000000000080 2.38117617750060 7 7
+      5  s -0.91651513800002 8.42313300000320 0.79372539249978 3 3
+      6  s -0.91651513800002 11.57686679999860 0.79372539249978 3 3
+LeftLeadAtoms.SpeciesAndCoordinates>
+
+RightLeadAtoms.Number         6
+<RightLeadAtoms.SpeciesAndCoordinates
+      1 mo 6.41560596600002 10.00000000000080 0.79372539250025 7 7
+      2  s 7.33212110399998 8.42313300000320 2.38117617750048 3 3
+      3  s 7.33212110399998 11.57686679999860 2.38117617750051 3 3
+      4 mo 9.16515138000002 10.00000000000080 2.38117617750060 7 7
+      5  s 10.08166651799998 8.42313300000320 0.79372539249978 3 3
+      6  s 10.08166651799998 11.57686679999860 0.79372539249978 3 3
+RightLeadAtoms.SpeciesAndCoordinates>
+
+#
+# SCF or Electronic System
+#
+
+scf.XcType                 GGA-PBE     # LDA|LSDA-CA|LSDA-PW|GGA-PBE
+scf.SpinPolarization        nc         # On|Off|NC
+scf.ElectronicTemperature  300.0       # default=300 (K)
+scf.energycutoff           300.0       # default=150 (Ry)
+scf.maxIter                 100        # default=40
+scf.EigenvalueSolver        negf       # DC|GDC|Cluster|Band
+scf.Kgrid                  6 9 1     # means n1 x n2 x n3
+scf.Mixing.Type           rmm-diisk     # Simple|Rmm-Diis|Gr-Pulay|Kerker|Rmm-Diisk
+scf.Kerker.factor           20 
+scf.Init.Mixing.Weight     0.30        # default=0.30 
+scf.Min.Mixing.Weight      0.001       # default=0.001 
+scf.Max.Mixing.Weight      0.400       # default=0.40 
+scf.Mixing.History          30          # default=5
+scf.Mixing.StartPulay       5          # default=6
+scf.criterion             1.0e-10      # default=1.0e-6 (Hartree) 
+scf.spinorbit.coupling       on
+scf.restart                  off
+
+NEGF.scf.Kgrid            9 1
+NEGF.scf.Iter.Band         20
+
+NEGF.filename.hks.l     mos2_lead.hks
+NEGF.filename.hks.r     mos2_lead.hks
+#NEGF.tran.energyrange   -6.17906 -6.17907 1.0e-3
+NEGF.tran.energyrange -1.03 -1.06 1e-8
+NEGF.tran.energydiv 1
+NEGF.tran.Kgrid 3 1
+NEGF.tran.buffer.right 1
+NEGF.tran.buffer.adjust on
+
+

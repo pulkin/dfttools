@@ -1,0 +1,75 @@
+tasks
+  0
+  20
+
+mixtype
+  1 !default 1
+
+! larger cut-off required for lattice optimisation
+rgkmax
+  8.0 !default 7.0
+gmaxvr
+  12.0 !default 12.0
+trimvg
+  .false. !default false
+lmaxapw
+  8
+lmaxvr
+  7
+lradstp
+  4   !default 4
+
+! PBE exchange-correlation functional
+xctype
+  20
+
+scale
+  1.8897261245650618
+
+avec
+   5.944039 0.       0.
+   0.       3.301128 0.
+   0.       0.       20.160000
+
+atoms
+  2
+  'W.in'
+  2
+  0.810843  0.75  0.495938   0.0 0.0 0.0
+  0.189157  0.25  0.504062   0.0 0.0 0.0
+  'Se.in'
+  4
+  0.084550  0.75  0.593738   0.0 0.0 0.0
+  0.577032  0.25  0.569474   0.0 0.0 0.0
+  0.422968  0.75  0.430526   0.0 0.0 0.0
+  0.915450  0.25  0.406262   0.0 0.0 0.0
+
+ngridk
+  11 18 1
+
+plot1d
+  2 100
+  0  0.0 0
+  0  0.5 0
+
+nempty
+  8
+
+epsengy
+  1e-4
+
+epspot
+  1e-6 !default 1e-6
+
+epsforce
+  2e-3
+
+epsstress
+  5e-4
+
+spinorb
+  .true.
+
+spinpol
+  .true.
+

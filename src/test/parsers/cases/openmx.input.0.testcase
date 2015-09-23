@@ -1,0 +1,85 @@
+#
+# File Name      
+#
+
+System.CurrrentDirectory         ./    # default=./
+System.Name                      mose2_1l
+level.of.stdout                   1    # default=1 (1-3)
+level.of.fileout                  1    # default=1 (0-2)
+
+#
+# Definition of Atomic Species
+#
+
+Species.Number       2
+<Definition.of.Atomic.Species
+ Mo  Mo7.0-s2p2d2f1   Mo_PBE13
+ Se  Se7.0-s2p1d1f1   Se_PBE13
+Definition.of.Atomic.Species>
+
+#
+# Atoms
+#
+
+Atoms.UnitVectors.Unit             Ang # Ang|AU
+<Atoms.UnitVectors
+3.288 0.0 0.0
+1.644 2.847491528 0.0
+0.0 0.0 100.0
+Atoms.UnitVectors>
+
+Atoms.Number         3
+
+Atoms.SpeciesAndCoordinates.Unit   Frac # Ang|AU
+<Atoms.SpeciesAndCoordinates
+   1   Mo    0.33333333333353    0.33333333333331    0.50000000000001     7.0     7.0
+   2   Se    0.66666666666614    0.66666666666674    0.48313110391249     3.0     3.0
+   3   Se    0.66666666666614    0.66666666666674    0.51686889613927     3.0     3.0
+Atoms.SpeciesAndCoordinates>
+
+#
+# SCF or Electronic System
+#
+
+scf.XcType                 GGA-PBE     # LDA|LSDA-CA|LSDA-PW|GGA-PBE
+scf.SpinPolarization        nc         # On|Off|NC
+scf.ElectronicTemperature  300.0       # default=300 (K)
+scf.energycutoff           200.0       # default=150 (Ry)
+scf.maxIter                 100        # default=40
+scf.EigenvalueSolver        band       # DC|GDC|Cluster|Band
+scf.Kgrid                  10 10 1     # means n1 x n2 x n3
+scf.Mixing.Type           rmm-diis     # Simple|Rmm-Diis|Gr-Pulay|Kerker|Rmm-Diisk
+scf.Init.Mixing.Weight     0.30        # default=0.30 
+scf.Min.Mixing.Weight      0.001       # default=0.001 
+scf.Max.Mixing.Weight      0.400       # default=0.40 
+scf.Mixing.History          7          # default=5
+scf.Mixing.StartPulay       5          # default=6
+scf.criterion             1.0e-10      # default=1.0e-6 (Hartree) 
+scf.spinorbit.coupling       on
+
+#
+# MD or Geometry Optimization
+#
+#
+<MD.Fixed.XYZ
+1 1 1 1
+2 1 1 0
+3 1 1 0
+MD.Fixed.XYZ>
+
+MD.Type                    nomd        # Nomd|Opt|NVE|NVT_VS|NVT_NH
+                                       # Constraint_Opt|DIIS
+MD.maxIter                  100        # default=1
+MD.Opt.criterion         1.0e-8        # default=1.0e-4 (Hartree/bohr)
+
+Band.dispersion on
+Band.Nkpath 3
+
+<Band.kpath
+  100  0.5 0.0 0.0  0.0 0.0 0.0  M G
+  100  0.0 0.0 0.0  0.6666666667 0.3333333333 0.0  G K
+  50   0.6666666666 0.3333333333 0.0  0.5 0.0 0.0  K M
+Band.kpath>
+
+
+

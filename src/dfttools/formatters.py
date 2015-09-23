@@ -97,7 +97,7 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
         })
         
         # Unit cell
-        parameters["CELL_PARAMETERS"] = "\n".join((indent + "{:e} {:e} {:e}",)*3).format(*numpy.reshape(cell.vectors/angstrom,-1))
+        parameters["CELL_PARAMETERS"] = "\n".join((indent + "{:.14e} {:.14e} {:.14e}",)*3).format(*numpy.reshape(cell.vectors/angstrom,-1))
         inline_parameters["CELL_PARAMETERS"] = "angstrom"
         
         # Atomic coordinates

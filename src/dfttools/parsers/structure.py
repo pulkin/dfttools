@@ -240,8 +240,12 @@ class GaussianCube(AbstractParser):
             self.parser.nextFloat()
             ac = self.parser.nextFloat(3)
             
-            v.append(__elements_table__[abs(aid)-1][0])
-            if aid>0:
+            if not aid == 0:
+                v.append(__elements_table__[abs(aid)-1][0])
+            else:
+                v.append("??")
+                
+            if aid>=0:
                 c.append(ac*numericalunits.angstrom)
             else:
                 c.append(ac*numericalunits.aBohr)

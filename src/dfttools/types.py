@@ -1304,7 +1304,7 @@ class Grid(Basis):
         piece = numpy.reshape(piece,(2,-1))
         p1 = numpy.amin(piece,axis = 0)
         p2 = numpy.amax(piece,axis = 0)
-        return list( (c<p2[0]) & (c>=p1[0]) for c in self.coordinates )
+        return list( (c<mx) & (c>=mn) for c,mn,mx in zip(self.coordinates,p1,p2) )
         
     @input_as_list
     def apply(self, selection):

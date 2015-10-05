@@ -290,7 +290,7 @@ Atoms.UnitVectors.Unit Ang
 <Atoms.UnitVectors
 """ + (
             "\n".join(tuple(
-                "{indent}{:.13e} {:.13e} {:.13e}".format(*v, indent = indent)
+                "{indent}{:.15e} {:.15e} {:.15e}".format(*v, indent = indent)
                 for v in target.vectors/angstrom
             ))
         ) +"""
@@ -300,7 +300,7 @@ Atoms.UnitVectors>
     def __coords__(fr, num, frac = False):
         _c_ = c if not frac else target.coordinates
         return "\n".join(tuple(
-            "{indent}{:3d} {:>2s} {:.13e} {:.13e} {:.13e} {}".format(
+            "{indent}{:3d} {:>2s} {:.15e} {:.15e} {:.15e} {}".format(
                 i+1, v[n], _c_[n,0], _c_[n,1], _c_[n,2], populations[v[n]],
                 indent = indent,
             ) for i, n in enumerate(range(fr, fr+num))

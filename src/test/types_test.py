@@ -824,11 +824,18 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(c[0,0,0], (0,0,0))
         testing.assert_allclose(c[1,2,3], (1./2*1, 2./3*2, 3./4*3))
         
-    def test_select(self):
+    def test_select_0(self):
         testing.assert_equal(self.grid.select((0.3,0.3,0.3,0.7,0.7,0.7)),(
             (False, True),
             (False, True, True),
             (False, False, True, False)
+        ))
+
+    def test_select_1(self):
+        testing.assert_equal(self.grid.select((0.3,0,0,0.7,1,1)),(
+            (False, True),
+            (True, True, True),
+            (True, True, True, True)
         ))
         
     def test_select_fail(self):
@@ -863,7 +870,7 @@ class GridTest(unittest.TestCase):
             ((0., .25**2, .75**2),),
         ))
         
-    def test_cut(self):
+    def test_cut_0(self):
         c = self.grid.cut(0.3,0.3,0.3,0.7,0.7,0.7)
         testing.assert_allclose(c.coordinates[0], ((0.5-0.3)/0.4, ))
         testing.assert_allclose(c.coordinates[1], ((1./3-0.3)/0.4, (2./3-0.3)/0.4 ))
@@ -871,6 +878,13 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(c.values, (
             ((0.5+1./9,), (0.5+4./9,)),
         ))
+        
+    def test_cut_1(self):
+        c = self.grid.cut(0.3,0,0,0.7,1,1)
+        testing.assert_allclose(c.coordinates[0], ((0.5-0.3)/0.4, ))
+        testing.assert_allclose(c.coordinates[1], self.grid.coordinates[1])
+        testing.assert_allclose(c.coordinates[2], self.grid.coordinates[2])
+        testing.assert_allclose(c.values, self.grid.values[[1],...])
         
     def test_add(self):
         x = numpy.linspace(0,1,2, endpoint = False)

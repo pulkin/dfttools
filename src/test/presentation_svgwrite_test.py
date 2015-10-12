@@ -37,7 +37,7 @@ class CellSVGTest(unittest.TestCase):
             'Si',
         )
     
-    def __check_dims__(self, svg, cell, window):
+    def __check_dims__(self, svg, cell, window, **kwargs):
         circles = 0
         lines = 0
         
@@ -63,21 +63,27 @@ class CellSVGTest(unittest.TestCase):
                     assert y >= window[1]
                     assert x <= window[2]
                     assert y <= window[3]
+                    
+                assert e["stroke-width"]>0
                 
-        assert circles == cell.size()
-        if cell.size()>0:
+        if "show_atoms" in kwargs and kwargs["show_atoms"] == True:
+            assert circles == cell.size()
+            
+        if cell.size()>0 and "show_bonds" in kwargs and kwargs["show_bonds"] == True:
             assert lines > 0
         
-    def __test_0__(self, cell, camera = 'z', camera_top = None, show_cell = False):
+    def __test_0__(self, cell, **kwargs):
         
         svg = svgwrite.Drawing(size = (1000,1000))
-        svgwrite_unit_cell(self.cell, svg, insert = (100,100), size = (800,800), camera = camera, camera_top = camera_top, show_cell = show_cell)
+        svgwrite_unit_cell(self.cell, svg, insert = (100,100), size = (800,800), **kwargs)
         self.__check_dims__(svg, self.cell, (99,99,901,901))
         
     def test_draw_simple_xyz(self):
         for s in (True, False):
             for c in ('x','y','z'):
-                self.__test_0__(self.cell, camera = c, show_cell = s)
+                for atoms in (True, False):
+                    for bonds in (True, False):
+                        self.__test_0__(self.cell, camera = c, show_cell = s, show_atoms = atoms, show_bonds = bonds)
 
     def test_draw_inplane_xyz_rotation(self):
         for c in ('x','y','z'):

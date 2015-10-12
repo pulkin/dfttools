@@ -74,6 +74,18 @@ automatically (OpenMX input file).
       
 .. image:: atomic-structure/2-bi2se3/output.svg
 
+Example: Moire pattern
+-------------------------------
+
+The Moire pattern is obtained using ``UnitCell.supercell``.
+
+.. plot:: examples/atomic-structure/3-graphene/plot.py
+      :include-source:
+      :nofigs:
+      :context: reset
+      
+.. image:: atomic-structure/3-graphene/output.svg
+
 Band structure
 ==============
 

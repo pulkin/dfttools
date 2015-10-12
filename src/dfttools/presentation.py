@@ -149,9 +149,11 @@ def svgwrite_unit_cell(
     size = (600,600),
     circle_size = 0.4,
     show_cell = False,
+    show_atoms = True,
+    show_bonds = True,
+    show_legend = True,
     fadeout_strength = 0.8,
     bg = (0xF0,0xF0,0xFF),
-    legend = True,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -179,12 +181,16 @@ def svgwrite_unit_cell(
         
         show_cell (bool): if True draws unit cell edges projected;
         
+        show_atoms (bool): if True draws atoms;
+        
+        show_bonds (bool): if True draws bonds;
+        
+        show_legend (bool): if True draws legend;
+    
         fadeout_strength (float): amount of fadeout applied to more distant atoms;
         
         bg (array): an integer array defining background color;
         
-        legend (bool): show legend;
-    
     Returns:
     
         An ```svgwrite.Drawing`` object. The object is saved if it was
@@ -276,42 +282,51 @@ def svgwrite_unit_cell(
             ))
             obj_z.append(0.5*(pair[0,2] + pair[1,2]))
     
-    # Draw circles
-    for i in range(cell.size()):
+    if show_atoms:
         
-        radius = e_size[i]*scale*circle_size
-        
-        obj.append(svg.circle(
-            center = projected[i,:2]*scale+shift,
-            r = radius,
-            fill = __svg_color__(colors_base[i]),
-            stroke = __svg_color__(__dark__(colors_base[i])),
-            stroke_width = 0.1*radius,
-        ))
-        
-        obj_z.append(projected[i,2])
+        # Draw circles
+        for i in range(cell.size()):
+            
+            radius = e_size[i]*scale*circle_size
+            
+            obj.append(svg.circle(
+                center = projected[i,:2]*scale+shift,
+                r = radius,
+                fill = __svg_color__(colors_base[i]),
+                stroke = __svg_color__(__dark__(colors_base[i])),
+                stroke_width = 0.1*radius,
+            ))
+            
+            obj_z.append(projected[i,2])
         
     d = cell.distances()
     
-    # Draw lines
-    for i in range(d.shape[0]):
-        for j in range(i,d.shape[1]):
-            if (d[i,j]<(e_covsize[i]+e_covsize[j])) and (d[i,j]>(e_size[i]+e_size[j])*circle_size):
-                
-                unit = projected[j] - projected[i]
-                unit = unit / ((unit**2).sum())**0.5
-                
-                start = (projected[i,:2]+unit[:2]*e_size[i]*circle_size)*scale + shift
-                end = (projected[j,:2]-unit[:2]*e_size[j]*circle_size)*scale + shift
-                
-                obj.append(svg.line(
-                    start = start,
-                    end = end,
-                    stroke = __svg_color__(__dark__((colors_base[i] + colors_base[j])/2)),
-                    stroke_width = scale*(e_size[i]+e_size[j])*circle_size/5,
-                ))
-                
-                obj_z.append((projected[j,2] + projected[i,2])/2)
+    if show_bonds:
+        
+        # Draw lines
+        for i in range(d.shape[0]):
+            for j in range(i,d.shape[1]):
+                if (d[i,j]<(e_covsize[i]+e_covsize[j])) and (d[i,j]>(e_size[i]+e_size[j])*circle_size):
+                    
+                    unit = projected[j] - projected[i]
+                    unit = unit / ((unit**2).sum())**0.5
+                    
+                    if show_atoms:
+                        start = (projected[i,:2]+unit[:2]*e_size[i]*circle_size)*scale + shift
+                        end = (projected[j,:2]-unit[:2]*e_size[j]*circle_size)*scale + shift
+                    
+                    else:
+                        start = projected[i,:2]*scale + shift
+                        end = projected[j,:2]*scale + shift
+                    
+                    obj.append(svg.line(
+                        start = start,
+                        end = end,
+                        stroke = __svg_color__(__dark__((colors_base[i] + colors_base[j])/2)),
+                        stroke_width = scale*(e_size[i]+e_size[j])*circle_size/5,
+                    ))
+                    
+                    obj_z.append((projected[j,2] + projected[i,2])/2)
                 
     svg.add(svg.rect(
         insert = insert,
@@ -323,7 +338,7 @@ def svgwrite_unit_cell(
     for i in range(order.shape[0]):
         svg.add(obj[order[i]])
         
-    if legend:
+    if show_legend:
         
         unique = []
         for i in elements:

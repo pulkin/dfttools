@@ -14,17 +14,20 @@ graphene_cell = UnitCell(graphene_basis, (
     (2./3,2./3,.5),
 ), ('C','C'))
 
+# Moire matching vectors
+moire = [1, 26, 6, 23]
+
 # A top layer
 l1 = graphene_cell.supercell(
-    (9,1,0),
-    (-1,10,0),
+    (moire[0],moire[1],0),
+    (-moire[1],moire[0]+moire[1],0),
     (0,0,1)
 )
 
 # A bottom layer
 l2 = graphene_cell.supercell(
-    (6,5,0),
-    (-5,11,0),
+    (moire[2],moire[3],0),
+    (-moire[3],moire[2]+moire[3],0),
     (0,0,1)
 )
 
@@ -32,4 +35,4 @@ l2 = graphene_cell.supercell(
 l2.vectors[:2] = l1.vectors[:2]
 
 # Draw
-svgwrite_unit_cell(l1.stack(l2, vector='z').repeated(2,2,1), 'output.svg', size = (440,360), camera = (0,0,-1), camera_top = (0,1,0), show_atoms = False)
+svgwrite_unit_cell(l1.stack(l2, vector='z'), 'output.svg', size = (440,360), camera = (0,0,-1), camera_top = (0,1,0), show_atoms = False)

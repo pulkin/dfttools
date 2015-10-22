@@ -287,8 +287,7 @@ class Output(AbstractParser):
         
         Returns:
         
-            A set of all cells found with atomic coordinates in **m**.
-            In ``Cell.values`` chemical captions are stored.
+            A set of all unit cells found.
         """
         result = []
         

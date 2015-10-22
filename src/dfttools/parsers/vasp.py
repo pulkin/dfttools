@@ -7,7 +7,7 @@ from .generic import AbstractParser
 from ..simple import band_structure, unit_cell
 from ..types import Basis, UnitCell
 
-class OutputParser(AbstractParser):
+class Output(AbstractParser):
     """
     Class for parsing VASP OUTCAR.
     

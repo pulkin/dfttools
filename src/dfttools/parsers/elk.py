@@ -272,8 +272,7 @@ class Bands(AbstractParser):
     @band_structure
     def bands(self):
         """
-        Retrieves the band structure and strores it into a flattened
-        UnitCell.
+        Retrieves the band structure and strores it into a flattened UnitCell.
         
         Returns:
         

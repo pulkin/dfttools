@@ -229,7 +229,7 @@ class Test_output_invalid(unittest.TestCase):
 class Test_output0(unittest.TestCase):
 
     def setUp(self):
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.output.0.testcase"),'r') as f:
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.output.0.testcase/output"),'r') as f:
             self.parser = output(f.read())
        
     def test_valid_header(self):

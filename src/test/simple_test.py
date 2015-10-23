@@ -18,7 +18,7 @@ class Test_methods(unittest.TestCase):
             ("openmx.input.1.testcase", openmx.Input),
             ("openmx.input.2.lead.testcase", openmx.Input),
             ("openmx.input.2.scatter.testcase", openmx.Input),
-            ("openmx.output.0.testcase", openmx.Output),
+            ("openmx.output.0.testcase/output", openmx.Output),
             ("openmx.tran.0.testcase", openmx.Transmission),
             ("openmx.tran.1.testcase", openmx.Transmission),
             ("qe.bands.0.testcase", qe.Bands),
@@ -46,16 +46,28 @@ class Test_methods(unittest.TestCase):
     def test_guess_parser(self):
         for f, p in self.data:
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/"+f)
-            parsers = guess_parser(path)
-            assert len(parsers) == 1
-            assert parsers[0] == p
+            with open(path, "r") as fl:
+                parsers = guess_parser(fl)
+                assert len(parsers) == 1
+                assert parsers[0] == p
         
     def test_parse_0(self):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/qe.output.0.testcase")
         with open(path,'r') as f:
             c1 = qe.output(f.read()).unitCells()
+            c2 = parse(f,"unit-cell")
+        
+        for i,j in zip(c1,c2):
+            assert i==j
 
-        c2 = parse(path,"unit-cell")
+    def test_parse_1(self):
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/openmx.output.0.testcase/output")
+        p2 = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/openmx.output.0.testcase/input")
+        with open(p2, 'r') as f:
+            c = parse(f, "unit-cell")
+        with open(path,'r') as f:
+            c1 = openmx.output(f.read()).unitCells(c)
+            c2 = parse(f,"unit-cell")
         
         for i,j in zip(c1,c2):
             assert i==j

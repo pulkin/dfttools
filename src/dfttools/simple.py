@@ -21,6 +21,12 @@ def tag_method(*tags):
         else:
             func.__tags__ = list(tags)
         
+        if len(tags)>0 and not (func.__doc__ is None):
+            func.__doc__ += """
+    .. note::
+    
+        This method can be shortcut """ + (", ".join("``dfttools.simple.parse(file,\""+i+"\")``" for i in tags)) + ".\n"
+        
         return func
         
     return f_w

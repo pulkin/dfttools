@@ -3,17 +3,17 @@ Parsing `OpenMX <http://openmx-square.org/>`_ files.
 """
 import re
 import warnings
-from os import listdir
-from os.path import isfile, isdir, join
 import math
 import json
+import os
+import os.path
 
 import numpy
 import numericalunits
 
-from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser
+from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, ParseError
 from .structure import cube
-from ..simple import band_structure, unit_cell
+from ..simple import band_structure, unit_cell, guess_parser, parse, tag_method
 from ..types import UnitCell, Basis
 
 def populations(s):
@@ -345,6 +345,25 @@ class Output(AbstractParser):
             
         return numpy.array(result)
         
+    def nat(self):
+        """
+        Retrieves number of atoms.
+        
+        Returns:
+        
+            Number of atoms for the first relaxation step.
+        """
+        self.parser.reset()
+        self.parser.skip("MD or geometry opt. at MD")
+        self.parser.skip("maximum force")
+        
+        n = 0
+        while self.parser.closest(("XYZ(ang)","***")) == 0:
+            self.parser.skip("XYZ(ang)")
+            n += 1
+            
+        return n
+        
     def unitCells(self, startingCell, noraise = False):
         """
         Retrieves atomic positions data for relax calculation.
@@ -362,8 +381,7 @@ class Output(AbstractParser):
         
         Returns:
         
-            A set of all cells found with atom coordinates in **m**.
-            In each ``Cell.values`` chemical captions are stored.
+            A set of all unit cells found.
         """
         self.parser.reset()
         cells = []
@@ -398,7 +416,25 @@ class Output(AbstractParser):
                     return cells
         
         return cells
-
+    
+    @tag_method("unit-cell", take_file = True)
+    def __unit_cells_silent__(self, f):
+        # Search for an input file
+        directory = os.path.dirname(f.name)
+        file_names = list(os.path.join(directory,i) for i in os.listdir(directory))
+        for name in file_names:
+            if os.path.isfile(name):
+                with open(name, "r") as f:
+                    if Input in guess_parser(f):
+                        try:
+                            c = Input(f.read()).unitCell()
+                            if c.size() == self.nat():
+                                return self.unitCells(c, noraise = True)
+                        except:
+                            pass
+        
+        raise ParseError("Could not locate corresponding input file")
+                        
     def populations(self):
         """
         Retrieves Mulliken populations during scf process.

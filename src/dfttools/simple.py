@@ -9,10 +9,16 @@ import parsers
     
 from parsers.generic import AbstractParser, ParseError
 
-def tag_method(*tags):
+def tag_method(*tags, **kwargs):
     """
     A generic decorator tagging some method.
+    
+    Kwargs:
+    
+        take_file (bool): set to True and the File object will be passed
+        to this method.
     """
+    take_file = kwargs.get("take_file", False)
     
     def f_w(func):
         
@@ -20,6 +26,8 @@ def tag_method(*tags):
             func.__tags__ += list(tags)
         else:
             func.__tags__ = list(tags)
+        
+        func.__take_file__ = take_file
         
         if len(tags)>0 and not (func.__doc__ is None):
             func.__doc__ += """
@@ -73,15 +81,12 @@ def guess_parser(f):
     
     Args:
     
-        f (file,str): a file to parse or the file name.
+        f (file): a file to parse.
         
     Returns:
     
         A list of parser candidates.
     """
-    if isinstance(f, str):
-        f = open(f, 'r')
-        
     result = []
     
     # Guess by contents
@@ -112,7 +117,7 @@ def parse(f, tag):
     
     Args:
     
-        f (file,str): a file to parse or the file name;
+        f (file): a file to parse;
         
         tag (str): the data tag, such as ``unit-cell`` or
         ``band-structure``;
@@ -121,9 +126,6 @@ def parse(f, tag):
     
         The parsed data.
     """
-    if isinstance(f, str):
-        f = open(f, 'r')
-        
     candidates = guess_parser(f)
     
     if len(candidates) == 0:
@@ -140,7 +142,10 @@ def parse(f, tag):
             if "__tags__" in dir(attr) and tag in attr.__tags__:
                 try:
                     attempted.append(parser.__class__.__name__+"."+attr.__name__)
-                    return attr()
+                    if attr.__take_file__:
+                        return attr(f)
+                    else:
+                        return attr()
                 except StopIteration:
                     pass
     

@@ -217,6 +217,14 @@ class Test_input2(unittest.TestCase):
         testing.assert_allclose(l.coordinates, s.coordinates)
         self.assertSequenceEqual(tuple(l.values),tuple(s.values))
         
+    def test_tolerance(self):
+        l = self.l.unitCell()
+        l.coordinates[2,2] += 1e-6
+        with self.assertRaises(ValueError):
+            self.s.unitCell(l = l, r = l)
+            
+        self.s.unitCell(l = l, r = l, tolerance = 0.01)
+        
 class Test_output_invalid(unittest.TestCase):
 
     def setUp(self):

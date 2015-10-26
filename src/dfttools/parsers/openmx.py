@@ -198,20 +198,22 @@ class Input(AbstractParser):
         return self.parser.intAfter(parameter)
 
     @unit_cell
-    def unitCell(self, l = None, r = None):
+    def unitCell(self, l = None, r = None, tolerance = 1e-12):
         """
         Retrieves atomic position data.
         
         Kwargs:
         
-            l,r (qetools.cell.Cell): left lead and right lead cells.
+            l,r (UnitCell): left lead and right lead cells.
             This information is required for parsing the cell from NEGF
-            calculation input file.
+            calculation input file;
+            
+            tolerance (float): a tolerance for comparing atomic position
+            data from the keywords and from the file itself in ``aBohr``.
         
         Returns:
         
-            A cell with atom coordinates in **m**. In ``Cell.values``
-            chemical captions are stored.
+            An input unit cell.
             
         Raises:
         
@@ -256,21 +258,27 @@ class Input(AbstractParser):
             self.parser.skip("<LeftLeadAtoms.SpeciesAndCoordinates")
             coordinatesl = numpy.zeros((nl,3))
             valuesl = []
+            
             for i in range(nl):
+                
                 self.parser.nextInt()
                 valuesl.append(self.parser.nextMatch(cre_word))
                 coordinatesl[i,:] = self.parser.nextFloat(3)
                 self.parser.nextLine()
+                
             self.parser.reset()
     
             self.parser.skip("<RightLeadAtoms.SpeciesAndCoordinates")
             coordinatesr = numpy.zeros((nr,3))
             valuesr = []
+            
             for i in range(nr):
+                
                 self.parser.nextInt()
                 valuesr.append(self.parser.nextMatch(cre_word))
                 coordinatesr[i,:] = self.parser.nextFloat(3)
                 self.parser.nextLine()
+                
             self.parser.reset()
                 
             if units.lower() == "ang":
@@ -281,7 +289,16 @@ class Input(AbstractParser):
                 coordinatesr *= numericalunits.aBohr
 
             dl = (l.cartesian()-coordinatesl).sum(axis = 0)/l.size()
+            delta_l = abs(l.cartesian()-coordinatesl-dl).max()
+            
             dr = (r.cartesian()-coordinatesr).sum(axis = 0)/r.size()
+            delta_r = abs(r.cartesian()-coordinatesr-dr).max()
+            
+            if delta_l/numericalunits.aBohr > tolerance:
+                raise ValueError("The atomic coordinates given by 'l' keyword and those present in the input file are different. Set the 'tolerance' keyword to at least {:e} to avoid this error.".format(delta_l/numericalunits.aBohr))
+            if delta_r/numericalunits.aBohr > tolerance:
+                raise ValueError("The atomic coordinates given by 'r' keyword and those present in the input file are different. Set the 'tolerance' keyword to at least {:e} to avoid this error.".format(delta_r/numericalunits.aBohr))
+                
             shape = l.vectors.copy()
             shape[0,:] = dl-dr-l.vectors[0,:]
             coordinates = coordinates + dl - l.vectors[0,:]

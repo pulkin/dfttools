@@ -3,6 +3,7 @@ Contains helper routines to parse text.
 """
 import re
 import sys
+import json
     
 import numpy
 
@@ -26,6 +27,13 @@ class ParseError(Exception):
     pass
     
 class AbstractParser(object):
+    """
+    A root class for text parsers.
+    
+    Args:
+    
+        data (str): text to parse.
+    """
     
     def __init__(self, data):
         self.data = data
@@ -62,7 +70,22 @@ class AbstractParser(object):
             True if the name is as expected.
         """
         raise NotImplementedError
+        
+class AbstractJSONParser(AbstractParser):
+    """
+    A root class for JSON parsers.
     
+    Args:
+    
+        data (str): text representation of JSON to parse.
+    """
+    
+    def __init__(self, data):
+        self.json = json.loads(data)
+
+    def __set_units__(self, field, units):
+        self.json[field] = numpy.array(self.json[field])*units
+        
 class StringParser(object):
     """
     Simple parser for a string with position memory.

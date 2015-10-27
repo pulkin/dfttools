@@ -11,7 +11,7 @@ import os.path
 import numpy
 import numericalunits
 
-from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, ParseError
+from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, AbstractJSONParser, ParseError
 from .structure import cube
 from ..simple import band_structure, unit_cell, guess_parser, parse, tag_method
 from ..types import UnitCell, Basis
@@ -92,29 +92,90 @@ def joint_populations(files):
         
     return result
     
-def dos(s):
+class JSON_DOS(AbstractJSONParser):
     """
-    Parses JSON with DoS. Replaces corresponding arrays with numpy
-    objects. Adds units where needed.
+    Parses JSON with OpenMX density of states.
     
     Args:
     
-        s (str): file contents.
-    
-    Returns:
-    
-        A dict with JSON data.
+        data (str): contents of OpenMX JSON DoS file.
     """
-    result = json.loads(s)
-    for field in ("energy", "DOS"):
-        result[field] = numpy.array(result[field])
+    
+    @staticmethod
+    def valid_header(header):
+        return "openmx-dos-negf" in header
         
-    result["energy"] *= 2*numericalunits.Ry
+    @staticmethod
+    def valid_filename(name):
+        return name.endswith(".Dos.json")
         
-    for field in result["basis"].keys():
-        result["basis"][field] = numpy.array(result["basis"][field])
+    def __init__(self, data):
+        super(JSON_DOS, self).__init__(data)
+        self.__set_units__("energy",2*numericalunits.Ry)
+        self.__set_units__("DOS",1./2/numericalunits.Ry)
         
-    return result
+        for field in self.json["basis"].keys():
+            self.json["basis"][field] = numpy.array(self.json["basis"][field])
+    
+    def basis(self):
+        """
+        Retrieves the basis set for density weights.
+        
+        Returns:
+        
+            A dict contatining basis description.
+        """
+        return self.json["basis"]
+        
+    def weights(self):
+        """
+        Retrieves the densities.
+        
+        Returns:
+        
+            Densities in a 4D array with the following index order:
+            * ky
+            * kz
+            * energy
+            * state
+        """
+        return self.json["DOS"]
+        
+    def energies(self):
+        """
+        Retrieves corresponding energies.
+        
+        Returns:
+        
+            A 1D array with energy values.
+        """
+        return numpy.linspace(self.json["energy"][0], self.json["energy"][1], self.json["DOS"].shape[2])
+        
+    def __k__(self, index):
+        n = self.json["DOS"].shape[index]
+        k = numpy.linspace(0, 1, n, endpoint = False)
+        k -= k[-1]/2
+        return k
+        
+    def ky(self):
+        """
+        Retrieves values of ky.
+        
+        Returns:
+        
+            Values of ky.
+        """
+        return self.__k__(0)
+        
+    def kz(self):
+        """
+        Retrieves values of kz.
+        
+        Returns:
+        
+            Values of kz.
+        """
+        return self.__k__(1)
     
 class Input(AbstractParser):
     """

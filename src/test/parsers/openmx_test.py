@@ -6,7 +6,7 @@ from numpy import testing
 import numpy
 import numericalunits
 
-from dfttools.parsers.openmx import bands, output, input, transmission, populations, joint_populations, dos, Transmission
+from dfttools.parsers.openmx import bands, output, input, transmission, populations, joint_populations, JSON_DOS, Transmission
 from dfttools.types import UnitCell, Basis
 
 class Test_bands0(unittest.TestCase):
@@ -407,13 +407,21 @@ class Test_joint_lowdin(unittest.TestCase):
         with self.assertRaises(ValueError):
             joint_populations([self.data[1],self.data[3]])
             
-class Test_DOS(unittest.TestCase):
+class Test_JSON_DOS(unittest.TestCase):
 
     def setUp(self):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.dos.0.testcase"),'r') as f:
-            self.data = dos(f.read())
+            self.parser = JSON_DOS(f.read())
             
     def test_consistency(self):
-        shape = self.data["DOS"].shape
-        for v in self.data["basis"].values():
+        shape = self.parser.weights().shape
+        
+        testing.assert_equal(shape[:3], [50,1,50])
+        
+        for v in self.parser.basis().values():
             testing.assert_equal(v.shape, (shape[-1],))
+
+        testing.assert_allclose(self.parser.energies(),numpy.linspace(-numericalunits.eV, numericalunits.eV, 50), rtol = 1e-5)
+        testing.assert_equal(self.parser.ky(),numpy.linspace(-0.49, 0.49, 50))
+        testing.assert_equal(self.parser.kz(),[0])
+        

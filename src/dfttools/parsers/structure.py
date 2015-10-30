@@ -226,7 +226,7 @@ class GaussianCube(AbstractParser):
             nv = self.parser.nextInt()
             v = self.parser.nextFloat(3)
             
-            if nv>0:
+            if nv<0:
                 shape.append(v*abs(nv)*numericalunits.angstrom)
             else:
                 shape.append(v*abs(nv)*numericalunits.aBohr)
@@ -245,7 +245,7 @@ class GaussianCube(AbstractParser):
             else:
                 v.append("??")
                 
-            if aid>=0:
+            if nv<0:
                 c.append(ac*numericalunits.angstrom)
             else:
                 c.append(ac*numericalunits.aBohr)

@@ -239,7 +239,7 @@ class Test_cube0(unittest.TestCase):
             (5.570575, 5.669178, 5.593517),
             (5.562867, 5.669178, 7.428055),
             (7.340606, 5.669178, 5.111259)
-        ))*numericalunits.angstrom)
+        ))*numericalunits.aBohr)
         
         assert c.values[0].lower() == 'o'
         assert c.values[1].lower() == 'h'
@@ -263,7 +263,7 @@ class Test_cube1(unittest.TestCase):
             (5.570575, 5.669178, 5.593517),
             (5.562867, 5.669178, 7.428055),
             (7.340606, 5.669178, 5.111259)
-        ))*numericalunits.aBohr)
+        ))*numericalunits.angstrom)
         
         assert c.values[0].lower() == 'o'
         assert c.values[1].lower() == 'h'

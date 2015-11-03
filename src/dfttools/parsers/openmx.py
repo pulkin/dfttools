@@ -548,6 +548,18 @@ class Output(AbstractParser):
             result.append(c*total/sum(c))
             
         return numpy.array(result)
+        
+    def neutral_charge(self):
+        """
+        Retrieves the number of valence electrons in the calculation for
+        the charge neutral system.
+        
+        Returns:
+        
+            The number of electrons.
+        """
+        self.parser.reset()
+        return self.parser.floatAfter("ideal(neutral)=")
 
     def solvers(self):
         """

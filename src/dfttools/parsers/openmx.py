@@ -520,7 +520,8 @@ class Output(AbstractParser):
         Returns:
         
             A numpy array where the first index corresponds to
-            iteration number and the second one is atomic ID.
+            iteration number and the second one is atomic ID. The
+            populations are renormalized to reproduce the total charge.
         """
         self.parser.reset()
         result = []
@@ -539,8 +540,12 @@ class Output(AbstractParser):
                 c.append(self.parser.nextFloat())
                 self.parser.nextLine()
             
+            self.parser.skip("total=")
+            total = self.parser.nextFloat()
+            
             self.parser.skip("NormRD")
-            result.append(c)
+            c = numpy.array(c)
+            result.append(c*total/sum(c))
             
         return numpy.array(result)
 

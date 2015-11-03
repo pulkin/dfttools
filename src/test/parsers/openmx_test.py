@@ -301,8 +301,8 @@ class Test_output0(unittest.TestCase):
         p = self.parser.populations()
         
         self.assertSequenceEqual(p.shape,(301,3))
-        testing.assert_equal(p[0],(12.13,6.93,6.93))
-        testing.assert_equal(p[-1],(13.6,6.2,6.2))
+        testing.assert_allclose(p[0],numpy.array((12.13,6.93,6.93))*26/25.99)
+        testing.assert_allclose(p[-1],(13.6,6.2,6.2))
 
     def test_solverd(self):
         s = self.parser.solvers()

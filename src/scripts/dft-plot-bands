@@ -3,6 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description = "Plots a band structure from a supported file")
 parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure file name", metavar = "FILENAME")
+parser.add_argument("-d", "--density", nargs = 1, help = "density of states file name", metavar = "FILENAME")
 parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
 
 options = parser.parse_args()
@@ -10,40 +11,72 @@ options = parser.parse_args()
 from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
 
-try:
+data = {}
+
+for file_name, destination in ((options.file, "bands"), (options.density[0], "density")):
     
-    with open(options.file, 'r') as f:
-        
-        try:
-            bands = parse(f, 'band-structure')
-        except ParseError:
-            print("Could not parse file '{}'\n".format(options.file))
-            raise
-        
-        if isinstance(bands, (list, tuple)):
-            if len(bands) == 0:
-                print("No data found in '{}'".format(options.file))
-                exit(1)
-            else:
-                bands = bands[-1]
-        
-        try:
-            from matplotlib import pyplot
-            from dfttools.presentation import matplotlib_bands
-        except ImportError:
-            print("Could not import matplotlib\n")
-            raise
-        
-        matplotlib_bands(
-            bands,
-            pyplot.gca()
-        )
-        
-        if not options.output is None:
-            pyplot.savefig(options.output)
-        else:
-            pyplot.show()
+    if not file_name is None:
             
-except IOError:
-    print("Could no read file '{}'\n".format(options.file))
+        try:
+            
+            with open(file_name, 'r') as f:
+                
+                try:
+                    bands = parse(f, 'band-structure')
+                except ParseError:
+                    print("Could not parse file '{}'\n".format(file_name))
+                    raise
+                
+                if isinstance(bands, (list, tuple)):
+                    if len(bands) == 0:
+                        print("No data found in '{}'".format(file_name))
+                        exit(1)
+                    else:
+                        bands = bands[-1]
+                        
+                data[destination] = bands
+                
+        except IOError:
+            
+            print("Could no read file '{}'\n".format(options.file))
+            raise
+    
+try:
+    from matplotlib import pyplot, gridspec
+    from dfttools.presentation import matplotlib_bands, matplotlib_bands_density
+except ImportError:
+    print("Could not import matplotlib\n")
     raise
+
+if not "density" in data:
+    
+    matplotlib_bands(
+        bands,
+        pyplot.gca()
+    )
+    
+else:
+    
+    fig = pyplot.figure(figsize = (12,9))
+    gs = gridspec.GridSpec(1, 2, width_ratios=[3, 1])
+    ax_left = pyplot.subplot(gs[0])
+    ax_right = pyplot.subplot(gs[1], sharey = ax_left)
+
+    matplotlib_bands(
+        data["bands"],
+        ax_left,
+    )
+    
+    matplotlib_bands_density(
+        data["density"],
+        ax_right,
+        200,
+        energy_range = ax_left.get_ylim(),
+        orientation = "portrait",
+    )
+
+if not options.output is None:
+    pyplot.savefig(options.output[0])
+else:
+    pyplot.show()
+            

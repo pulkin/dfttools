@@ -352,12 +352,42 @@ class Output(AbstractParser):
                 raise ParseError("Unknown units: %s" % units)
                 
         return result
+        
+    def __bands_energies__(self, parseMode_kp, basis, kpoints, fermi, alat):
+        
+        n_kp = len(kpoints)
+        energies = []
+            
+        for i in range(n_kp):
+            
+            self.parser.skip("k =")
+            self.parser.nextLine(2)
+            sub_energies = []
+            
+            while self.parser.closest((cre_float,"\n\n")) == 0:
+                sub_energies.append(self.parser.nextFloat()*numericalunits.eV)
+                
+            energies.append(sub_energies)
+            
+        if parseMode_kp == 0:
+            c = UnitCell(basis, kpoints, energies)
+        else:
+            c = UnitCell(basis, kpoints*2*math.pi/alat, energies, c_basis = "cartesian")
+        
+        if not fermi is None:
+            c.meta["Fermi"] = fermi
+            
+        return c
     
-    def bands(self, skipVCRelaxException = False):
+    def bands(self, index = -1, skipVCRelaxException = False):
         """
         Retrieves bands.
         
         Kwargs:
+        
+            index (int or None): index of a band structure or ``None''
+            if all band structures need to be parsed. Supports negative
+            indexing.
         
             skipVCRelaxException (bool): forces to skip variable cell
             relaxation exception. In this very special case no
@@ -386,7 +416,7 @@ class Output(AbstractParser):
         
         self.parser.reset()
         self.parser.skip("reciprocal axes: (cart. coord. in units 2 pi/alat)")
-        shape = self.parser.nextFloat((3,4))[:,1:]*2*math.pi/alat
+        basis = Basis(self.parser.nextFloat((3,4))[:,1:]*2*math.pi/alat)
         
         self.parser.skip("number of k points=")
         n_kp = self.parser.nextInt()
@@ -407,6 +437,8 @@ class Output(AbstractParser):
             raise Exception("No kpoint data found in the file.")
         
         bandStructures = []
+            
+        counter = 0
         
         while True:
             
@@ -419,29 +451,45 @@ class Output(AbstractParser):
             elif parseMode == 1:
                 self.parser.skip("End of band structure calculation")
                 
-            energies = []
+            curr_fermi = fermi[counter] if counter < len(fermi) else None
             
-            for i in range(n_kp):
+            if index is None:
                 
-                self.parser.skip("k =")
-                self.parser.nextLine(2)
-                sub_energies = []
-                
-                while self.parser.closest((cre_float,"\n\n")) == 0:
-                    sub_energies.append(self.parser.nextFloat()*numericalunits.eV)
+                bandStructures.append(self.__bands_energies__(parseMode_kp, basis, kpoints, curr_fermi, alat))
                     
-                energies.append(sub_energies)
-            
-            if parseMode_kp == 0:
-                bandStructures.append(UnitCell(Basis(shape), kpoints, energies))
-            else:
-                bandStructures.append(UnitCell(Basis(shape), kpoints*2*math.pi/alat, energies, c_basis = "cartesian"))
+            elif index < 0:
                 
-            if len(fermi)>0:
-                bandStructures[-1].meta["Fermi"] = fermi[0]
-                fermi = fermi[1:]
+                self.parser.save()
             
-        return bandStructures
+            elif index == counter:
+                
+                return self.__bands_energies__(parseMode_kp, basis, kpoints, curr_fermi, alat)
+            
+            counter += 1
+            
+        if index is None:
+            
+            return bandStructures
+            
+        elif index < 0:
+            
+            if (-index-1>counter):
+                raise ParseError("Only {:d} band structures found ({:d} requested)".format(counter, index))
+                
+            for i in range(-index):
+                self.parser.pop()
+            
+            c = self.__bands_energies__(parseMode_kp, basis, kpoints, fermi[index] if -index<=len(fermi) else None, alat)
+            
+            for i in range(counter+index):
+                self.parser.pop()
+                
+            return c
+                
+        else:
+            
+            raise ParseError("Only {:d} band structures found ({:d} requested)".format(counter, index))
+            
     
     @band_structure
     def __bands_silent__(self):

@@ -141,12 +141,17 @@ def parse(f, tag):
             attr = getattr(parser, a)
             if "__tags__" in dir(attr) and tag in attr.__tags__:
                 try:
+                    
                     attempted.append(parser.__class__.__name__+"."+attr.__name__)
                     if attr.__take_file__:
                         return attr(f)
                     else:
                         return attr()
+                        
                 except StopIteration:
+                    pass
+                    
+                except ParseError:
                     pass
     
     if len(attempted) == 0:

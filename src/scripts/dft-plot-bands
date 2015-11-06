@@ -27,13 +27,6 @@ for file_name, destination in ((options.file, "bands"), (options.density[0], "de
                     print("Could not parse file '{}'\n".format(file_name))
                     raise
                 
-                if isinstance(bands, (list, tuple)):
-                    if len(bands) == 0:
-                        print("No data found in '{}'".format(file_name))
-                        exit(1)
-                    else:
-                        bands = bands[-1]
-                        
                 data[destination] = bands
                 
         except IOError:

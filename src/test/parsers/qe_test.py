@@ -6,6 +6,7 @@ from numpy import testing
 import numpy
 import numericalunits
 
+from dfttools.parsers.generic import ParseError
 from dfttools.parsers.qe import bands, output, cond, input, proj
 from dfttools.types import Basis
 
@@ -127,7 +128,7 @@ class Test_output0(unittest.TestCase):
         )
     def test_bands(self):
         self.assertRaises(Exception,self.parser.bands)
-        b = self.parser.bands(skipVCRelaxException = True)
+        b = self.parser.bands(index = None, skipVCRelaxException = True)
         assert len(b) == 19
         for i in range(len(b)):
             testing.assert_allclose(b[0].vectors,numpy.array(
@@ -186,6 +187,24 @@ class Test_output0(unittest.TestCase):
         )*numericalunits.eV)
         assert b[0].meta["Fermi"] == 10.0033*numericalunits.eV
         assert b[-1].meta["Fermi"] == 8.2525*numericalunits.eV
+        
+        for i in range(19):
+            bb = self.parser.bands(index = i, skipVCRelaxException = True)
+            assert len(self.parser.parser.__history__) == 0
+            assert bb == b[i]
+            assert bb.meta["Fermi"] == b[i].meta["Fermi"]
+            
+        for i in range(19):
+            bb = self.parser.bands(index = -i-1, skipVCRelaxException = True)
+            assert len(self.parser.parser.__history__) == 0
+            assert bb == b[-i-1]
+            assert bb.meta["Fermi"] == b[-i-1].meta["Fermi"]
+        
+        with self.assertRaises(ParseError):
+            self.parser.bands(index = -21, skipVCRelaxException = True)
+            
+        with self.assertRaises(ParseError):
+            self.parser.bands(index = 19, skipVCRelaxException = True)
     
     def test_valid_header(self):
         assert output.valid_header(self.parser.parser.string[:1000])
@@ -319,7 +338,7 @@ class Test_output3(unittest.TestCase):
             self.parser = output(f.read())
 
     def test_bands(self):
-        b = self.parser.bands()
+        b = self.parser.bands(index = None)
         assert len(b) == 1
         b = b[0]
         testing.assert_allclose(b.vectors,numpy.array(
@@ -361,7 +380,7 @@ class Test_output4(unittest.TestCase):
         ))*numericalunits.eV)
         
     def test_bands(self):
-        b = self.parser.bands()
+        b = self.parser.bands(index = None)
         
         testing.assert_equal(b[0].coordinates, (
             (0.0000000,   0.0000000,   0.0000000),

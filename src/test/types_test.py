@@ -185,6 +185,19 @@ class BasisTest(unittest.TestCase):
         
         with self.assertRaises(ArgumentError):
             c.reorder_vectors(2,1,2)
+            
+    def test_genpath(self):
+        keys = ((0,0,0),(1,0,0),(1,1,0),(1,1,1))
+        pth = self.c.generate_path(keys, n = 7)
+        testing.assert_allclose(pth, (
+            (0,0,0),
+            (.5,0,0),
+            (1,0,0),
+            (1,.5,0),
+            (1,1,0),
+            (1,1,.5),
+            (1,1,1)
+        ))
 
 class CellInitializationTest(unittest.TestCase):
     

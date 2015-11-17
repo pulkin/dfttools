@@ -392,6 +392,47 @@ class Basis(object):
             raise ArgumentError("The input contains duplicates")
             
         self.vectors = self.vectors[new,:]
+        
+    def generate_path(self, points, n = 100, force_edges = False):
+        """
+        Generates a path in this basis.
+        
+        Args:
+        
+            points (array): edges of the path where the leading dimension
+            corresponds to points and the second dimension corresponds
+            to the coordinates of the points in this basis.
+            
+        Kwargs:
+        
+            n (int): number of points;
+            
+            force_edges (int): force to include the edges into the final
+            list of coordinates.
+            
+        Returns:
+        
+            A 2D array with the path. The coordinates of points are
+            given in this basis.
+        """
+        points = numpy.array(points)
+        
+        cartesian = self.transform_to_cartesian(points)
+        lengths = ((cartesian[1:,:]-cartesian[:-1,:])**2).sum(axis = -1)**.5
+        lengths = numpy.concatenate(((0,),lengths,))
+        lengths = numpy.cumsum(lengths)
+        
+        if not force_edges:
+            
+            uniform = numpy.linspace(0,lengths[-1],n)
+            large = numpy.searchsorted(lengths,uniform)
+            large[0] = 1
+            small = ((uniform - lengths[large-1]) / (lengths[large] - lengths[large-1]))[:,numpy.newaxis]
+            return points[large-1,:] * (1 - small) + points[large,:] * small
+            
+        else:
+            
+            raise NotImplementedError
 
 class UnitCell(Basis):
     """

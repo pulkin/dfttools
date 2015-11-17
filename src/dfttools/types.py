@@ -392,7 +392,8 @@ class Basis(object):
             raise ArgumentError("The input contains duplicates")
             
         self.vectors = self.vectors[new,:]
-        
+    
+    @input_as_list
     def generate_path(self, points, n = 100, force_edges = False):
         """
         Generates a path in this basis.

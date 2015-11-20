@@ -1,6 +1,5 @@
 import numpy
 cimport numpy, cython
-from numericalunits import eV
 
 #@cython.boundscheck(True)
 def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):

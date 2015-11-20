@@ -5,9 +5,9 @@ from numpy import testing, random
 
 from numericalunits import angstrom
 
-from dfttools.types import Basis, UnitCell
+from dfttools.types import Basis, UnitCell, Grid
 from dfttools.parsers import structure, qe, openmx
-from dfttools.formatters import xsf_structure, qe_input, siesta_input, openmx_input
+from dfttools.formatters import xsf_structure, xsf_grid, qe_input, siesta_input, openmx_input
 
 class BackForthTests(unittest.TestCase):
     
@@ -20,6 +20,15 @@ class BackForthTests(unittest.TestCase):
             ),
             'C',
         )
+        
+        coords = (numpy.linspace(0,1,11, endpoint = False),numpy.linspace(0,1,13, endpoint = False),numpy.linspace(0,1,17, endpoint = False))
+        
+        self.grid = Grid(
+            self.cell,
+            coords,
+            numpy.zeros((11,13,17)),
+        )
+        self.grid.values = numpy.prod(numpy.sin(self.grid.explicit_coordinates()*2*numpy.pi), axis = -1)
         
     def test_xsf_back_forth(self):
         c1 = self.cell
@@ -44,6 +53,11 @@ class BackForthTests(unittest.TestCase):
             testing.assert_allclose(i.vectors/angstrom, j.vectors/angstrom, atol = 1e-6)
             testing.assert_allclose(i.coordinates, j.coordinates)
             testing.assert_equal(i.values, j.values)
+            
+    def test_xsf_grid_back_forth(self):
+        data = xsf_grid(self.grid, self.cell)
+        g = structure.xsf(data).grids()[0]
+        testing.assert_allclose(self.grid.values, g.values, atol = 1e-7)
 
     def test_qe_back_forth(self):
         c1 = self.cell

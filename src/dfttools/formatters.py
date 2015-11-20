@@ -48,6 +48,45 @@ def xsf_structure(*cells):
         if not i == len(cells):
             answer += '\n'
     return answer
+    
+def xsf_grid(grid, cell, npl = 6):
+    """
+    Generates an `xcrysden <http://www.xcrysden.org>`_ file with the
+    data on the grid.
+    
+    Args:
+    
+        grid (Grid): data on the grid;
+        
+        cell (UnitCell): structural data;
+        
+    Kwargs:
+    
+        npl (int): numbers per line in the grid section;
+        
+    Returns:
+    
+        A string contating XSF-formatted data.
+    """
+    result = __xsf_structure__(cell)
+    
+    result += "BEGIN_BLOCK_DATAGRID_3D\ndfttools.formatter\nDATAGRID_3D_UNKNOWN\n"
+    result += " ".join(("{:d}",)*3).format(*(numpy.array(grid.values.shape)+1)) + "\n0 0 0\n"
+    result += (("     {:14.10f}"*3+"\n")*3).format(*numpy.reshape(grid.vectors/angstrom,-1))
+    
+    l = grid.values
+    l = numpy.concatenate((l,l[0:1,:,:]), axis = 0)
+    l = numpy.concatenate((l,l[:,0:1,:]), axis = 1)
+    l = numpy.concatenate((l,l[:,:,0:1]), axis = 2)
+    l = l.reshape(-1, order = 'F')
+    for i in range(l.shape[0]/npl):
+        result += " ".join(("{:e}",)*npl).format(*l[i*npl:(i+1)*npl])+"\n"
+        
+    rest = l.shape[0] - (i+1)*npl
+    result += " ".join(("{:e}",)*rest).format(*l[i*npl:])+"\n"
+    result += "END_DATAGRID_3D\nEND_BLOCK_DATAGRID_3D\n"
+
+    return result
 
 def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters = {}, pseudopotentials = {}, indent = 4):
     """

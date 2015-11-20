@@ -559,7 +559,7 @@ def matplotlib_bands(
     axes.set_xlim((0,1))
     
     axes.set_xticks(edges)
-    axes.set_xticklabels(list("({:.2f} {:.2f} {:.2f})".format(*i) for i in cell.coordinates[makes_turn,:]))
+    axes.set_xticklabels(list(" ".join(("{:.2f}",)*len(i)).format(*i) for i in cell.coordinates[makes_turn,:]))
     
     if not units_name is None:
         axes.set_ylabel('Energy, {}'.format(units_name))

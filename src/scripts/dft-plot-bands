@@ -13,7 +13,7 @@ from dfttools.simple import parse
 
 data = {}
 
-for file_name, destination in ((options.file, "bands"), (options.density[0], "density")):
+for file_name, destination in ((options.file, "bands"), (options.density[0] if not options.density is None else None, "density")):
     
     if not file_name is None:
             

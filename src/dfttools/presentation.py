@@ -179,7 +179,7 @@ def svgwrite_unit_cell(
         circle_size (float): size of the circles representing atoms,
         arbitrary units;
         
-        show_cell (bool): if True draws unit cell edges projected;
+        show_cell (bool): if True draws the unit cell edges projected;
         
         show_atoms (bool): if True draws atoms;
         

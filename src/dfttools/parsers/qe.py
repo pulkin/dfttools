@@ -473,7 +473,7 @@ class Output(AbstractParser):
             
         elif index < 0:
             
-            if (-index-1>counter):
+            if (-index>counter):
                 raise ParseError("Only {:d} band structures found ({:d} requested)".format(counter, index))
                 
             for i in range(-index):

@@ -191,7 +191,7 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
             for key, value in sorted(data.items()):
                 
                 if isinstance(value, bool):
-                    value = ".true." if value else ".false"
+                    value = ".true." if value else ".false."
                 elif isinstance(value, int):
                     value = "{:d}".format(value)
                 elif isinstance(value, float):

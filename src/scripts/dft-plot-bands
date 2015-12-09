@@ -4,12 +4,18 @@ import argparse
 parser = argparse.ArgumentParser(description = "Plots a band structure from a supported file")
 parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure file name", metavar = "FILENAME")
 parser.add_argument("-d", "--density", nargs = 1, help = "density of states file name", metavar = "FILENAME")
+parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", metavar = "FILENAME")
 parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
 
 options = parser.parse_args()
 
 from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
+
+from numericalunits import eV
+
+if not options.fermi is None:
+    options.fermi = float(options.fermi[0])*eV
 
 data = {}
 
@@ -27,6 +33,9 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if n
                     print("Could not parse file '{}'\n".format(file_name))
                     raise
                 
+                if not options.fermi is None:
+                    bands.meta["Fermi"] = options.fermi
+                    
                 data[destination] = bands
                 
         except IOError:

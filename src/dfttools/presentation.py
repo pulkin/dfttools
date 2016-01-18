@@ -443,6 +443,7 @@ def matplotlib_bands(
     weights = None,
     weights_color = None,
     weights_size = None,
+    edge_names = [],
     **kwargs
 ):
     """
@@ -476,6 +477,8 @@ def matplotlib_bands(
         
         weights_size (array): a 2D array with weights on the band
         structure which will be converted to line thickness;
+        
+        edge_names (list): the edges names to appear on the band structure;
         
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
@@ -559,7 +562,10 @@ def matplotlib_bands(
     axes.set_xlim((0,1))
     
     axes.set_xticks(edges)
-    axes.set_xticklabels(list(" ".join(("{:.2f}",)*len(i)).format(*i) for i in cell.coordinates[makes_turn,:]))
+    axes.set_xticklabels(list(
+        edge_names[i] if i<len(edge_names) else " ".join(("{:.2f}",)*cell.coordinates.shape[1]).format(*cell.coordinates[makes_turn,:][i])
+        for i in range(makes_turn.sum())
+    ))
     
     if not units_name is None:
         axes.set_ylabel('Energy, {}'.format(units_name))

@@ -1369,7 +1369,8 @@ class Grid(Basis):
         
         for i in range(len(self.coordinates)):
             
-            selection[i] = numpy.array(selection[i])
+            if not isinstance(selection[i],slice):
+                selection[i] = numpy.array(selection[i])
             self.coordinates[i] = self.coordinates[i][selection[i]]
             
             # Set a valid slice

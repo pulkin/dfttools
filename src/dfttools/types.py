@@ -10,7 +10,7 @@ import warnings
 import numpy
 from numpy import linalg, random
 
-from .blochl import tetrahedron
+from .blochl import tetrahedron, tetrahedron_plain
     
 def input_as_list(func):
     
@@ -1726,16 +1726,19 @@ class Grid(Basis):
         initial = self.values
         points = numpy.array(points, dtype = numpy.float64)
         self.values = numpy.reshape(self.values, self.values.shape[:3]+(-1,))
-        raw = tetrahedron(self, points)
         
-        self.values = initial
-        
-        if not(resolved):
-            return raw.sum(axis = 0).sum(axis = 0).sum(axis = 0).sum(axis = 0)
+        if resolved:
             
-        else:
+            raw = tetrahedron(self, points)
+            self.values = initial
             return Grid(
                 self,
                 self.coordinates,
                 numpy.reshape(raw, self.values.shape + points.shape),
             )
+        
+        else:
+            
+            raw = tetrahedron_plain(self, points)
+            self.values = initial
+            return raw

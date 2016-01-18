@@ -334,7 +334,7 @@ def svgwrite_unit_cell(
         fill = __svg_color__(bg),
     ))
     
-    order = numpy.argsort(obj_z)[::-1]
+    order = numpy.argsort(obj_z)
     for i in range(order.shape[0]):
         svg.add(obj[order[i]])
         

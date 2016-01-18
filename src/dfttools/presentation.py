@@ -263,7 +263,7 @@ def svgwrite_unit_cell(
     shift = insert + 0.5*size - center*scale
     
     # Calculate base colors
-    colors_base = tuple(__fadeout_z__(e_color[i], projected[i,2], b_min[2], b_max[2], fadeout_strength, bg) for i in range(cell.size()))
+    colors_base = tuple(__fadeout_z__(e_color[i], projected[i,2], b_max[2], b_min[2], fadeout_strength, bg) for i in range(cell.size()))
     
     # Arrays for storing objects with z-index
     obj = []

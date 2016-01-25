@@ -534,8 +534,7 @@ def matplotlib_bands(
         
     segments = numpy.concatenate(segment_sets,axis = 0)
     
-    if not "color" in kwargs:
-        kwargs["color"] = next(axes._get_lines.color_cycle)
+    kwargs.update(next(axes._get_lines.prop_cycler))
         
     lc = LineCollection(segments, **kwargs)
     

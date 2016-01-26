@@ -3,8 +3,9 @@ import argparse
 
 parser = argparse.ArgumentParser(description = "Plots a band structure from a supported file")
 parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure file name", metavar = "FILENAME")
-parser.add_argument("-d", "--density", nargs = 1, help = "density of states file name", metavar = "FILENAME")
-parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", metavar = "FILENAME")
+parser.add_argument("-d", "--density", nargs = '?', help = "plot density of states", metavar = "FILENAME", const = True)
+parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", metavar = "VALUE")
+parser.add_argument("-r", "--range", nargs = 2, help = "Energy range in eV", metavar = "VALUE")
 parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
 
 options = parser.parse_args()
@@ -17,9 +18,12 @@ from numericalunits import eV
 if not options.fermi is None:
     options.fermi = float(options.fermi[0])*eV
 
+if not options.range is None:
+    options.range = list(float(v) for v in options.range)
+    
 data = {}
 
-for file_name, destination in ((options.file, "bands"), (options.density[0] if not options.density is None else None, "density")):
+for file_name, destination in ((options.file, "bands"), (options.density[0] if "__getitem__" in dir(options.density) else None, "density")):
     
     if not file_name is None:
             
@@ -42,7 +46,7 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if n
             
             print("Could no read file '{}'\n".format(options.file))
             raise
-    
+
 try:
     from matplotlib import pyplot, gridspec
     from dfttools.presentation import matplotlib_bands, matplotlib_bands_density
@@ -52,11 +56,24 @@ except ImportError:
 
 if not "density" in data:
     
-    matplotlib_bands(
-        bands,
-        pyplot.gca()
-    )
-    
+    if options.density:
+        
+        matplotlib_bands_density(
+            data["bands"],
+            pyplot.gca(),
+            200,
+            orientation = "landscape",
+            energy_range = options.range,
+        )
+        
+    else:
+        
+        matplotlib_bands(
+            data["bands"],
+            pyplot.gca(),
+            energy_range = options.range,
+        )
+
 else:
     
     fig = pyplot.figure(figsize = (12,9))
@@ -67,6 +84,7 @@ else:
     matplotlib_bands(
         data["bands"],
         ax_left,
+        energy_range = options.range,
     )
     
     matplotlib_bands_density(

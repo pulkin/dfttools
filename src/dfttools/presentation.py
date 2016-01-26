@@ -518,8 +518,8 @@ def matplotlib_bands(
     edges = kpoints[makes_turn]
 
     # Plot edges
-    for i in range(edges.shape[0]):
-        axes.axvline(x=edges[i],color='black',linewidth = 2)
+    for e in edges[1:-1]:
+        axes.axvline(x=e,color='black',linewidth = 2)
         
     # Get continious parts
     continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])

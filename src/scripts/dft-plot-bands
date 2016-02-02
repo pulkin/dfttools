@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser(description = "Plots a band structure from a su
 parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure file name", metavar = "FILENAME")
 parser.add_argument("-d", "--density", nargs = '?', help = "plot density of states", metavar = "FILENAME", const = True)
 parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", metavar = "VALUE")
-parser.add_argument("-r", "--range", nargs = 2, help = "Energy range in eV", metavar = "VALUE")
+parser.add_argument("-e", "--range", nargs = 2, help = "Energy range in eV", metavar = "VALUE")
 parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
 
 options = parser.parse_args()

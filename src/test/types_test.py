@@ -198,6 +198,19 @@ class BasisTest(unittest.TestCase):
             (1,1,.5),
             (1,1,1)
         ))
+        
+    def test_save_load(self):
+        import numericalunits
+        import pickle
+        x = Basis(
+            (numericalunits.angstrom,)*3,
+            kind = 'orthorombic',
+        )
+        x.units["vectors"] = "m"
+        data = pickle.dumps(x)
+        numericalunits.reset_units()
+        x = pickle.loads(data)
+        testing.assert_allclose(x.vectors, numpy.eye(3)*numericalunits.angstrom)
 
 class CellInitializationTest(unittest.TestCase):
     

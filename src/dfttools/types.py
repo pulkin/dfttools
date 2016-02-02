@@ -9,6 +9,7 @@ import warnings
 
 import numpy
 from numpy import linalg, random
+import numericalunits
 
 from .blochl import tetrahedron, tetrahedron_plain
     
@@ -117,11 +118,27 @@ class Basis(object):
             self.meta = meta.copy()
         else:
             self.meta = {}
+            
+        self.units = {}
 
+    def __export_units__(self, attr):
+        x = getattr(self, attr)
+        if not attr in self.units:
+            return x
+        measure = getattr(numericalunits, self.units[attr]) 
+        return x/measure
+
+    def __import_units__(self, attr):
+        x = getattr(self, attr)
+        if attr in self.units:
+            measure = getattr(numericalunits, self.units[attr]) 
+            setattr(self, attr, x*measure)
+        
     def __getstate__(self):
         return {
-            "vectors":self.vectors,
+            "vectors":self.__export_units__("vectors"),
             "meta":self.meta,
+            "units":self.units,
         }
         
     def __setstate__(self,data):
@@ -129,6 +146,8 @@ class Basis(object):
             data["vectors"],
             meta = data["meta"],
         )
+        self.units = data["units"]
+        self.__import_units__("vectors")
         
     def __eq__(self, another):
         return type(another) == type(self) and numpy.all(self.vectors == another.vectors)

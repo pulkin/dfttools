@@ -154,6 +154,7 @@ def svgwrite_unit_cell(
     show_legend = True,
     fadeout_strength = 0.8,
     bg = (0xF0,0xF0,0xFF),
+    bond_ratio = 1,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -190,6 +191,9 @@ def svgwrite_unit_cell(
         fadeout_strength (float): amount of fadeout applied to more distant atoms;
         
         bg (array): an integer array defining background color;
+        
+        bond_ratio (float): scale factor to determine whether the bond
+        is rendered;
         
     Returns:
     
@@ -306,7 +310,7 @@ def svgwrite_unit_cell(
         # Draw lines
         for i in range(d.shape[0]):
             for j in range(i,d.shape[1]):
-                if (d[i,j]<(e_covsize[i]+e_covsize[j])) and (d[i,j]>(e_size[i]+e_size[j])*circle_size):
+                if (d[i,j]<(e_covsize[i]+e_covsize[j])*bond_ratio) and (d[i,j]>(e_size[i]+e_size[j])*circle_size):
                     
                     unit = projected[j] - projected[i]
                     unit = unit / ((unit**2).sum())**0.5
@@ -355,7 +359,7 @@ def svgwrite_unit_cell(
         x = insert[0] + size[0] - (__legend_margin__ + __box_size__)*len(unique)
         y = insert[1] + __legend_margin__
         
-        for i, e in enumerate(unique):
+        for i, e in enumerate(sorted(unique)):
             
             xx = x + (__legend_margin__ + __box_size__)*i
             yy = y

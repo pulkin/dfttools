@@ -124,7 +124,7 @@ __elements_table__ = (
 )
 __unknown_element__ = ('??', (0xA0,0xA0,0xA0), 1.75, 1.45)
 
-__elements_name_lookup_table__ = dict((i[0].lower(), (n,)+i) for n, i in enumerate(__elements_table__))
+__elements_name_lookup_table__ = dict((i[0].lower(), [n]+list(i)) for n, i in enumerate(__elements_table__))
 
 def __fadeout_z__(color, z, mx, mn, strength, bg):
     
@@ -180,7 +180,8 @@ def svgwrite_unit_cell(
         circle_size (float): size of the circles representing atoms,
         arbitrary units;
         
-        show_cell (bool): if True draws the unit cell edges projected;
+        show_cell (bool, str): if True draws the unit cell edges projected,
+        if 'invisible' the unit cell is invisible;
         
         show_atoms (bool): if True draws atoms;
         
@@ -273,7 +274,7 @@ def svgwrite_unit_cell(
     obj = []
     obj_z = []
     
-    if show_cell:
+    if show_cell == True:
         
         # Draw unit cell edges
         for pair in projected_edges:
@@ -555,7 +556,7 @@ def matplotlib_bands(
     
     # Plot Fermi energy
     if show_fermi and "Fermi" in cell.meta:
-        axes.axhline(y = cell.meta["Fermi"]/units,color='r')
+        axes.axhline(y = cell.meta["Fermi"]/units,color='black', ls = "--", lw = 0.5)
         
     # Set energy range
     if energy_range is None:

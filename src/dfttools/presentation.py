@@ -448,6 +448,7 @@ def matplotlib_bands(
     weights = None,
     weights_color = None,
     weights_size = None,
+    optimize_visible = False,
     edge_names = [],
     **kwargs
 ):
@@ -483,6 +484,8 @@ def matplotlib_bands(
         weights_size (array): a 2D array with weights on the band
         structure which will be converted to line thickness;
         
+        optimize_visible (bool): draw only visible lines;
+        
         edge_names (list): the edges names to appear on the band structure;
         
         The rest of kwargs are passed to
@@ -511,6 +514,10 @@ def matplotlib_bands(
         units_name = units
         units = getattr(numericalunits, units)
         
+    # Set energy range
+    if energy_range is None:
+        energy_range = __guess_energy_range__(cell)/units
+        
     # Fold K points to 0- > 1 line
     kpoints = cell.distances((0,)+tuple(range(cell.size())))
     for i in range(1,kpoints.shape[0]):
@@ -529,12 +536,32 @@ def matplotlib_bands(
     # Get continious parts
     continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])
     
+    # Get the segments to draw
+    visible_segment = continious[:,numpy.newaxis]*numpy.ones((1,cell.values.shape[1]), dtype = numpy.bool)
+    
+    # Optimize visible segments
+    if optimize_visible:
+        visible_point = numpy.logical_and(cell.values/units > energy_range[0], cell.values/units < energy_range[1])
+        visible_segment = numpy.logical_and(
+            numpy.logical_or(visible_point[:-1,:],visible_point[1:,:]),
+            visible_segment
+        )
+        
+    # Adjust visible points
+    #visible_point = numpy.concatenate((
+        #numpy.zeros((1,cell.vallues.shape[1])),
+        #visible_segment,
+        #numpy.zeros((1,cell.vallues.shape[1]))
+    #), axis = 0)
+    #visible_point = numpy.logical_or(visible_point[:-1,:], visible_point[1:,:])
+    
     # Prepare LineCollection
     segment_sets = []
     for i in range(cell.values.shape[1]):
         points = numpy.array([kpoints, cell.values[:,i]/units]).T.reshape(-1, 1, 2)
-        segments = numpy.arange(cell.values.shape[0]-1)[continious]
-        segments = numpy.concatenate([points[:-1][continious], points[1:][continious]], axis=1)
+        #segments = numpy.arange(cell.values.shape[0]-1)[visible_segment[:,i]]
+        segments = numpy.concatenate([points[:-1][visible_segment[:,i]], points[1:][visible_segment[:,i]]], axis=1)
+        
         segment_sets.append(segments)
         
     segments = numpy.concatenate(segment_sets,axis = 0)
@@ -557,10 +584,6 @@ def matplotlib_bands(
     # Plot Fermi energy
     if show_fermi and "Fermi" in cell.meta:
         axes.axhline(y = cell.meta["Fermi"]/units,color='black', ls = "--", lw = 0.5)
-        
-    # Set energy range
-    if energy_range is None:
-        energy_range = __guess_energy_range__(cell)/units
                 
     axes.set_ylim(energy_range)
     axes.set_xlim((0,1))

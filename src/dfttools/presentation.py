@@ -586,7 +586,7 @@ def matplotlib_bands(
     ))
     
     if not units_name is None:
-        axes.set_ylabel('Energy, {}'.format(units_name))
+        axes.set_ylabel('Energy ({})'.format(units_name))
         
     else:
         axes.set_ylabel('Energy')

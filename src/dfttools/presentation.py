@@ -546,20 +546,11 @@ def matplotlib_bands(
             numpy.logical_or(visible_point[:-1,:],visible_point[1:,:]),
             visible_segment
         )
-        
-    # Adjust visible points
-    #visible_point = numpy.concatenate((
-        #numpy.zeros((1,cell.vallues.shape[1])),
-        #visible_segment,
-        #numpy.zeros((1,cell.vallues.shape[1]))
-    #), axis = 0)
-    #visible_point = numpy.logical_or(visible_point[:-1,:], visible_point[1:,:])
     
     # Prepare LineCollection
     segment_sets = []
     for i in range(cell.values.shape[1]):
         points = numpy.array([kpoints, cell.values[:,i]/units]).T.reshape(-1, 1, 2)
-        #segments = numpy.arange(cell.values.shape[0]-1)[visible_segment[:,i]]
         segments = numpy.concatenate([points[:-1][visible_segment[:,i]], points[1:][visible_segment[:,i]]], axis=1)
         
         segment_sets.append(segments)

@@ -71,7 +71,7 @@ class BandPlotTest(unittest.TestCase):
         assert len(segments) == (30*3-3)*3
         
         testing.assert_equal(axes.get_ylim(), numpy.array((0,3))*eV/getattr(numericalunits, units))
-        assert axes.get_yaxis().get_label().get_text().endswith(units)
+        assert axes.get_yaxis().get_label().get_text().endswith("("+units+")")
 
     @cleanup
     def test_plot_eV(self):
@@ -84,7 +84,7 @@ class BandPlotTest(unittest.TestCase):
     @cleanup
     def test_custom_units(self):
         matplotlib_bands(self.bands, pyplot.gca(), units = 2*Ry, units_name = "Hartree")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("Hartree")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(Hartree)")
         
     @cleanup
     def test_unknown_units(self):

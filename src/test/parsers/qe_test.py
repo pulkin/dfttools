@@ -438,13 +438,6 @@ class Test_proj0(unittest.TestCase):
             ( 0.023, 0.023, 0.023, 0.023, 0.023, 0.023, 0.020, 0.020)
         )
 
-    def test_weights_trim(self):
-        c = self.parser.weights(lower = 2, upper = 3)
-        assert c.shape == (28,1,8)
-        testing.assert_allclose(c[ 0, 0,numpy.array((1,2,3,5,6,7))],
-            ( 0.160, )*6
-        )
-
     def test_valid_header(self):
         assert proj.valid_header(self.parser.parser.string[:1000])
         

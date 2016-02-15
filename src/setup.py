@@ -20,6 +20,10 @@ else:
     ext_modules += [
         Extension("dfttools.blochl", [ "cython/blochl.c" ]),
     ]
+    
+ext_modules.append(
+    Extension("dfttools.parsers.native", [ "c/qeproj.c", "c/nativemodule.c" ])
+)
 
 setup(
     name='DFT Parsing Tools',

@@ -437,6 +437,11 @@ class Test_proj0(unittest.TestCase):
         testing.assert_allclose(c[-1,-1,numpy.array((1,2,3,5,6,7,0,4))],
             ( 0.023, 0.023, 0.023, 0.023, 0.023, 0.023, 0.020, 0.020)
         )
+        
+    def test_weights_equality(self):
+        c = self.parser.weights()
+        c2 = self.parser._weights()
+        testing.assert_allclose(c,c2)
 
     def test_valid_header(self):
         assert proj.valid_header(self.parser.parser.string[:1000])

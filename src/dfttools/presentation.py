@@ -561,13 +561,12 @@ def matplotlib_bands(
         
     lc = LineCollection(segments, **kwargs)
     
-    if not weights_color is None:
-        a = 0.5*(weights_color[:-1][continious]+weights_color[1:][continious])
-        lc.set_array(a.T.reshape(-1))
-        
-    if not weights_size is None:
-        a = 0.5*(weights_size[:-1][continious]+weights_size[1:][continious])
-        lc.set_linewidth(a.T.reshape(-1))
+    # Weights
+    for array, target in ((weights_color, lc.set_array), (weights_size, lc.set_linewidth)):
+        if not array is None:
+            array = numpy.swapaxes(0.5*(array[1:,:]+array[:-1,:]),0,1)
+            array = array[numpy.swapaxes(visible_segment,0,1)]
+            target(array)
         
     # Plot bands
     axes.add_collection(lc)

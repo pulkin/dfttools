@@ -2,6 +2,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+void __debug__(FILE *f) {
+    long int pos = ftell(f);
+    char *line = NULL;
+    size_t len;
+    if (getline(&line, &len, f) != -1) printf("Line: [%s]\n", line);
+    if (line) free(line);
+    fseek(f,pos,SEEK_SET);
+}
+
 int skip_either(char **c, int n, FILE *f) {
     char ch;
     int i[n];
@@ -80,7 +89,7 @@ int n_basis(FILE *f) {
 }
 
 int _weights(float **data, int basis_size, int bands_number, FILE *f) {
-
+    
     if (!skip("Calling projwave", f)) return -1;
     
     int nk = 0;
@@ -109,9 +118,9 @@ int _weights(float **data, int basis_size, int bands_number, FILE *f) {
             if (!skip("psi =", f)) return -1;
             
             int state;
-            float weight;
-            while (fscanf(f, "%f*[#%d]+", &weight, &state) == 2) {
-                (*data)[nk*multiplier + ne*basis_size + state-1] = weight;
+            int w1,w2;
+            while (fscanf(f, "%d.%d*[#%d]+", &w1, &w2, &state) == 3) {
+                (*data)[nk*multiplier + ne*basis_size + state-1] = 1.0*w1+1e-3*w2;
             }
         
         }

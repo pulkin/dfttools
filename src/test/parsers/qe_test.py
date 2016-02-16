@@ -442,6 +442,13 @@ class Test_proj0(unittest.TestCase):
         c = self.parser.weights()
         c2 = self.parser._weights()
         testing.assert_allclose(c,c2)
+        
+    def test_weights_space(self):
+        data = self.parser.data.replace('[# ','[#').replace('[# ','[#').replace('[# ','[#')
+        parser = proj(data)
+        c = self.parser.weights()
+        c2 = self.parser._weights()
+        testing.assert_allclose(c,c2)
 
     def test_valid_header(self):
         assert proj.valid_header(self.parser.parser.string[:1000])

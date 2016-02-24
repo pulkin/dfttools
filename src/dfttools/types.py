@@ -8,11 +8,13 @@ from functools import wraps
 import warnings
 
 import numpy
-from numpy import linalg, random
+from numpy import random
+from scipy import linalg
 import numericalunits
 
 from .blochl import tetrahedron, tetrahedron_plain
-    
+from .gf import greens_function
+
 def input_as_list(func):
     
     @wraps(func)
@@ -1761,3 +1763,556 @@ class Grid(Basis):
             raw = tetrahedron_plain(self, points)
             self.values = initial
             return raw
+
+class TightBinding(object):
+    
+    def __init__(self, m):
+        """
+        A class representing tight binding (periodic) matrix.
+        
+        Args:
+        
+            m (dict): a tight binding matrix. The dict keys represent
+            sets of integers corresponding to matrix block location
+            while dict values are block matrices.
+        """
+        if len(m) == 0:
+            raise ValueError("Empty input")
+            
+        self.__m__ = dict((k, numpy.array(v, dtype = numpy.complex)) for k,v in m.items() if numpy.count_nonzero(v)>0)
+        
+        self.dims = None
+        self.msize = None
+        d1 = None
+        
+        for k,v in self.__m__.items():
+            
+            msize = v.shape
+            if not len(msize) == 2:
+                raise ValueError("{} is not a 2D matrix: shape = {}".format(str(k), str(msize)))
+                
+            if not msize[0] == msize[1]:
+                raise ValueError("{} is not a square matrix: shape = {}".format(str(k), str(msize)))
+                
+            if self.dims is None:
+                self.dims = len(k)
+                d1 = k
+                self.msize = msize[0]
+                
+            elif not self.dims == len(k):
+                raise ValueError("Inconsistent dimensions: {} vs {}".format(str(d1),str(k)))
+                
+            elif not self.msize == msize[0]:
+                raise ValueError("Inconsistent matrix size: {:d} in {} vs {:d} in {}".format(self.msize, str(d1), msize[0], str(k)))
+    
+    def copy(self):
+        """
+        Calculates a copy.
+        
+        Returns:
+        
+            A (shallow) copy.
+        """
+        return TightBinding(self.__m__.copy())
+        
+    def __repr__(self):
+        return str(self.__m__)
+        
+    def __foreach__(self, p):
+        return TightBinding(
+            dict((k,p(k,v)) for k,v in self.__m__.items())
+        )
+        
+    @staticmethod
+    def __tr_i__(i):
+        return tuple(-ii for ii in i)
+        
+    def __eq__(self, other):
+        return len((self-other).__m__) == 0
+        
+    def __neg__(self):
+        return self.__foreach__(lambda k,v: -v)
+        
+    def __abs__(self):
+        return self.__foreach__(lambda k,v: abs(v))
+            
+    def __add__(self, other):
+        keys = set(self.__m__.keys()) | set(other.__m__.keys())
+        result = {}
+        for k in keys:
+            result[k] = self.__m__.get(k,0) + other.__m__.get(k,0)
+        return TightBinding(result)
+        
+    def __radd__(self, other):
+        return self + other
+        
+    def __sub__(self, other):
+        keys = set(self.__m__.keys()) | set(other.__m__.keys())
+        result = {}
+        for k in keys:
+            result[k] = self.__m__.get(k,0) - other.__m__.get(k,0)
+        return TightBinding(result)
+        
+    def __rsub__(self, other):
+        return - self + other
+        
+    def __mul__(self, other):
+        return self.__foreach__(lambda k,v: v*other)
+        
+    def __rmul__(self, other):
+        return self*other
+        
+    def __div__(self, other):
+        if isinstance(other, TightBinding):
+            keys = set(self.__m__.keys()) | set(other.__m__.keys())
+            result = {}
+            for k in keys:
+                result[k] = self.__m__.get(k,0) / other.__m__.get(k,0)
+            return TightBinding(result)
+        else:
+            return self.__foreach__(lambda k,v: v/other)
+        
+    def __getitem__(self, key):
+        if not isinstance(key, tuple):
+            key = (key,)
+            
+        if key in self.__m__:
+            return self.__m__[key]
+            
+        else:
+            if not len(key) == self.dims:
+                raise ValueError("Argument number mismatch: found {:d}, required {:d}".format(len(key), self.dims))
+                
+            return numpy.zeros((self.msize,self.msize), dtype = numpy.complex)
+            
+    def __setitem__(self, key, item):
+        if not isinstance(key, tuple):
+            key = (key,)
+            
+        if not len(key) == self.dims:
+            raise ValueError("Argument number mismatch: found {:d}, required {:d}".format(len(key), self.dims))
+            
+        item = numpy.array(item, dtype = numpy.complex)
+        
+        if not len(item.shape) == 2:
+            raise ValueError("Not a 2D matrix: shape = {}".format(str(item.shape)))
+            
+        if not item.shape[0] == self.msize or not item.shape[1] == self.msize:
+            raise ValueError("Wrong dimensions: shape = {}".format(str(item.shape)))
+                
+        self.__m__[key] = item
+        
+    def apply(self, mask):
+        """
+        Applies a mask to the tight binding.
+        
+        Returns:
+        
+            A new instance of tight binding with the mask applied.
+        """
+        return TightBinding(dict(
+            (k, v[mask,:][:,mask]) for k,v in self.__m__.items()
+        ))
+        
+    def tr(self):
+        """
+        Calculates transposed matrix.
+        
+        Returns:
+        
+            A transposed of the tight binding matrix.
+        """
+        result = {}
+        for k in self.__m__.keys():
+            result[TightBinding.__tr_i__(k)] = numpy.transpose(self.__m__[k])
+            
+        return TightBinding(result)
+        
+    def cc(self):
+        """
+        Calculates complex conjugate.
+        
+        Returns:
+        
+            A complex conjugate of the tight binding matrix.
+        """
+        result = self.__m__.copy()
+        for k,v in result.items():
+            result[k] = numpy.conj(v)
+            
+        return TightBinding(result)
+        
+    def hc(self):
+        """
+        Calculates Hermitian conjugate.
+        
+        Returns:
+        
+            A Hermitian conjugate of the tight binding matrix.
+        """
+        return self.tr().cc()
+        
+    def absmax(self):
+        """
+        Retrieves maximum value by modulus.
+        
+        Returns:
+        
+            A float with the maximum value.
+        """
+        mx = 0
+        for k,v in self.__m__.items():
+            mx = max(mx, abs(v).max())
+        return mx
+            
+    def hermitian_error(self):
+        """
+        Calculates largest non-hermitian element of the Hamiltonian.
+        
+        Returns:
+        
+            A float giving a measure of the matrix non-hermitianity.
+        """
+        return (self - self.hc()).absmax()
+        
+    def fourier(self, k, index = None):
+        """
+        Performs Fourier transform.
+        
+        Args:
+        
+            k (float): the wave number or a wave vector.
+            
+        Kwargs:
+        
+            index (int): index to transform; if None transforms along
+            first ``len(k)'' indeces.
+            
+        Returns:
+        
+            Transformed tight binding matrix.
+        """
+        if not index is None:
+            
+            new_data = {}
+            
+            for key, value in self.__m__.items():
+                
+                key2 = tuple(key[:index] + key[index+1:])
+                matrix = value*numpy.exp(2j*numpy.pi*key[index]*k)
+                
+                if key2 in new_data:
+                    new_data[key2] += matrix
+                    
+                else:
+                    new_data[key2] = matrix
+                    
+            return TightBinding(new_data)
+            
+        else:
+            
+            result = self
+            for i in k:
+                result = result.fourier(i, index = 0)
+            return result
+            
+    def diagonal(self):
+        """
+        Retrieves diagonal block.
+        
+        Returns:
+        
+            The diagonal block of the tight binding.
+        """
+        return self[(0,)*self.dims]
+        
+    def is_1DNN(self):
+        """
+        Determines if it is a valid 1D nearest neighbour matrix.
+            
+        Returns:
+        
+            True if it is a valid one.
+        """
+        if not self.dims == 1:
+            return False
+            
+        if not set(self.__m__.keys()) <= set(((0,),(1,),(-1,))):
+            return False
+        
+        return True
+        
+    def gf(self, energy, b = None, direction = 'negative', skip_checks = False, tolerance = 1e-12):
+        """
+        Calculates the Green's function matrix.
+        
+        Args:
+        
+            energy (complex): energy to calculate at;
+
+        Kwargs:
+        
+            b (TightBinding): the right-hand side of a generalized
+            eigenvalue problem;
+            
+            direction (str): either 'positive' or 'negative' - the
+            direction for the GF;
+            
+            skip_checks (bool): whether to skip the checks of the setup;
+            
+            tolerance (float): tolerance for Green's function iterations.
+            
+        Returns:
+        
+            A matrix with the Green's function.
+        """
+        
+        if b is None:
+            b = self.eye()
+            
+        if not skip_checks:
+            if not self.is_1DNN():
+                raise ValueError("Not a 1D NN tight binding")
+            if not b.is_1DNN():
+                raise ValueError("'b' is not a 1D NN tight binding")
+            
+        if direction == 'positive':
+            return greens_function(
+                energy+0j,
+                self[0],
+                self[1],
+                b[0],
+                b[1],
+                tolerance = tolerance,
+            )
+            
+        elif direction == 'negative':
+            return greens_function(
+                energy+0j,
+                self[0],
+                self[-1],
+                b[0],
+                b[-1],
+                tolerance = tolerance,
+            )
+            
+        else:
+            raise ValueError("Unknown value of the direction: {}".format(direction))
+            
+    def eig_path(self, pts, b = None):
+        """
+        Calculates eigenvalues along a path in k space.
+        
+        Args:
+        
+            pts (array): an array containing k-points to calculate at;
+            
+        Kwargs:
+            
+            b (TightBinding): the rhs of a generailzed eigenvalue problem;
+        
+        Returns:
+        
+            Eigenvalues in a multidimensional array.
+        """
+        result = []
+        for i in pts:
+            
+            hh = self.fourier(i).__m__.values()[0]
+            
+            if not b is None:
+                bb = b.fourier(i).__m__.values()[0]
+                
+            else:
+                bb = None
+                
+            result.append(linalg.eigvalsh(hh, b = bb))
+        return numpy.array(result)
+        
+    def eye(self):
+        """
+        Generates an eye tight binding matrix.
+        
+        Args:
+        
+            like (TightBinding): the prototype matrix;
+            
+        Returns:
+        
+            A TightBinding of the same structure as input.
+        """
+        return TightBinding({
+            (0,)*self.dims : numpy.eye(self.msize),
+        })
+        
+    def super(self, size, dim):
+        """
+        Creates a supercell version of this tight binding.
+        
+        Args:
+        
+            size (int): a multiple to increase the tight binding;
+            
+            dim (int): dimension along which to increase the tight binding.
+            
+        Returns:
+        
+            A supercell tight binding.
+        """
+        result = {}
+        for k,v in self.__m__.items():
+            for i in range(size):
+                j = k[dim]+i
+                new_k = k[:dim] + (j/size,) + k[dim+1:]
+                
+                if not new_k in result:
+                    result[new_k] = numpy.zeros((self.msize*size,self.msize*size), dtype = numpy.complex)
+                
+                j = j % size
+                result[new_k][i*self.msize:(i+1)*self.msize,j*self.msize:(j+1)*self.msize] = v
+                
+        return TightBinding(result)
+        
+    def inverted(self, dim = 0):
+        """
+        Creates a space-inverted version of self.
+        
+        Kwargs:
+        
+            dim (int): dimension to invert;
+            
+        Returns:
+        
+            An inverted version of self.
+        """
+        return TightBinding(dict(
+            (k[:dim] + (-k[dim],) + k[dim+1:],v) for k,v in self.__m__.items()
+        ))
+        
+    def periodic_device(self, size = 1):
+        """
+        Initializes a periodic device with 2 identical leads and no
+        scattering region.
+        
+        Kwargs:
+        
+            size (int): number of units to include into a scattering
+            region;
+        
+        Returns:
+        
+            A periodic 2-terminal device.
+        """
+        if not self.is_1DNN():
+            raise ValueError("Not a 1D NN tight binding")
+            
+        return MultiterminalDevice(self.super(size,0).diagonal(), [self, self.inverted()])
+
+class MultiterminalDevice(object):
+    
+    def __init__(self, center, leads, connections = None):
+        """
+        Describes a multiterminal 1D device.
+        
+        Args:
+        
+            center (matrix): a matrix of the center part of device;
+            
+            leads (array): the semi-infinite leads connected to a device;
+            
+        Kwargs:
+        
+            connections (array): corresponding connections of the leads.
+        """
+        self.center = numpy.array(center, dtype = numpy.complex)
+        self.leads = leads
+        
+        for i, l in enumerate(leads):
+            if not l.is_1DNN():
+                raise ValueError("Lead #{:d} is not a valid 1D NN".format(i))
+        
+        if connections is None:
+            
+            self.connections = []
+            
+            if len(leads) > 2:
+                raise ValueError("Could not guess connections of more than 2 leads")
+                
+            if len(leads) > 0:
+                self.connections.append(numpy.dot(
+                    self.leads[0][1],
+                    numpy.eye(self.leads[0].msize, M = self.center.shape[0])
+                ))
+                
+            if len(leads) > 1:
+                n = self.leads[1].msize
+                m = self.center.shape[0]
+                self.connections.append(numpy.dot(
+                    self.leads[1][1],
+                    numpy.eye(n, M = m, k = m-n),
+                ))
+                
+        else:
+            
+            self.connections = connections
+    
+    def eye(self):
+        """
+        Generates an eye multiterminal device.
+        
+        Args:
+        
+            like (MutiterminalDevice): the prototype;
+            
+        Returns:
+        
+            A MultiterminalDevice of the same structure as input.
+        """
+        return MultiterminalDevice(
+            numpy.eye(self.center.shape[0]),
+            list(i.eye() for i in self.leads),
+            connections = list(numpy.zeros(i.shape) for i in self.connections),
+        )
+
+    def __se__(self, energy, i, b, tolerance = 1e-12):
+            
+        G = self.leads[i].gf(
+            energy,
+            b = b.leads[i],
+            direction = 'negative',
+            skip_checks = True,
+            tolerance = tolerance,
+        )
+        
+        wSH1 = energy*b.connections[i] - self.connections[i]
+        wSH2 = energy*b.connections[i].conj().T - self.connections[i].conj().T
+        
+        return numpy.dot(numpy.dot(wSH2,G),wSH1)
+
+    def gf(self, energy, b = None, tolerance = 1e-12):
+        """
+        Calculates the Green's function matrix.
+        
+        Args:
+        
+            energy (complex): energy to calculate at;
+
+        Kwargs:
+        
+            b (TightBinding): the right-hand side of a generalized
+            eigenvalue problem;
+            
+            tolerance (float): tolerance for Green's function iterations.
+            
+        Returns:
+        
+            A matrix with the Green's function.
+        """
+        if b is None:
+            b = self.eye()
+            
+        gi = energy*b.center - self.center
+        for i in range(len(self.leads)):
+            gi -= self.__se__(energy, i, b, tolerance = tolerance)
+            
+        return linalg.inv(gi)

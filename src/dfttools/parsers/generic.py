@@ -32,12 +32,17 @@ class AbstractParser(object):
     
     Args:
     
-        data (str): text to parse.
+        data (str): text to parse or a file to read.
     """
     
-    def __init__(self, data):
-        self.data = data
-        self.parser = parse(data)
+    def __init__(self, file):
+        if hasattr(file,"read"):
+            self.file = file
+            self.data = file.read()
+        else:
+            self.file = None
+            self.data = file
+        self.parser = parse(self.data)
     
     @staticmethod
     def valid_header(header):

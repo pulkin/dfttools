@@ -6,7 +6,7 @@ from numpy import testing
 import numpy
 import numericalunits
 
-from dfttools.parsers.openmx import bands, output, input, transmission, populations, joint_populations, JSON_DOS, Transmission
+from dfttools.parsers.openmx import *
 from dfttools.types import UnitCell, Basis
 
 class Test_bands0(unittest.TestCase):
@@ -427,3 +427,17 @@ class Test_JSON_DOS(unittest.TestCase):
         testing.assert_equal(self.parser.ky(),numpy.linspace(-0.49, 0.49, 50))
         testing.assert_equal(self.parser.kz(),[0])
         
+class Test_HKS(unittest.TestCase):
+
+    def setUp(self):
+        self.parser = hks(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase"),'rb'))
+        self.h, self.s = self.parser.hamiltonian()
+
+    def test_hamiltonian(self):
+        assert self.h.msize == 72
+        assert self.s.msize == 72            
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase-band"),'r') as f:
+            b = bands(f.read()).bands()
+        test_index = [0,-1]
+        values = self.h.eig_path(b.coordinates[test_index,:], b = self.s)
+        testing.assert_allclose(values, b.values[test_index,:])

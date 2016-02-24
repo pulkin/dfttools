@@ -5,7 +5,7 @@ import pickle
 import numpy
 from numpy import testing
 
-from dfttools.types import Basis, UnitCell, Grid, ArgumentError
+from dfttools.types import *
 
 class BasisInitializationTest(unittest.TestCase):
     
@@ -1165,3 +1165,135 @@ class TetrahedronDensityTest(unittest.TestCase):
         g.values = g.values[:,:,0,...]
         with self.assertRaises(ArgumentError):
             g.tetrahedron_density((-.1,0,.1,.2))
+
+class TightBindingTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.tb = TightBinding({
+            (0,): [[0,1],[1,0]],
+            (1,): [[0,0],[.1,0]],
+            (-1,): [[0,.1],[0,0]],
+        })
+    
+    def test_eq(self):
+        assert self.tb.copy() == self.tb
+        assert (-self.tb) == (-self.tb)
+        assert abs(self.tb) == self.tb
+        assert 2*self.tb == self.tb + self.tb
+        assert 0.5*self.tb == self.tb - 0.5*self.tb
+        assert 0.5*self.tb == self.tb/2
+        
+    def test_hc(self):
+        assert self.tb.hc() == self.tb
+
+    def test_herror(self):
+        assert self.tb.hermitian_error() == 0
+        a = self.tb.copy()
+        a[1] = a[1] + 0.1
+        assert a.hermitian_error() == 0.1
+
+    def test_eigpath(self):
+        p = numpy.linspace(-.5,.5,31)
+        eig = self.tb.eig_path(p[:,numpy.newaxis])
+        testing.assert_allclose(eig,
+            ((1.01+0.2*numpy.cos(2*numpy.pi*p))**.5)[:,numpy.newaxis] * [[-1,1]]
+        )
+
+    def test_1DNN(self):
+        assert self.tb.is_1DNN()
+        
+    def test_super(self):
+        s = self.tb.super(2,0)
+        testing.assert_equal(s[0], [
+            [0, 1, 0, 0],
+            [1, 0, .1, 0],
+            [0, .1, 0, 1],
+            [0, 0, 1, 0],
+        ])
+        testing.assert_equal(s[1], [
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 0, 0, 0],
+            [.1, 0, 0, 0],
+        ])
+        assert s == s.hc()
+        assert len(s.__m__) == 3
+        
+    def test_eye(self):
+        print self.tb.eye()
+        assert self.tb.eye() == TightBinding({
+            (0,): [[1,0],[0,1]],
+            (1,): [[0,0],[0,0]],
+            (-1,): [[0,0],[0,0]],
+        })
+        
+    #def test_gf(self):
+        #testing.assert_allclose(
+            #self.tb.gf(0,direction = 'positive'),
+            #self.tb.gf(0,direction = 'negative'),
+        #)
+        #e = numpy.linspace(-5,5,100) + 1j*1e-8
+        
+        #for ee in e:
+            #if abs(ee-1) < 0.2 or abs(ee+1) < 0.2:
+                #assert -numpy.imag(numpy.trace(self.tb.gf(ee,direction = 'positive'))) > 1e-8
+                
+            #else:
+                #assert -numpy.imag(numpy.trace(self.tb.gf(ee,direction = 'negative'))) < 1e-6
+
+class MTDTest(unittest.TestCase):
+    
+    def __model_tb__(self, m1, m2):
+        return TightBinding({
+            (0,): m1,
+            (1,): m2,
+            (-1,): numpy.array(m2).conj().T,
+        })
+        
+    def __model__(self, m1, m2, size = 1):
+        return self.__model_tb__(m1,m2).periodic_device(size = size)
+        
+    def __test_1__(self, a, b, size = 1):
+        m = self.__model__([[a]],[[b]], size = size)
+        
+        for e in numpy.linspace(-3,3,30):
+            
+            actual = -numpy.imag(numpy.trace(m.gf(e+1e-8*1j)))
+            expected = 4*abs(b)**2 - (e-a)**2
+            expected = 1/expected**.5 if expected>0 else 0
+            expected *= size
+            testing.assert_allclose(actual,expected,atol = 1e-6*size)
+            
+    def test_1_simple(self):
+        self.__test_1__(0,1)
+        
+    def test_1_diag(self):
+        self.__test_1__(0.1,1)
+        
+    def test_1_arb(self):
+        self.__test_1__(0.1,0.5*(1+1j))
+        
+    def test_1_2x(self):
+        self.__test_1__(0.1,0.5*(1+1j), size = 2)
+        
+    def test_1_3x(self):
+        self.__test_1__(0.1,0.5*(1+1j), size = 3)
+        
+    def test_2_random(self):
+        random.seed(0)
+        tb = self.__model_tb__(random.rand(2,2) + 1j*random.rand(2,2) - 0.5 - 0.5j, random.rand(2,2) + 1j*random.rand(2,2) - 0.5 - 0.5j)
+        tb = tb + tb.hc()
+        assert tb == tb.hc()
+        d1 = tb.periodic_device()
+        assert d1.leads[0] == d1.leads[0].hc()
+        assert d1.leads[1] == d1.leads[1].hc()
+        d2 = tb.periodic_device(size = 2)
+        
+        for e in numpy.linspace(-3,3,30):
+            
+            gf1 = d1.gf(e+1e-8*1j)
+            gf2 = d2.gf(e+1e-8*1j)
+            print -numpy.imag(numpy.diag(gf1)).sum()
+            print -numpy.imag(numpy.diag(gf2)).sum()
+            testing.assert_allclose(gf1,gf2[:2,:2])
+            testing.assert_allclose(gf1,gf2[2:,2:])

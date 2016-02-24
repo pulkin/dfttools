@@ -14,16 +14,18 @@ ext_modules = [ ]
 if use_cython:
     ext_modules += [
         Extension("dfttools.blochl", [ "cython/blochl.pyx" ]),
+        Extension("dfttools.gf", [ "cython/gf.pyx" ]),
     ]
     cmdclass.update({ 'build_ext': build_ext })
 else:
     ext_modules += [
         Extension("dfttools.blochl", [ "cython/blochl.c" ]),
+        Extension("dfttools.gf", [ "cython/gf.pyx" ]),
     ]
     
-ext_modules.append(
-    Extension("dfttools.parsers.native", [ "c/qeproj.c", "c/nativemodule.c" ])
-)
+ext_modules += [
+    Extension("dfttools.parsers.native", [ "c/qeproj.c", "c/nativemodule.c", "c/openmx-hks.c" ]),
+]
 
 setup(
     name='DFT Parsing Tools',

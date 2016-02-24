@@ -13,8 +13,9 @@ import numericalunits
 
 from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, AbstractJSONParser, ParseError
 from .structure import cube
+from .native import openmx_hks_blocks
 from ..simple import band_structure, unit_cell, guess_parser, parse, tag_method
-from ..types import UnitCell, Basis
+from ..types import UnitCell, Basis, TightBinding
 
 def populations(s):
     """
@@ -787,8 +788,40 @@ class Transmission(AbstractParser):
         """
         return self.__table__()[:,3]*numericalunits.eV
 
+class HKS(AbstractParser):
+    """
+    Class for parsing Hamiltonian from openmx.hks file.
+    
+    Args:
+    
+        data (string): contents of OpenMX HKS file
+    """
+    
+    def __init__(self, file):
+        if not hasattr(file,"read"):
+            raise ValueError("This parser requires file-like objects opened with 'rb' option")
+        self.file = file
+        
+    @staticmethod
+    def valid_filename(name):
+        return name.endswith(".hks")
+        
+    def hamiltonian(self):
+        """
+        Retrieves tight-binding hamiltonian and overlap matrices.
+        
+        Returns:
+        
+            TightBinding objects with Hamiltonian and overlaps.
+        """
+        blocks = openmx_hks_blocks(self.file)
+        blocks_h = dict((tuple(x[:3]),x[3]*2*numericalunits.Ry) for x in blocks if not x[3] is None)
+        blocks_s = dict((tuple(x[:3]),x[4]) for x in blocks if not x[4] is None)
+        return TightBinding(blocks_h), TightBinding(blocks_s)
+
 # Lower case versions
 input = Input
 output = Output
 bands = Bands
 transmission = Transmission
+hks = HKS

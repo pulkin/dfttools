@@ -1783,28 +1783,25 @@ class TightBinding(object):
         self.__m__ = dict((k, numpy.array(v, dtype = numpy.complex)) for k,v in m.items() if numpy.count_nonzero(v)>0)
         
         self.dims = None
-        self.msize = None
+        self.shape = None
         d1 = None
         
         for k,v in self.__m__.items():
             
-            msize = v.shape
-            if not len(msize) == 2:
-                raise ValueError("{} is not a 2D matrix: shape = {}".format(str(k), str(msize)))
+            shape = tuple(v.shape)
+            if not len(shape) == 2:
+                raise ValueError("{} is not a 2D matrix: shape = {}".format(str(k), str(shape)))
                 
-            if not msize[0] == msize[1]:
-                raise ValueError("{} is not a square matrix: shape = {}".format(str(k), str(msize)))
-                
-            if self.dims is None:
+            if self.shape is None:
                 self.dims = len(k)
                 d1 = k
-                self.msize = msize[0]
+                self.shape = shape
                 
             elif not self.dims == len(k):
                 raise ValueError("Inconsistent dimensions: {} vs {}".format(str(d1),str(k)))
                 
-            elif not self.msize == msize[0]:
-                raise ValueError("Inconsistent matrix size: {:d} in {} vs {:d} in {}".format(self.msize, str(d1), msize[0], str(k)))
+            elif not self.shape == shape:
+                raise ValueError("Inconsistent matrix size: {} in {} vs {} in {}".format(str(self.shape), str(d1), str(shape), str(k)))
     
     def copy(self):
         """
@@ -1884,7 +1881,7 @@ class TightBinding(object):
             if not len(key) == self.dims:
                 raise ValueError("Argument number mismatch: found {:d}, required {:d}".format(len(key), self.dims))
                 
-            return numpy.zeros((self.msize,self.msize), dtype = numpy.complex)
+            return numpy.zeros(self.shape, dtype = numpy.complex)
             
     def __setitem__(self, key, item):
         if not isinstance(key, tuple):
@@ -1898,7 +1895,7 @@ class TightBinding(object):
         if not len(item.shape) == 2:
             raise ValueError("Not a 2D matrix: shape = {}".format(str(item.shape)))
             
-        if not item.shape[0] == self.msize or not item.shape[1] == self.msize:
+        if not tuple(item.shape) == self.shape:
             raise ValueError("Wrong dimensions: shape = {}".format(str(item.shape)))
                 
         self.__m__[key] = item
@@ -1917,6 +1914,16 @@ class TightBinding(object):
             (NaN, inf) elements are set to one.
         """
         return self.__foreach__(lambda k,v: numpy.isnan(v) + (check_inf == True) * numpy.isinf(v))
+        
+    def is_square(self):
+        """
+        Checks if it is a square matrix.
+        
+        Returns:
+        
+            True if it is a square matrix.
+        """
+        return self.shape[0] == self.shape[1]
         
     def apply(self, mask):
         """
@@ -1989,6 +1996,9 @@ class TightBinding(object):
         
             A float giving a measure of the matrix non-hermitianity.
         """
+        if not self.is_square():
+            raise ValueError("Not a square matrix")
+            
         return (self - self.hc()).absmax()
         
     def fourier(self, k, index = None):
@@ -2161,7 +2171,7 @@ class TightBinding(object):
             A TightBinding of the same structure as input.
         """
         return TightBinding({
-            (0,)*self.dims : numpy.eye(self.msize),
+            (0,)*self.dims : numpy.eye(self.shape[0], M = self.shape[1]),
         })
         
     def super(self, size, dim):
@@ -2185,10 +2195,10 @@ class TightBinding(object):
                 new_k = k[:dim] + (j/size,) + k[dim+1:]
                 
                 if not new_k in result:
-                    result[new_k] = numpy.zeros((self.msize*size,self.msize*size), dtype = numpy.complex)
+                    result[new_k] = numpy.zeros(numpy.array(self.shape)*size, dtype = numpy.complex)
                 
                 j = j % size
-                result[new_k][i*self.msize:(i+1)*self.msize,j*self.msize:(j+1)*self.msize] = v
+                result[new_k][i*self.shape[0]:(i+1)*self.shape[0],j*self.shape[1]:(j+1)*self.shape[1]] = v
                 
         return TightBinding(result)
         
@@ -2231,13 +2241,14 @@ class MultiterminalDevice(object):
     
     def __init__(self, center, leads, connections = None):
         """
-        Describes a multiterminal 1D device.
+        Describes a multiterminal device.
         
         Args:
         
-            center (matrix): a matrix of the center part of device;
+            center (TightBinding): a matrix of the center part of device;
             
-            leads (array): the semi-infinite leads connected to a device;
+            leads (array): the semi-infinite leads connected to a device,
+            an array where each element;
             
         Kwargs:
         
@@ -2260,11 +2271,11 @@ class MultiterminalDevice(object):
             if len(leads) > 0:
                 self.connections.append(numpy.dot(
                     self.leads[0][1],
-                    numpy.eye(self.leads[0].msize, M = self.center.shape[0])
+                    numpy.eye(self.leads[0].shape[1], M = self.center.shape[0])
                 ))
                 
             if len(leads) > 1:
-                n = self.leads[1].msize
+                n = self.leads[1].shape[1]
                 m = self.center.shape[0]
                 self.connections.append(numpy.dot(
                     self.leads[1][1],
@@ -2278,14 +2289,10 @@ class MultiterminalDevice(object):
     def eye(self):
         """
         Generates an eye multiterminal device.
-        
-        Args:
-        
-            like (MutiterminalDevice): the prototype;
             
         Returns:
         
-            A MultiterminalDevice of the same structure as input.
+            A MultiterminalDevice of the same structure as self.
         """
         return MultiterminalDevice(
             numpy.eye(self.center.shape[0]),

@@ -14,6 +14,7 @@ import numericalunits
 
 from .blochl import tetrahedron, tetrahedron_plain
 from .gf import greens_function
+#from .fastcalc import greens_function
 
 def input_as_list(func):
     
@@ -1902,6 +1903,21 @@ class TightBinding(object):
                 
         self.__m__[key] = item
         
+    def isnan(self, check_inf = True):
+        """
+        Checks if NaN are present in the tight binding.
+        
+        Kwargs:
+        
+            check_inf (bool): checks infinities as well.
+            
+        Returns:
+        
+            A Tight binding with empty matrices where corresponding
+            (NaN, inf) elements are set to one.
+        """
+        return self.__foreach__(lambda k,v: numpy.isnan(v) + (check_inf == True) * numpy.isinf(v))
+        
     def apply(self, mask):
         """
         Applies a mask to the tight binding.
@@ -2042,7 +2058,7 @@ class TightBinding(object):
         
         return True
         
-    def gf(self, energy, b = None, direction = 'negative', skip_checks = False, tolerance = 1e-12):
+    def gf(self, energy, b = None, direction = 'negative', skip_checks = False, tolerance = 1e-12, maxiter = 100):
         """
         Calculates the Green's function matrix.
         
@@ -2060,16 +2076,17 @@ class TightBinding(object):
             
             skip_checks (bool): whether to skip the checks of the setup;
             
-            tolerance (float): tolerance for Green's function iterations.
+            tolerance (float): tolerance for Green's function iterations;
+            
+            maxiter (int): maximum number of iterations.
             
         Returns:
         
             A matrix with the Green's function.
         """
-        
         if b is None:
             b = self.eye()
-            
+                
         if not skip_checks:
             if not self.is_1DNN():
                 raise ValueError("Not a 1D NN tight binding")
@@ -2083,7 +2100,8 @@ class TightBinding(object):
                 self[1],
                 b[0],
                 b[1],
-                tolerance = tolerance,
+                tolerance,
+                maxiter,
             )
             
         elif direction == 'negative':
@@ -2093,7 +2111,8 @@ class TightBinding(object):
                 self[-1],
                 b[0],
                 b[-1],
-                tolerance = tolerance,
+                tolerance,
+                maxiter,
             )
             
         else:

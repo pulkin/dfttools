@@ -10,8 +10,8 @@ def greens_function(
     numpy.ndarray[numpy.complex128_t, ndim=2] H1,
     numpy.ndarray[numpy.complex128_t, ndim=2] S0,
     numpy.ndarray[numpy.complex128_t, ndim=2] S1,
-    double tolerance = 1e-12,
-    int maxiter = 100,
+    double tolerance,
+    int maxiter,
 ):
     
     cdef numpy.ndarray[numpy.complex_t, ndim=2] es0 = E*S0 - H0

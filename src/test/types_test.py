@@ -1,11 +1,14 @@
 import unittest
 import math
 import pickle
+import os
 
 import numpy
 from numpy import testing
+import numericalunits
 
 from dfttools.types import *
+from dfttools.parsers.openmx import hks
 
 class BasisInitializationTest(unittest.TestCase):
     
@@ -1227,20 +1230,25 @@ class TightBindingTest(unittest.TestCase):
             (-1,): [[0,0],[0,0]],
         })
         
-    #def test_gf(self):
-        #testing.assert_allclose(
-            #self.tb.gf(0,direction = 'positive'),
-            #self.tb.gf(0,direction = 'negative'),
-        #)
-        #e = numpy.linspace(-5,5,100) + 1j*1e-8
-        
-        #for ee in e:
-            #if abs(ee-1) < 0.2 or abs(ee+1) < 0.2:
-                #assert -numpy.imag(numpy.trace(self.tb.gf(ee,direction = 'positive'))) > 1e-8
-                
-            #else:
-                #assert -numpy.imag(numpy.trace(self.tb.gf(ee,direction = 'negative'))) < 1e-6
+class TightBindingPerformanceTest(unittest.TestCase):
+    
+    def setUp(self):
+        self.parser = hks(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/openmx.hks.0.testcase"),'rb'))
+        self.h, self.s = self.parser.hamiltonian()
 
+    def tearDown(self):
+        self.parser.file.close()
+        
+    def test_gf_perf(self):
+        for k1 in numpy.linspace(0,1,3, endpoint = False):
+            h1 = self.h.fourier(k1, index = 1)
+            s1 = self.s.fourier(k1, index = 1)
+            for k2 in numpy.linspace(0,1,3, endpoint = False):
+                h2 = h1.fourier(k2, index = 1)
+                s2 = s1.fourier(k2, index = 1)
+                for e in numpy.linspace(-10,10,10)*numericalunits.eV:
+                    h2.gf(e+1e-6j, b = s2)
+                
 class MTDTest(unittest.TestCase):
     
     def __model_tb__(self, m1, m2):

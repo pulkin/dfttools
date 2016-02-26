@@ -433,11 +433,26 @@ class Test_HKS(unittest.TestCase):
         self.parser = hks(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase"),'rb'))
         self.h, self.s = self.parser.hamiltonian()
 
+    def tearDown(self):
+        self.parser.file.close()
+
     def test_hamiltonian(self):
         assert self.h.msize == 72
         assert self.s.msize == 72            
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase-band"),'r') as f:
             b = bands(f.read()).bands()
         test_index = [0,-1]
+
+        # Unknown bug here
+        for k,v in self.h.isnan().__m__.items():
+            print k, v.sum()
+            if (abs(v.sum())>0):
+                print self.h[k]
+
+        for k,v in self.s.isnan().__m__.items():
+            print k, v.sum()
+            if (abs(v.sum())>0):
+                print self.s[k]
+            
         values = self.h.eig_path(b.coordinates[test_index,:], b = self.s)
         testing.assert_allclose(values, b.values[test_index,:])

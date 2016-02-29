@@ -450,6 +450,7 @@ def matplotlib_bands(
     weights_size = None,
     optimize_visible = False,
     edge_names = [],
+    mark_points = None,
     **kwargs
 ):
     """
@@ -487,6 +488,10 @@ def matplotlib_bands(
         optimize_visible (bool): draw only visible lines;
         
         edge_names (list): the edges names to appear on the band structure;
+        
+        mark_points (list): marks specific points on the band structure,
+        the first number in each list element is interpreted as k-point
+        while the second number is band number;
         
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
@@ -570,6 +575,16 @@ def matplotlib_bands(
         
     # Plot bands
     axes.add_collection(lc)
+    
+    # Mark points
+    if not mark_points is None:
+        mark_points = numpy.array(mark_points)
+        axes.scatter(
+            list(kpoints[i] for i,j in mark_points),
+            list(cell.values[i,j]/units for i,j in mark_points),
+            marker = "+",
+            s = 50,
+        )
     
     # Plot Fermi energy
     if show_fermi and "Fermi" in cell.meta:

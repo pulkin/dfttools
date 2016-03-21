@@ -111,7 +111,7 @@ def guess_parser(f):
             
     return result
     
-def parse(f, tag):
+def parse(f, tag, *args):
     """
     Identifies and parses data.
     
@@ -127,6 +127,7 @@ def parse(f, tag):
         The parsed data.
     """
     candidates = guess_parser(f)
+    debug_data = "Candidate classes:\n" + "\n".join(" - "+str(i) for i in candidates)
     
     if len(candidates) == 0:
         raise ParseError("Unidentified data: no parser match")
@@ -144,18 +145,15 @@ def parse(f, tag):
                     
                     attempted.append(parser.__class__.__name__+"."+attr.__name__)
                     if attr.__take_file__:
-                        return attr(f)
+                        return attr(f, *args)
                     else:
-                        return attr()
+                        return attr(*args)
                         
-                except StopIteration:
-                    pass
-                    
-                except ParseError:
+                except (StopIteration, ParseError):
                     pass
     
     if len(attempted) == 0:
-        raise ParseError("No matching parser found")
+        raise ParseError("No matching parser found\n"+debug_data)
     
     else:
         raise ParseError("Parsing failed, attempted following candidates:\n" + "\n".join(tuple(

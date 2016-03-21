@@ -6,6 +6,8 @@ parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure 
 parser.add_argument("-d", "--density", nargs = '?', help = "plot density of states", metavar = "FILENAME", const = True)
 parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", metavar = "VALUE")
 parser.add_argument("-e", "--range", nargs = 2, help = "Energy range in eV", metavar = "VALUE")
+parser.add_argument("-c", "--color", nargs = 1, help = "Color bands according to a scalar", metavar = "FILENAME")
+parser.add_argument("-m", "--cmap", nargs = 1, help = "Color map used for coloring bands", metavar = "VALUE")
 parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
 
 options = parser.parse_args()
@@ -47,6 +49,16 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if "
             print("Could no read file '{}'\n".format(options.file))
             raise
 
+if not options.color is None:
+    with open(options.color[0],'r') as f:
+        weights = parse(f, "basis-dependent", data["bands"]).values
+
+else:
+    weights = None
+
+if not options.cmap is None:
+    options.cmap = options.cmap[0]
+
 try:
     from matplotlib import pyplot, gridspec
     from dfttools.presentation import matplotlib_bands, matplotlib_bands_density
@@ -68,11 +80,16 @@ if not "density" in data:
         
     else:
         
-        matplotlib_bands(
+        plot = matplotlib_bands(
             data["bands"],
             pyplot.gca(),
             energy_range = options.range,
+            weights_color = weights,
+            cmap = options.cmap,
         )
+
+        if not options.color is None:
+            pyplot.colorbar(plot)
 
 else:
     
@@ -85,6 +102,8 @@ else:
         data["bands"],
         ax_left,
         energy_range = options.range,
+        weights_color = weights,
+        cmap = options.cmap,
     )
     
     matplotlib_bands_density(
@@ -94,6 +113,9 @@ else:
         energy_range = ax_left.get_ylim(),
         orientation = "portrait",
     )
+
+    if not options.color is None:
+        pyplot.colorbar(plot)
 
 if not options.output is None:
     pyplot.savefig(options.output[0])

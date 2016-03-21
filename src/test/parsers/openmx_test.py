@@ -437,8 +437,8 @@ class Test_HKS(unittest.TestCase):
         self.parser.file.close()
 
     def test_hamiltonian(self):
-        assert self.h.msize == 72
-        assert self.s.msize == 72            
+        assert self.h.shape == (72,72)
+        assert self.s.shape == (72,72)
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase-band"),'r') as f:
             b = bands(f.read()).bands()
         test_index = [0,-1]

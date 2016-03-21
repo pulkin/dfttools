@@ -9,7 +9,7 @@ import numericalunits
 
 from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, re_float, cre_int, ParseError, AbstractParser
 from .native import qe_proj_weights
-from ..simple import band_structure, unit_cell
+from ..simple import band_structure, unit_cell, tag_method
 from ..types import UnitCell, Basis
 
 class Bands(AbstractParser):
@@ -52,7 +52,8 @@ class Bands(AbstractParser):
         self.parser.skip("nbnd=")
         return self.parser.nextInt()
     
-    def bands(self, basis):
+    @tag_method("basis-dependent")    
+    def reciprocal_data(self, basis):
         """
         Retrieves the band structure data.
         
@@ -65,7 +66,6 @@ class Bands(AbstractParser):
         
             A unit cell containing band structure data.
         """
-        
         nk = self.nk()
         ne = self.ne()
         self.parser.reset()
@@ -76,9 +76,26 @@ class Bands(AbstractParser):
         for i in range(nk):
             self.parser.nextLine()
             coordinates[i,:] = self.parser.nextFloat(3)
-            values[i,:] = self.parser.nextFloat(ne)*numericalunits.eV
+            values[i,:] = self.parser.nextFloat(ne)
         
         return UnitCell(basis, coordinates, values)
+    
+    def bands(self, basis):
+        """
+        Retrieves the bands.
+        
+        Args:
+        
+            basis (types.Basis): the reciprocal unit cell of the band
+            structure.
+            
+        Returns:
+        
+            A unit cell containing band energies.
+        """
+        result = self.reciprocal_data(basis)
+        result.values *= numericalunits.eV
+        return result
 
 class Output(AbstractParser):
     """
@@ -527,6 +544,8 @@ class Proj(AbstractParser):
         """
         self.parser.reset()
         
+        state = 0
+        
         if self.parser.present("Calling projwave ...."):
             
             self.parser.skip("Calling projwave ....")
@@ -542,11 +561,14 @@ class Proj(AbstractParser):
             
             result = []
             
-            while self.parser.present("state #"):
+            while self.parser.closest(("state #"," k = ")) == 0:
                 
                 self.parser.skip("state #")
+                state += 1
+                self.parser.skip(":")
+                
                 result.append((
-                    self.parser.nextInt(),
+                    state,
                     self.parser.nextInt(),
                     self.parser.nextMatch(cre_word),
                     self.parser.nextInt(),
@@ -572,11 +594,14 @@ class Proj(AbstractParser):
             
             result = []
             
-            while self.parser.present("state #"):
+            while self.parser.closest(("state #"," k = ")) == 0:
                 
                 self.parser.skip("state #")
+                state += 1
+                self.parser.skip(":")
+                
                 result.append((
-                    self.parser.nextInt(),
+                    state,
                     self.parser.nextInt(),
                     self.parser.nextMatch(cre_word),
                     self.parser.nextInt(),

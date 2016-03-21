@@ -588,7 +588,7 @@ def matplotlib_bands(
     
     # Plot Fermi energy
     if show_fermi and "Fermi" in cell.meta:
-        axes.axhline(y = cell.meta["Fermi"]/units,color='black', ls = "--", lw = 0.5)
+        axes.axhline(y = cell.meta["Fermi"]/units, color='black', ls = "--", lw = 0.5)
                 
     axes.set_ylim(energy_range)
     axes.set_xlim((0,1))
@@ -730,7 +730,9 @@ def matplotlib_bands_density(
     data += data_baseline
     data *= units
     data_baseline *= units
-    
+
+    kwargs.update(next(axes._get_lines.prop_cycler))
+            
     if orientation == "portrait":
         
         if use_fill:
@@ -739,7 +741,7 @@ def matplotlib_bands_density(
             plot = axes.plot(data,energies,**kwargs)
             
         if "Fermi" in cell.meta and show_fermi:
-            axes.axhline(y = cell.meta["Fermi"]/units,color='r')
+            axes.axhline(y = cell.meta["Fermi"]/units, color='black', ls = "--", lw = 0.5)
                     
         axes.set_ylim(energy_range)
 
@@ -759,7 +761,7 @@ def matplotlib_bands_density(
             plot = axes.plot(energies,data,**kwargs)
 
         if "Fermi" in cell.meta and show_fermi:
-            axes.axvline(x = cell.meta["Fermi"]/units,color='r')
+            axes.axvline(x = cell.meta["Fermi"]/units, color='black', ls = "--", lw = 0.5)
             
         axes.set_xlim(energy_range)
         

@@ -101,9 +101,24 @@ static PyObject *openmx_hks_blocks(PyObject *self, PyObject *args) {
             PyObject *H = PyArray_SimpleNew(2, array_size, NPY_CDOUBLE);
             PyObject *S = PyArray_SimpleNew(2, array_size, NPY_CDOUBLE);
             
-            calculate_block(basis, x, y, z, (struct F_complex*)PyArray_GETPTR2(H,0,0), (struct F_complex*)PyArray_GETPTR2(S,0,0));
+            // Unsafe variant
+            //calculate_block(basis, x, y, z, (struct F_complex*)PyArray_GETPTR2(H,0,0), (struct F_complex*)PyArray_GETPTR2(S,0,0));
             
-            // Convert to numpy
+            // Safe variant
+            struct F_complex H_[basis.size*basis.size];
+            struct F_complex S_[basis.size*basis.size];
+            calculate_block(basis, x, y, z, H_, S_);
+            int k,l;
+            for (k=0; k<basis.size; k++) for (l=0; l<basis.size; l++) {
+                struct F_complex *v_;
+                v_ = (struct F_complex *)PyArray_GETPTR2(H,k,l);
+                v_->r = H_[k*basis.size+l].r;
+                v_->i = H_[k*basis.size+l].i;
+                v_ = (struct F_complex *)PyArray_GETPTR2(S,k,l);
+                v_->r = S_[k*basis.size+l].r;
+                v_->i = S_[k*basis.size+l].i;
+            }
+            
             PyList_SetItem(block, 3, H);
             PyList_SetItem(block, 4, S);
         

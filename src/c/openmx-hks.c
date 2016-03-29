@@ -462,6 +462,9 @@ int calculate_block(struct basis_description basis, int x, int y, int z, struct 
     
     int j,j2,k,k2,row,column,index,result = 0;
     
+    if (H) memset(H, 0, sizeof(struct F_complex)*basis.size*basis.size);
+    if (S) memset(S, 0, sizeof(struct F_complex)*basis.size*basis.size);
+    
     // Iterate over elements
     for (j=0; j<data->atoms_number; j++) {
         struct atom *a = data->atoms + j;

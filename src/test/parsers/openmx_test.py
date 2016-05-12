@@ -429,19 +429,22 @@ class Test_JSON_DOS(unittest.TestCase):
         
 class Test_HKS(unittest.TestCase):
 
-    def setUp(self):
-        self.parser = hks(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase"),'rb'))
-        self.h, self.s = self.parser.hamiltonian()
-
-    def tearDown(self):
-        self.parser.file.close()
-
     def test_hamiltonian(self):
-        assert self.h.shape == (72,72)
-        assert self.s.shape == (72,72)
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase-band"),'r') as f:
-            b = bands(f.read()).bands()
+            bb = bands(f.read()).bands()
         test_index = [0,-1]
-            
-        values = self.h.eig_path(b.coordinates[test_index,:], b = self.s)
-        testing.assert_allclose(values, b.values[test_index,:])
+        
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase"),'rb') as f:
+            with open_hks(f) as parser:
+                h, s = parser.hamiltonian()
+                parser.slice_basis((1,)*36 + (0,)*36)
+                h2, s2 = parser.hamiltonian()
+                
+        testing.assert_equal(h.shape, (72,72))
+        testing.assert_equal(s.shape, (72,72))
+        testing.assert_equal(h2.shape, (36,36))
+        testing.assert_equal(s2.shape, (36,36))
+        values = h.eig_path(bb.coordinates[test_index,:], b = s)
+        testing.assert_allclose(values, bb.values[test_index,:])
+
+        testing.assert_equal((h.subsystem(numpy.arange(36),numpy.arange(36))-h2).absmax(), 0)

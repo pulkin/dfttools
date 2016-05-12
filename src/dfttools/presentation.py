@@ -153,8 +153,9 @@ def svgwrite_unit_cell(
     show_bonds = True,
     show_legend = True,
     fadeout_strength = 0.8,
-    bg = (0xF0,0xF0,0xFF),
+    bg = (0xFF,0xFF,0xFF),
     bond_ratio = 1,
+    hook_atomic_color = None,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -195,6 +196,10 @@ def svgwrite_unit_cell(
         
         bond_ratio (float): scale factor to determine whether the bond
         is rendered;
+        
+        hook_atomic_color (float): a function accepting integer (atom
+        ID) and a 3-element list (suggested RGB color) and returning a
+        new color of the atom
         
     Returns:
     
@@ -269,6 +274,8 @@ def svgwrite_unit_cell(
     
     # Calculate base colors
     colors_base = tuple(__fadeout_z__(e_color[i], projected[i,2], b_max[2], b_min[2], fadeout_strength, bg) for i in range(cell.size()))
+    if hook_atomic_color:
+        colors_base = tuple(hook_atomic_color(i,c) for i,c in enumerate(colors_base))
     
     # Arrays for storing objects with z-index
     obj = []

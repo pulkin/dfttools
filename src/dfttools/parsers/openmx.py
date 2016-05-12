@@ -13,7 +13,7 @@ import numericalunits
 
 from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, AbstractJSONParser, ParseError
 from .structure import cube
-from .native import openmx_hks_blocks
+from .native import openmx_hks_load, openmx_hks_unload, openmx_hks_blocks, openmx_hks_basis, openmx_hks_slice_basis
 from ..simple import band_structure, unit_cell, guess_parser, parse, tag_method
 from ..types import UnitCell, Basis, TightBinding
 
@@ -801,10 +801,39 @@ class HKS(AbstractParser):
         if not hasattr(file,"read"):
             raise ValueError("This parser requires file-like objects opened with 'rb' option")
         self.file = file
+        self.__handle__ = None
+        
+    def load(self):
+        if not self.__handle__ is None:
+            raise Exception("Loaded already")
+            
+        self.__handle__ = openmx_hks_load(self.file)
+        
+    def unload(self):
+        if self.__handle__ is None:
+            raise Exception("Not loaded yet")
+            
+        openmx_hks_unload(self.__handle__)
+        self.__handle__ = None
         
     @staticmethod
     def valid_filename(name):
         return name.endswith(".hks")
+        
+    def basis(self):
+        """
+        Generates a basis set from basis description strings.
+        
+        Returns:
+        
+            A basis description, n by 3 array where the [:,0] elements
+            are basis spins, [:,1] elements are basis atoms, [:,2] are
+            basis orbitals.
+        """
+        if self.__handle__ is None:
+            raise Exception("Not loaded yet")
+            
+        return openmx_hks_basis(self.__handle__)
         
     def hamiltonian(self):
         """
@@ -814,11 +843,40 @@ class HKS(AbstractParser):
         
             TightBinding objects with Hamiltonian and overlaps.
         """
-        blocks = openmx_hks_blocks(self.file)
+        if self.__handle__ is None:
+            raise Exception("Not loaded yet")
+            
+        blocks = openmx_hks_blocks(self.__handle__)
         blocks_h = dict((tuple(x[:3]),x[3]*2*numericalunits.Ry) for x in blocks if not x[3] is None)
         blocks_s = dict((tuple(x[:3]),x[4]) for x in blocks if not x[4] is None)
         return TightBinding(blocks_h), TightBinding(blocks_s)
+        
+    def slice_basis(self, s):
+        """
+        Slices the basis set.
+        
+        Args:
+        
+            s (array): a boolean slice
+        """
+        if self.__handle__ is None:
+            raise Exception("Not loaded yet")
+            
+        openmx_hks_slice_basis(self.__handle__, numpy.array(s, dtype = numpy.intc))
 
+class open_hks(object):
+    
+    def __init__(self, f):
+        self.__file__ = f
+    
+    def __enter__(self):
+        self.__parser__ = hks(self.__file__)
+        self.__parser__.load()
+        return self.__parser__
+        
+    def __exit__(self, type, value, traceback):
+        self.__parser__.unload()
+        
 # Lower case versions
 input = Input
 output = Output

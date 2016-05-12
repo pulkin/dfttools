@@ -432,6 +432,30 @@ void make_basis(struct hks_data *data, struct basis_description *basis) {
     }
 }
 
+void slice_basis(struct basis_description *basis, int *slice) {
+/* Reduces the basis set by slicing. */
+
+    int i, spin, at, orb;
+    int counter = 0;
+    
+    for (i=0; i<basis->size; i++) {
+        spin = basis->r2s[i].spin;
+        at = basis->r2s[i].atom;
+        orb = basis->r2s[i].orbital;
+        
+        if (slice[i]) {
+            basis->s2r[spin][at][orb] = counter;
+            basis->r2s[counter].spin = spin;
+            basis->r2s[counter].atom = at;
+            basis->r2s[counter].orbital = orb;
+            counter++;
+        } else {
+            basis->s2r[spin][at][orb] = -1;
+        }
+    }
+    basis->size = counter;
+}
+
 void dispose_basis(struct basis_description *basis) {
 /* Disposes sparse-to-real basis */
 
@@ -486,33 +510,41 @@ int calculate_block(struct basis_description basis, int x, int y, int z, struct 
                             // Spin 0 0
                             row = basis.s2r[0][j][k];
                             column = basis.s2r[0][INDEX_OF(data->atoms,a2)][k2];
-                            index = row*basis.size + column;
-                            H[index].r += r.hamiltonian[0][k][k2];
-                            H[index].i += r.spinorb[0][k][k2];
-                            S[index].r += r.overlap[0][k][k2];
+                            if (row>=0 && column>=0) {
+                                index = row*basis.size + column;
+                                H[index].r += r.hamiltonian[0][k][k2];
+                                H[index].i += r.spinorb[0][k][k2];
+                                S[index].r += r.overlap[0][k][k2];
+                            }
                             
                             // Spin 1 1
                             row = basis.s2r[1][j][k];
                             column = basis.s2r[1][INDEX_OF(data->atoms,a2)][k2];
-                            index = row*basis.size + column;
-                            H[index].r += r.hamiltonian[1][k][k2];
-                            H[index].i += r.spinorb[1][k][k2];
-                            S[index].r += r.overlap[0][k][k2];
+                            if (row>=0 && column>=0) {
+                                index = row*basis.size + column;
+                                H[index].r += r.hamiltonian[1][k][k2];
+                                H[index].i += r.spinorb[1][k][k2];
+                                S[index].r += r.overlap[0][k][k2];
+                            }
                             
                             // Spin 0 1
                             row = basis.s2r[0][j][k];
                             column = basis.s2r[1][INDEX_OF(data->atoms,a2)][k2];
-                            index = row*basis.size + column;
-                            H[index].r += r.hamiltonian[2][k][k2];
-                            H[index].i += r.hamiltonian[3][k][k2] + r.spinorb[2][k][k2];
+                            if (row>=0 && column>=0) {
+                                index = row*basis.size + column;
+                                H[index].r += r.hamiltonian[2][k][k2];
+                                H[index].i += r.hamiltonian[3][k][k2] + r.spinorb[2][k][k2];
+                            }
                             
                         } else if (data->spin_mode == SPIN_MODE_NONE) {
                             
                             row = basis.s2r[0][j][k];
                             column = basis.s2r[0][INDEX_OF(data->atoms,a2)][k2];
-                            index = row*basis.size + column;
-                            H[index].r += r.hamiltonian[0][k][k2];
-                            S[index].r += r.overlap[0][k][k2];
+                            if (row>=0 && column>=0) {
+                                index = row*basis.size + column;
+                                H[index].r += r.hamiltonian[0][k][k2];
+                                S[index].r += r.overlap[0][k][k2];
+                            }
                             
                         }
                     }
@@ -533,9 +565,11 @@ int calculate_block(struct basis_description basis, int x, int y, int z, struct 
                             // Spin 1 0 (which is a spin 0 1 in a conjugate block of a matrix)
                             row = basis.s2r[0][j][k];
                             column = basis.s2r[1][INDEX_OF(data->atoms,a2)][k2];
-                            index = column*basis.size + row;
-                            H[index].r += r.hamiltonian[2][k][k2];
-                            H[index].i -= r.hamiltonian[3][k][k2] + r.spinorb[2][k][k2];
+                            if (row>=0 && column>=0) {
+                                index = column*basis.size + row;
+                                H[index].r += r.hamiltonian[2][k][k2];
+                                H[index].i -= r.hamiltonian[3][k][k2] + r.spinorb[2][k][k2];
+                            }
                             
                         }
                     }

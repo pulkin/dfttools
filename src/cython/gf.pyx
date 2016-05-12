@@ -5,19 +5,17 @@ cimport numpy, cython
 
 #@cython.boundscheck(True)
 def greens_function(
-    numpy.complex128_t E,
-    numpy.ndarray[numpy.complex128_t, ndim=2] H0,
-    numpy.ndarray[numpy.complex128_t, ndim=2] H1,
-    numpy.ndarray[numpy.complex128_t, ndim=2] S0,
-    numpy.ndarray[numpy.complex128_t, ndim=2] S1,
+    numpy.ndarray[numpy.complex128_t, ndim=2] W0,
+    numpy.ndarray[numpy.complex128_t, ndim=2] W_positive,
+    numpy.ndarray[numpy.complex128_t, ndim=2] W_negative,
     double tolerance,
     int maxiter,
 ):
     
-    cdef numpy.ndarray[numpy.complex_t, ndim=2] es0 = E*S0 - H0
-    cdef numpy.ndarray[numpy.complex_t, ndim=2] e00 = E*S0 - H0
-    cdef numpy.ndarray[numpy.complex_t, ndim=2] alp = -E*S1  + H1
-    cdef numpy.ndarray[numpy.complex_t, ndim=2] bet = -E*S1.conj().T + H1.conj().T
+    cdef numpy.ndarray[numpy.complex_t, ndim=2] es0 = W0
+    cdef numpy.ndarray[numpy.complex_t, ndim=2] e00 = W0
+    cdef numpy.ndarray[numpy.complex_t, ndim=2] alp = -W_positive
+    cdef numpy.ndarray[numpy.complex_t, ndim=2] bet = -W_negative
     cdef numpy.ndarray[numpy.complex_t, ndim=2] gr00 = linalg.inv(es0)
     cdef numpy.ndarray[numpy.complex_t, ndim=2] gt = gr00
     
@@ -50,5 +48,8 @@ def greens_function(
             gt = gr00
         else:
             break
-            
+    
+    if rms>tolerance:
+        raise Exception("Green's function iteration error: after {:d} iterations the error is {:e} (required {:e})".format(iterations, rms, tolerance))
+        
     return gr00

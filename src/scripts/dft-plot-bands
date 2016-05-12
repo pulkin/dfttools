@@ -8,6 +8,7 @@ parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", meta
 parser.add_argument("-e", "--range", nargs = 2, help = "Energy range in eV", metavar = "VALUE")
 parser.add_argument("-c", "--color", nargs = 1, help = "Color bands according to a scalar", metavar = "FILENAME")
 parser.add_argument("-m", "--cmap", nargs = 1, help = "Color map used for coloring bands", metavar = "VALUE")
+parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose output")
 parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
 
 options = parser.parse_args()
@@ -34,6 +35,8 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if "
             with open(file_name, 'r') as f:
                 
                 try:
+                    if options.verbose:
+                        print "Parsing {} ...".format(file_name)
                     bands = parse(f, 'band-structure')
                 except ParseError:
                     print("Could not parse file '{}'\n".format(file_name))
@@ -70,6 +73,9 @@ if not "density" in data:
     
     if options.density:
         
+        if options.verbose:
+            print "Plotting density only ..."
+            
         matplotlib_bands_density(
             data["bands"],
             pyplot.gca(),
@@ -80,6 +86,9 @@ if not "density" in data:
         
     else:
         
+        if options.verbose:
+            print "Plotting bands only ..."
+            
         plot = matplotlib_bands(
             data["bands"],
             pyplot.gca(),
@@ -98,6 +107,9 @@ else:
     ax_left = pyplot.subplot(gs[0])
     ax_right = pyplot.subplot(gs[1], sharey = ax_left)
 
+    if options.verbose:
+        print "Plotting bands (next: density) ..."
+            
     matplotlib_bands(
         data["bands"],
         ax_left,
@@ -106,6 +118,9 @@ else:
         cmap = options.cmap,
     )
     
+    if options.verbose:
+        print "Plotting density ..."
+        
     matplotlib_bands_density(
         data["density"],
         ax_right,

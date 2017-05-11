@@ -426,25 +426,3 @@ class Test_JSON_DOS(unittest.TestCase):
         testing.assert_allclose(self.parser.energies(),numpy.linspace(-numericalunits.eV, numericalunits.eV, 50), rtol = 1e-5)
         testing.assert_equal(self.parser.ky(),numpy.linspace(-0.49, 0.49, 50))
         testing.assert_equal(self.parser.kz(),[0])
-        
-class Test_HKS(unittest.TestCase):
-
-    def test_hamiltonian(self):
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase-band"),'r') as f:
-            bb = bands(f.read()).bands()
-        test_index = [0,-1]
-        
-        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/openmx.hks.0.testcase"),'rb') as f:
-            with open_hks(f) as parser:
-                h, s = parser.hamiltonian()
-                parser.slice_basis((1,)*36 + (0,)*36)
-                h2, s2 = parser.hamiltonian()
-                
-        testing.assert_equal(h.shape, (72,72))
-        testing.assert_equal(s.shape, (72,72))
-        testing.assert_equal(h2.shape, (36,36))
-        testing.assert_equal(s2.shape, (36,36))
-        values = h.eig_path(bb.coordinates[test_index,:], b = s)
-        testing.assert_allclose(values, bb.values[test_index,:])
-
-        testing.assert_equal((h.subsystem(numpy.arange(36),numpy.arange(36))-h2).absmax(), 0)

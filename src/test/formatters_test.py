@@ -111,37 +111,3 @@ class BackForthTests(unittest.TestCase):
         testing.assert_allclose(c1.vectors/angstrom, c2.vectors/angstrom, atol = 1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol = 1e-6)
         testing.assert_equal(c1.values, c2.values)
-
-class GTBTests(unittest.TestCase):
-    
-    def setUp(self):
-        tb = TightBinding({
-            (0,0): [[0]],
-            (0,1): [[1j]],
-            (0,2): [[.1j]],
-            (0,-1): [[-1j]],
-            (0,-2): [[-.1j]],
-            (1,0): [[.3]],
-            (-1,0): [[.3]],
-            (1,1): [[.05]],
-            (1,-1): [[.05]],
-            (-1,1): [[.05]],
-            (-1,-1): [[.05]],
-        })
-
-        self.device = tb.periodic_device(size = 2)
-        
-        import os
-        self.parser = openmx.hks(open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/openmx.hks.0.testcase"),'rb'))
-        self.parser.load()
-        self.h, self.s = self.parser.hamiltonian()
-        self.parser.unload()
-        self.h -= 0.23*numericalunits.Ry*2
-        self.h /= numericalunits.eV
-        self.device2 = self.h.periodic_device(size = 1)
-        self.device2_s = self.s.periodic_device(size = 1)
-        
-    def test_w(self):
-        k = numpy.linspace(-0.5,0.5,101)[:,numpy.newaxis] * ((1,0),)
-        e = numpy.linspace(-3,3,101) + 0.01j
-        gtb_input(self.device2, k, e, overlap = self.device2_s)

@@ -23,7 +23,6 @@ else:
     
 ext_modules += [
     Extension("dfttools.parsers.native", [ "c/qeproj.c", "c/nativemodule.c"]),
-    #Extension("dfttools.fastcalc", [ "c/fastcalc.c"]),
 ]
 
 setup(

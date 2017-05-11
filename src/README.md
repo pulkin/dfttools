@@ -1,5 +1,4 @@
 # DFT Tools
 
-DFT Tools is a helper python package to parse text data from density
-functional theory (DFT) codes.
+DFT Tools is a helper python package to parse, operate and present text data related to density functional theory (DFT) codes.
 

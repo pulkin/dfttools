@@ -656,7 +656,7 @@ class Proj(AbstractParser):
                 
                 projections_ke = numpy.zeros(basisSize)
                 for i in range(rawData.shape[0]/2):
-                    projections_ke[rawData[2*i+1]-1] = rawData[2*i]
+                    projections_ke[int(rawData[2*i+1])-1] = rawData[2*i]
                 projections_k.append(projections_ke)
                 
                 if not upper is None and len(projections_k) >= (upper-lower):

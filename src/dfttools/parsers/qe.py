@@ -996,7 +996,9 @@ class Input(AbstractParser):
         self.parser.reset()
         self.parser.skip("atomic_positions")
         units = self.parser.nextMatch(cre_word)
-        coordinates = numpy.zeros((nl["system"]["nat"],3))
+        if not int(nl["system"]["nat"]) == nl["system"]["nat"]:
+			raise ValueError("The number of atoms (`nat` field in `systems` namelist) is non-integer")
+        coordinates = numpy.zeros((int(nl["system"]["nat"]),3))
         statics = numpy.ones(coordinates.shape)
         values = numpy.zeros(coordinates.shape[0],"S2")
         

@@ -213,6 +213,14 @@ class BasisTest(unittest.TestCase):
         numericalunits.reset_units()
         x = pickle.loads(data)
         testing.assert_allclose(x.vectors, numpy.eye(3)*numericalunits.angstrom)
+    
+    def test_rotated(self):
+        b1 = self.b.rotated((0,0,-1),numpy.pi/2)
+        testing.assert_allclose(b1.vectors, (
+            (0,1,0),
+            (-3.**.5/2,.5,0),
+            (0,0,3),
+        ), atol = 1e-10)
 
 class CellInitializationTest(unittest.TestCase):
     

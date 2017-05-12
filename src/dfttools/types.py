@@ -234,6 +234,44 @@ class Basis(object):
             coordinates,
         )
     
+    def rotated(self, axis, angle, units = 'rad'):
+        """
+        Rotates this basis.
+        
+        Args:
+        
+            axis (array): axis to rotate around;
+            
+            angle (float): angle to rotate;
+            
+        Kwargs:
+        
+            units (str): units of the angle: 'rad', 'deg' or 'frac'.
+            
+        Returns:
+        
+            A rotated copy of this basis.
+        """
+        units = {
+            "rad"  : 1.0,
+            "deg"  : numpy.pi/180,
+            "frac" : numpy.pi*2,
+        }[units]
+        angle *= units
+        c = numpy.cos(angle)
+        s = numpy.sin(angle)
+        axis = numpy.array(axis, dtype = numpy.float)
+        axis /= (axis**2).sum()**.5
+        axis_x = numpy.array((
+            (0, -axis[2], axis[1]),
+            (axis[2], 0, -axis[0]),
+            (-axis[1], axis[0], 0),
+        ))
+        M = c * numpy.eye(self.vectors.shape[0]) + s * axis_x + (1-c) * numpy.dot(axis[:,numpy.newaxis],axis[numpy.newaxis,:])
+        result = self.copy()
+        result.vectors = numpy.dot(result.vectors, M)
+        return result
+        
     def volume(self):
         """
         Computes the volume of a triclinic cell represented by the basis.

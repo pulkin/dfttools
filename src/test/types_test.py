@@ -498,7 +498,7 @@ class CellTest(unittest.TestCase):
         testing.assert_allclose(rp.coordinates,((0.,0.,0.),
             (1./6,1./6,0.5),(.5,0.,0.),(2./3,1./6,0.5),
             (0.,0.5,0.),(1./6,2./3,0.5),(0.5,0.5,0),
-            (2./3.,2./3,0.5)))
+            (2./3.,2./3,0.5)), atol = 1e-14)
         testing.assert_equal(rp.values,("Co",)*8)
         
     def test_select_0(self):

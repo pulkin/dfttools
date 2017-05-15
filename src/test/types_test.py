@@ -1163,6 +1163,20 @@ class GridTest(unittest.TestCase):
     def test_interpolate_error_0(self):
         with self.assertRaises(Exception):
             self.grid.interpolate(((0,0,0), (1./2,1./3,1./4), (-1./2, -2./3, -3./4)), periodic = False)
+            
+    def test_interpolate_periodic(self):
+        x = numpy.linspace(0,1,2, endpoint = False)
+        y = numpy.linspace(0,1,2, endpoint = False)
+        z = numpy.linspace(0,1,2, endpoint = False)
+        xx,yy,zz = numpy.meshgrid(x,y,z,indexing='ij')
+        data = xx
+        grid = Grid(
+            Basis((1,2,3), kind = 'orthorombic'),
+            (x, y, z),
+            data,
+        )
+        interpolated = grid.interpolate_to_cell(((.25,0,0),(.75,0,0)), periodic = True)
+        testing.assert_equal(interpolated.values, (.25,.25))
 
 class TetrahedronDensityTest(unittest.TestCase):
     

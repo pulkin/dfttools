@@ -2,7 +2,6 @@
 This submodule contains key types for handling coordinate-dependent data:
 ``UnitCell`` and ``Grid`` as well as ``Basis``.
 """
-import math
 import itertools
 from functools import wraps
 import warnings

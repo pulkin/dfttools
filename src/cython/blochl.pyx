@@ -85,7 +85,7 @@ def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
     return result
 
 #@cython.boundscheck(True)
-def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
+def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):
     
     cdef double vol = cell.volume()
     cdef int i,j,k,i1,j1,k1,v1,v2,v3,v4,b,n
@@ -97,6 +97,10 @@ def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
     cdef numpy.ndarray[numpy.double_t, ndim=2] vv = numpy.zeros((8,cell.values.shape[-1]), dtype = numpy.double)
 
     cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
+    
+    for i in range(4):
+        if not vals.shape[i] == weights.shape[i]:
+            raise ValueError("Weights array dimension {:d} mismatch: {:d}, expected {:d}".format(i,weights.shape[i],vals.shape[i]))
         
     # Parallelipiped loop
     for i in range(crds.shape[0]):
@@ -157,5 +161,5 @@ def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
                             else:
                                 _t = 0
                                 
-                            result[n] += _t
+                            result[n] += _t * weights[i,j,k,b]
     return result

@@ -1185,8 +1185,8 @@ class TetrahedronDensityTest(unittest.TestCase):
         
     def test_td_1(self):
         d = self.grid.tetrahedron_density((-.1,0,.1,.2), resolved = True)
-        testing.assert_equal(d.values.shape, (50,50,1,4))
-        testing.assert_allclose(d.values.sum(axis = 0).sum(axis = 0).sum(axis = 0),(0,0,2*math.pi*0.1, 2*math.pi*0.2), rtol = 1e-2)
+        testing.assert_equal(d.values.shape, (50,50,1,1,4))
+        testing.assert_allclose(d.values.sum(axis = 0).sum(axis = 0).sum(axis = 0)[0],(0,0,2*math.pi*0.1, 2*math.pi*0.2), rtol = 1e-2)
 
     def test_td_fail(self):
         g = self.grid.copy()

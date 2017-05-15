@@ -1757,7 +1757,7 @@ class Grid(Basis):
         result.values = self.__interpolate__(result.coordinates, driver = driver, periodic = periodic, **kwargs)
         return result
         
-    def tetrahedron_density(self, points, resolved = False):
+    def tetrahedron_density(self, points, resolved = False, weights = None):
         """
         Convolves data to calculate density (of states). Uses the
         tetrahedron method from PRB 49, 16223 by E. Blochl et al. Works
@@ -1770,7 +1770,11 @@ class Grid(Basis):
         Kwargs:
         
             resolved (bool): if True returns a spacially and index
-            resolved density.
+            resolved density. The dimensions of the returned array
+            are ``self.values.shape + points.shape``.
+            
+            weights (array): if specified and ``resolved`` is False
+            convolves result with the specified weights.
             
         Returns:
         
@@ -1783,19 +1787,34 @@ class Grid(Basis):
         initial = self.values
         points = numpy.array(points, dtype = numpy.float64)
         self.values = numpy.reshape(self.values, self.values.shape[:3]+(-1,))
+        minima = numpy.min(self.values, axis = (0,1,2))
+        maxima = numpy.max(self.values, axis = (0,1,2))
+        bottom = (maxima<points.min()).sum()
+        top = (minima<points.max()).sum()
+        
+        # Optimize size
+        self.values = self.values[...,bottom:top]
         
         if resolved:
             
-            raw = tetrahedron(self, points)
+            # Sum over bands
+            raw = tetrahedron(self, points).reshape(self.values.shape + points.shape)
             self.values = initial
             return Grid(
                 self,
                 self.coordinates,
-                numpy.reshape(raw, self.values.shape + points.shape),
+                raw,
             )
         
         else:
             
-            raw = tetrahedron_plain(self, points)
+            if weights is None:
+                weights = numpy.ones(self.values.shape, dtype = numpy.float64)
+                
+            else:
+                weights = numpy.array(weights, dtype = numpy.float64)
+                weights = numpy.reshape(weights, weights.shape[:3]+(-1,))[...,bottom:top]
+                
+            raw = tetrahedron_plain(self, points, weights)
             self.values = initial
             return raw

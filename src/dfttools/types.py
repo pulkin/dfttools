@@ -1689,7 +1689,7 @@ class Grid(Basis):
                 right_slice = (slice(None),)*i + ((-1,),) + (slice(None),)*(len(data_points)-i-1)
                 right = data_values[right_slice]
                 
-                data_values = numpy.concatenate((left, data_values, right), axis = i)
+                data_values = numpy.concatenate((right, data_values, left), axis = i)
                 
             points = points % 1
         
@@ -1723,7 +1723,7 @@ class Grid(Basis):
             A grid with interpolated values.
         """
         # A dummy grid
-        result = Grid(Basis(self.vectors, meta = self.meta), points, numpy.zeros(
+        result = Grid(self, points, numpy.zeros(
             tuple(i.shape[0] for i in points) + (0,)
         ))
         

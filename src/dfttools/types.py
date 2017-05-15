@@ -1067,7 +1067,7 @@ class UnitCell(Basis):
         
         result.apply(numpy.all(numpy.logical_and(result.coordinates >= 0, result.coordinates < 1), axis = 1))
         result.coordinates -= result.transform_from(u, random_displacement)
-        return result.normalized()
+        return result
     
     def species(self):
         """

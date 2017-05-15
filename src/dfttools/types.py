@@ -730,8 +730,7 @@ class UnitCell(Basis):
         
         Kwargs:
         
-            sort: either 'x', 'y', 'z' or a consequetive number of a
-            vector to sort coordinates along.
+            sort: coordinates to sort with: either 'x', 'y', 'z' or 0,1,2.
         
         Returns:
         

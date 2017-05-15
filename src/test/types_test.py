@@ -1155,7 +1155,7 @@ class GridTest(unittest.TestCase):
         testing.assert_equal(i.values, numpy.array((0, 1./4+1./9+1./16, 1./4+1./9+1./16))[:,numpy.newaxis]*((1,2),))
         
     def test_interpolate_0(self):
-        i = self.grid.interpolate(self.grid.coordinates, periodic = False)
+        i = self.grid.interpolate_to_grid(self.grid.coordinates, periodic = False)
 
         testing.assert_equal(i.coordinates, self.grid.coordinates)
         testing.assert_equal(i.values, self.grid.values)

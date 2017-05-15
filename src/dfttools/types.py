@@ -1645,7 +1645,7 @@ class Grid(Basis):
         
         return UnitCell(Basis(self.vectors, meta = self.meta), c, v)
         
-    def __interpolate__(self, points, driver = None, periodic = True, **kwargs):
+    def interpolate_to_array(self, points, driver = None, periodic = True, **kwargs):
         """
         Interpolates values at specified points and returns an array of
         interpolated values. By default uses ``scipy.interpolate.interpn``.
@@ -1701,7 +1701,7 @@ class Grid(Basis):
         # Interpolate
         return driver(data_points, data_values, points, **kwargs)
 
-    def interpolate(self, points, driver = None, periodic = True, **kwargs):
+    def interpolate_to_grid(self, points, driver = None, periodic = True, **kwargs):
         """
         Interpolates values at specified points and returns a grid.
         By default uses ``scipy.interpolate.interpn``.
@@ -1727,7 +1727,7 @@ class Grid(Basis):
             tuple(i.shape[0] for i in points) + (0,)
         ))
         
-        result.values = self.__interpolate__(result.explicit_coordinates(), driver = driver, periodic = periodic, **kwargs)
+        result.values = self.interpolate_to_array(result.explicit_coordinates(), driver = driver, periodic = periodic, **kwargs)
         return result
         
     def interpolate_to_cell(self, points, driver = None, periodic = True, **kwargs):
@@ -1754,7 +1754,7 @@ class Grid(Basis):
         # A dummy unit cell
         result = UnitCell(Basis(self.vectors, meta = self.meta), points, points)
         
-        result.values = self.__interpolate__(result.coordinates, driver = driver, periodic = periodic, **kwargs)
+        result.values = self.interpolate_to_array(result.coordinates, driver = driver, periodic = periodic, **kwargs)
         return result
         
     def interpolate_to_path(self, points, n, anchor = True, **kwargs):

@@ -12,8 +12,6 @@ from scipy import linalg
 import numericalunits
 
 from .blochl import tetrahedron, tetrahedron_plain
-from .gf import greens_function
-#from .fastcalc import greens_function
 
 def input_as_list(func):
     

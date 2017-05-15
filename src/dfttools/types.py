@@ -455,46 +455,52 @@ class Basis(object):
         self.vectors = self.vectors[new,:]
     
     @input_as_list
-    def generate_path(self, points, n = 100, force_edges = False):
+    def generate_path(self, points, n, anchor = True):
         """
-        Generates a path in this basis.
-        
+        Generates a path given key points and the total number of points
+        on the path.
+                
         Args:
         
-            points (array): edges of the path where the leading dimension
-            corresponds to points and the second dimension corresponds
-            to the coordinates of the points in this basis.
+            points (array): key points of the path expressed in this basis;
+            
+            n (int): the total number of points on the path.
             
         Kwargs:
         
-            n (int): number of points;
-            
-            force_edges (int): force to include the edges into the final
-            list of coordinates.
+            anchor (bool): force the specified points to be present in
+            the final path. If True alters slightly the total point number;
             
         Returns:
         
-            A 2D array with the path. The coordinates of points are
-            given in this basis.
+            Path coordinates expressed in this basis.
         """
         points = numpy.array(points)
+        points_c = self.transform_to_cartesian(points)
+        lengths = ((points_c[1:] - points_c[:-1])**2).sum(axis = -1)**.5
+        lengths_cs = numpy.cumsum(lengths)
         
-        cartesian = self.transform_to_cartesian(points)
-        lengths = ((cartesian[1:,:]-cartesian[:-1,:])**2).sum(axis = -1)**.5
-        lengths = numpy.concatenate(((0,),lengths,))
-        lengths = numpy.cumsum(lengths)
-        
-        if not force_edges:
+        if anchor:
             
-            uniform = numpy.linspace(0,lengths[-1],n)
-            large = numpy.searchsorted(lengths,uniform)
-            large[0] = 1
-            small = ((uniform - lengths[large-1]) / (lengths[large] - lengths[large-1]))[:,numpy.newaxis]
-            return points[large-1,:] * (1 - small) + points[large,:] * small
+            lengths_n = numpy.round(lengths * n / lengths_cs[-1])
+            path = []
+            
+            for i in range(lengths_n.size):
+                
+                path_pos = numpy.linspace(0,1,lengths_n[i], endpoint = False)[:,numpy.newaxis]
+                path.append(points[i,numpy.newaxis,:] * (1 - path_pos) + points[i+1,numpy.newaxis,:] * path_pos)
+                
+            path.append(points[-1,numpy.newaxis,:])
+            path = numpy.concatenate(path, axis = 0)
             
         else:
             
-            raise NotImplementedError
+            path_l = numpy.linspace(0,1,n) * lengths_cs[-1]
+            path_id = numpy.searchsorted(lengths_cs, path_l)
+            path_pos = (lengths_cs[path_id] - path_l) / lengths[path_id]
+            path = points[path_id,:] * path_pos[:,numpy.newaxis] + points[path_id+1,:] * (1 - path_pos[:,numpy.newaxis])
+            
+        return numpy.array(path)
 
 class UnitCell(Basis):
     """

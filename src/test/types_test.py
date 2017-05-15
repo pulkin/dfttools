@@ -220,7 +220,16 @@ class BasisTest(unittest.TestCase):
             (0,1,0),
             (-3.**.5/2,.5,0),
             (0,0,3),
-        ), atol = 1e-10)
+        ), atol = 1e-7)
+        
+    def test_rotated_2(self):
+        c1 = self.c.rotated((0,0,-1),numpy.pi/4)
+        s2 = 1./2.**.5
+        testing.assert_allclose(c1.vectors, (
+            (s2,s2,0),
+            (-s2,s2,0),
+            (0,0,1),
+        ))
 
 class CellInitializationTest(unittest.TestCase):
     

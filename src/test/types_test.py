@@ -190,7 +190,7 @@ class BasisTest(unittest.TestCase):
             
     def test_genpath(self):
         keys = ((0,0,0),(1,0,0),(1,1,0),(1,1,1))
-        pth = self.c.generate_path(keys, n = 7)
+        pth = self.c.generate_path(keys, 7)
         testing.assert_allclose(pth, (
             (0,0,0),
             (.5,0,0),
@@ -200,6 +200,15 @@ class BasisTest(unittest.TestCase):
             (1,1,.5),
             (1,1,1)
         ))
+        
+    def test_genpath2(self):
+        keys = ((0,0,0),(1,0,0),(1,1,0),(1,1,1))
+        pth = self.c.generate_path(keys, 7, anchor = True)
+        for k in keys:
+            a = numpy.array(k, dtype = float).tolist()
+            b = pth.tolist()
+            print a,b
+            assert a in b
         
     def test_save_load(self):
         import numericalunits

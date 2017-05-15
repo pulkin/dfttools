@@ -467,7 +467,7 @@ class CellTest(unittest.TestCase):
         
     def test_stack_fail_0(self):
         with self.assertRaises(ArgumentError):
-            self.cell.stack(self.cell2, vector = 'z')
+            self.cell.stack(self.cell2, vector = 'z', restrict_collinear = True)
             
     def test_stack_fail_1(self):
         with self.assertRaises(ArgumentError):

@@ -1541,7 +1541,7 @@ class Grid(Basis):
         )
     
     @input_as_list
-    def stack(self, grids, vector = 'x', tolerance = 1e-10):
+    def stack(self, grids, vector = 'x', **kwargs):
         """
         Stacks several grids along one of the vectors.
         
@@ -1555,9 +1555,8 @@ class Grid(Basis):
             vector (str,int): a vector along which to stack, either 'x',
             'y', 'z' or an int specifying the vector.
         
-            tolerance (float): a largest possible error in input grids'
-            vectors
-            
+        The rest of kwargs are redirected to ``Basis.stack``.
+                    
         Raises:
         
             ArgumentError: in the case of vector mismatch.
@@ -1573,7 +1572,7 @@ class Grid(Basis):
         otherVectors = list(range(grids[0].vectors.shape[0]))
         del otherVectors[d]
             
-        basis = Basis.stack(*grids, vector = vector, tolerance = tolerance)
+        basis = Basis.stack(*grids, vector = vector, **kwargs)
         
         for g in grids:
             if not type(g) in (Grid, Basis):

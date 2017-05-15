@@ -351,7 +351,7 @@ class Basis(object):
         return Basis(self.vectors, meta = self.meta)
     
     @input_as_list
-    def stack(self, basises, vector = 'x', tolerance = 1e-10):
+    def stack(self, basises, vector = 'x', tolerance = 1e-10, restrict_collinear = False):
         """
         Stacks several basises along one of the vectors.
         
@@ -363,10 +363,13 @@ class Basis(object):
         Kwargs:
         
             vector (str,int): a vector along which to stack, either 'x',
-            'y', 'z' or an int specifying the vector.
+            'y', 'z' or an int specifying the vector;
         
             tolerance (float): a largest possible error in input basises'
-            vectors
+            vectors;
+            
+            restrict_collinear (bool): if True will raise an exception
+            if the vectors to stack along are not collinear
             
         Raises:
         
@@ -387,22 +390,23 @@ class Basis(object):
             i.vectors[numpy.newaxis,...] for i in basises
         ), axis = 0)
         
-        # check the stacking vectors of each cell pointing the same direction
-        # and if the rest of lattice vectors coincide
+        # Check if non-stacking lattice vectors coincide
         stackingVectorsSum = shapes[:,d,:].sum(axis = 0)
         vecLengths = (shapes**2).sum(axis = 2)**0.5
         otherVectors_d = shapes[:,otherVectors,:] - shapes[0,otherVectors,:][numpy.newaxis,...]
         otherVectors_ds = (otherVectors_d**2).sum(axis = -1)**.5
         
-        if numpy.any( otherVectors_ds > tolerance * vecLengths[:,otherVectors] ) \
-            or numpy.any(numpy.abs(__angle__(shapes[:,d,:],stackingVectorsSum[numpy.newaxis,:])-1) > tolerance):
-                raise ArgumentError('Dimension mismatch for stacking:\n{}\nCheck your input basis vectors or set tolerance to at least {} to skip this error'.format(
-                    shapes,
-                    max(
-                        numpy.amax(otherVectors_ds/vecLengths[:,otherVectors]),
-                        numpy.amax(numpy.abs(__angle__(shapes[:,d,:],stackingVectorsSum[numpy.newaxis,:])-1))
-                    ),
-                ))
+        if numpy.any( otherVectors_ds > tolerance * vecLengths[:,otherVectors] ):
+            raise ArgumentError('Dimension mismatch for stacking:\n{}\nCheck your input basis vectors or set tolerance to at least {} to skip this error'.format(
+                shapes,
+                numpy.amax(otherVectors_ds/vecLengths[:,otherVectors]),
+            ))
+        
+        if restrict_collinear and numpy.any(numpy.abs(__angle__(shapes[:,d,:],stackingVectorsSum[numpy.newaxis,:])-1) > tolerance):
+            raise ArgumentError('Vectors to stack along are not collinear:\n{}\nCheck your input basis vectors or set tolerance to at least {} to skip this error'.format(
+                shapes,
+                numpy.amax(numpy.abs(__angle__(shapes[:,d,:],stackingVectorsSum[numpy.newaxis,:])-1)),
+            ))
             
         shape = self.vectors.copy()
         shape[d,:] = stackingVectorsSum

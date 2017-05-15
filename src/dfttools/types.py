@@ -1,6 +1,6 @@
 """
 This submodule contains key types for handling coordinate-dependent data:
-``UnitCell`` and ``Grid``.
+``UnitCell`` and ``Grid`` as well as ``Basis``.
 """
 import math
 import itertools

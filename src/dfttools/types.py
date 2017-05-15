@@ -1003,22 +1003,16 @@ class UnitCell(Basis):
         basis = Basis.stack(*cells, vector = vector, **kwargs)
          
         values = numpy.concatenate(tuple(cell.values for cell in cells if isinstance(cell, UnitCell)), axis = 0)
-            
-        stackingVectorsLen = numpy.array(tuple((cell.vectors[d,:]**2).sum()**.5 for cell in cells))
-        shifts = numpy.cumsum(stackingVectorsLen)
-        shifts = shifts/shifts[-1]
         
-        # kx+b
-        k = numpy.ones((len(cells),dims))
-        k[:,d] = stackingVectorsLen/stackingVectorsLen.sum()
-        b = numpy.zeros((len(cells),dims))
-        b[:,d] = numpy.concatenate(((0,),shifts[:-1]))
-        
-        coordinates = numpy.concatenate(tuple(
-            cell.coordinates*k[numpy.newaxis,i,:]+b[numpy.newaxis,i,:] for i,cell in enumerate(cells) if isinstance(cell, UnitCell) 
-        ),axis = 0)
+        coordinates = []
+        shift = numpy.zeros(dims)
+        for c in cells:
+            if isinstance(c, UnitCell):
+                coordinates.append(c.cartesian() + shift[numpy.newaxis,:])
+            shift += c.vectors[d,:]
+        coordinates = numpy.concatenate(coordinates, axis = 0)
             
-        return UnitCell(basis, coordinates, values)
+        return UnitCell(basis, coordinates, values, c_basis = "cartesian")
 
     @input_as_list
     def supercell(self, vec):

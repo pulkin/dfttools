@@ -1757,6 +1757,30 @@ class Grid(Basis):
         result.values = self.__interpolate__(result.coordinates, driver = driver, periodic = periodic, **kwargs)
         return result
         
+    def interpolate_to_path(self, points, n, anchor = True, **kwargs):
+        """
+        Interpolates values to a path: performs path generation using
+        ``Basis.generate_path`` and interpolates values on it.
+        
+        Args:
+        
+            points (array): key points of the path expressed in lattice coordinates;
+            
+            n (int): the total number of points on the path.
+            
+        Kwargs:
+        
+            anchor (bool): force the specified points to be present in
+            the final path. If True alters slightly the total point number;
+            
+            kwargs: keywords to the 'interpolate_to_cell' routine.
+            
+        Returns:
+        
+            A unit cell interpolated values.
+        """
+        return self.interpolate_to_cell(self.generate_path(points,n,anchor = anchor), **kwargs)
+
     def tetrahedron_density(self, points, resolved = False, weights = None):
         """
         Convolves data to calculate density (of states). Uses the

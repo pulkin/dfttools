@@ -1175,8 +1175,8 @@ class GridTest(unittest.TestCase):
             (x, y, z),
             data,
         )
-        interpolated = grid.interpolate_to_cell(((.25,0,0),(.75,0,0)), periodic = True)
-        testing.assert_equal(interpolated.values, (.25,.25))
+        interpolated = grid.interpolate_to_array(((.25,0,0),(.75,0,0)), periodic = True)
+        testing.assert_equal(interpolated, (.25,.25))
 
 class TetrahedronDensityTest(unittest.TestCase):
     

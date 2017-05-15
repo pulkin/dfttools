@@ -191,6 +191,8 @@ class BasisTest(unittest.TestCase):
     def test_genpath(self):
         keys = ((0,0,0),(1,0,0),(1,1,0),(1,1,1))
         pth = self.c.generate_path(keys, 7)
+        pth2 = self.c.generate_path(keys, 7, anchor = False)
+        testing.assert_allclose(pth, pth2)
         testing.assert_allclose(pth, (
             (0,0,0),
             (.5,0,0),

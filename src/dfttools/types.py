@@ -454,7 +454,6 @@ class Basis(object):
             
         self.vectors = self.vectors[new,:]
     
-    @input_as_list
     def generate_path(self, points, n, anchor = True):
         """
         Generates a path given key points and the total number of points

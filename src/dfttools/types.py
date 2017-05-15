@@ -966,7 +966,7 @@ class UnitCell(Basis):
             numpy.concatenate(v, axis = 0))
     
     @input_as_list
-    def stack(self, cells, vector = 'x', tolerance = 1e-10):
+    def stack(self, cells, vector = 'x', **kwargs):
         """
         Stacks several cells along one of the vectors.
         
@@ -979,10 +979,9 @@ class UnitCell(Basis):
         
             vector (str,int): a vector along which to stack, either 'x',
             'y', 'z' or an int specifying the vector.
-        
-            tolerance (float): a largest possible error in input cells'
-            vectors
             
+        The rest of kwargs are redirected to ``Basis.stack``.
+        
         Raises:
         
             ArgumentError: in the case of vector mismatch.
@@ -999,7 +998,7 @@ class UnitCell(Basis):
             if not type(c) in (UnitCell, Basis):
                 raise ArgumentError('Cannot stack object {}'.format(c))
             
-        basis = Basis.stack(*cells, vector = vector, tolerance = tolerance)
+        basis = Basis.stack(*cells, vector = vector, **kwargs)
          
         values = numpy.concatenate(tuple(cell.values for cell in cells if isinstance(cell, UnitCell)), axis = 0)
             

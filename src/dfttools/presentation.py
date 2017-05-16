@@ -973,7 +973,13 @@ def matplotlib_scalar(
     units = "angstrom",
     units_name = None,
     show_cell = False,
+    normalize = True,
     ppu = None,
+    isolines = None,
+    window = None,
+    margins = 0.1,
+    scale_bar = None,
+    scale_bar_location = 1,
     **kwargs
 ):
     """
@@ -1002,20 +1008,34 @@ def matplotlib_scalar(
         show_cell (bool): if True then projected unit cell boundaries are
         shown on the final image;
         
+        normalize (bool): normalize data before plotting such that the
+        minimum is set at zero and the maximum is equal to one;
+        
         ppu (float): points per ``unit`` for the raster image;
-    
-        The rest of kwargs are passed to ``pyplot.imshow``.
+        
+        isolines (array): plot isolines at the specified levels;
+        
+        window (array): 4 values representing a window to plot the data:
+        minimum and maximum 'x' coordinate and minimum and maximum 'y'
+        coordinate;
+        
+        margins (float): adds margins to the grid where the data is
+        interpolated;
+        
+        scale_bar (int): adds a scal bar to the image at the specified
+        location;
+        
+        scale_bar_location (int): location of the scale bar;
+        
+        The rest of kwargs are passed to ``pyplot.imshow`` or ``pyplot.contour``.
         
     Returns:
     
         A ``matplotlib.image.AxesImage`` plotted.
     """
     
-    if not len(grid.coordinates)==3:
-        raise TypeError("A {:d}D grid found, required 3D".format(len(grid.coordinates)))
-        
-    if not len(grid.values.shape)==3:
-        raise TypeError("The dimensionality of the 'values' array is {:d}, required 3".format(len(grid.values.shape)))
+    if not grid.vectors.shape[0] == 3:
+        raise TypeError("A {:d}D grid found, required 3D".format(grid.vectors.shape[0]))
         
     if isinstance(units, str):
         units_name = units
@@ -1036,12 +1056,19 @@ def matplotlib_scalar(
     
     # Calculate in-plane coordinates of the grid edges
     edges_inplane = basis.transform_from_cartesian(grid.vertices() - origin)
-    mn = edges_inplane.min(axis = 0)
-    mx = edges_inplane.max(axis = 0)
+    if window is None:
+        mn = edges_inplane.min(axis = 0)
+        mx = edges_inplane.max(axis = 0)
+    else:
+        mn = numpy.array((window[0],window[2]))*units
+        mx = numpy.array((window[1],window[3]))*units
+        
+    # Margins
+    mn_a, mx_a = mn,mx
+    mn,mx = mn*(1+margins) + mx*(-margins), mn*(-margins) + mx*(1+margins)
     
     if ppu is None:
-        l = ((grid.vectors**2).sum(axis = 1)**.5)
-        ppu = (numpy.array(grid.values.shape)/l).min()
+        ppu = (grid.size() / grid.volume())**(1./3)
         
     else:
         ppu /= units
@@ -1049,13 +1076,23 @@ def matplotlib_scalar(
     # In-plane grid size: px, py
     px = round((mx[0]-mn[0])*ppu)
     py = round((mx[1]-mn[1])*ppu)
+    if px*py == 0:
+        raise ValueError("The data is too sparse: the suggested ppu is {:e} points per {:s} while grid dimensions are {:e} and {:e} {:s}. Please set the ppu parameter manually".format(
+            ppu * units,
+            units_name,
+            (mx[0]-mn[0])/units,
+            (mx[1]-mn[1])/units,
+            units_name,
+        ))
     
     # In-plane grid spacing: dx, dy
     dx = (mx[0]-mn[0]) / px
     dy = (mx[0]-mn[0]) / py
     
     # Build an inplane grid
-    mg = numpy.meshgrid(numpy.linspace(mn[0]+dx/2,mx[0]-dx/2,px), numpy.linspace(mn[1]+dy/2,mx[1]-dy/2,py), (0,), indexing='ij')
+    x = numpy.linspace(mn[0]+dx/2,mx[0]-dx/2,px)
+    y = numpy.linspace(mn[1]+dy/2,mx[1]-dy/2,py)
+    mg = numpy.meshgrid(x, y, (0,), indexing='ij')
     dims = mg[0].shape[:2]
     points_inplane = numpy.concatenate(tuple(i[...,numpy.newaxis] for i in mg), axis = len(mg)).reshape(-1,3)
     
@@ -1063,14 +1100,36 @@ def matplotlib_scalar(
     points_cartesian = basis.transform_to_cartesian(points_inplane) + origin
     points_lattice = grid.transform_from_cartesian(points_cartesian)
     
-    interpolated = grid.interpolate_to_cell(points_lattice)
+    # Interpolate
+    if isinstance(grid, Grid):
+        interpolated = grid.interpolate_to_cell(points_lattice)
+        
+    else:
+        interpolated = grid.interpolate(points_lattice)
     
-    image = axes.imshow(numpy.swapaxes(interpolated.values.reshape(*dims),0,1), extent = [
-        mn[0]/units,
-        mx[0]/units,
-        mn[1]/units,
-        mx[1]/units,
-    ], origin = "lower", **kwargs)
+    if isolines is None:
+        
+        interpolated.values = numpy.sum(interpolated.values, axis = tuple(range(1,len(interpolated.values.shape))))
+        if normalize:
+            interpolated.values -= interpolated.values.min()
+            interpolated.values /= interpolated.values.max()
+        
+        image = axes.imshow(numpy.swapaxes(interpolated.values.reshape(*dims),0,1), extent = [
+            mn[0]/units,
+            mx[0]/units,
+            mn[1]/units,
+            mx[1]/units,
+        ], origin = "lower", **kwargs)
+        
+    else:
+        
+        values = numpy.swapaxes(numpy.reshape(interpolated.values, (x.size, y.size, -1)),0,1)
+        lmax = max(isolines)
+        lmin = min(isolines)
+        for i in range(values.shape[-1]):
+            if values[...,i].min() < lmax and values[...,i].max() > lmin:
+                image = axes.contour(x/units,y/units,values[...,i],isolines, **kwargs)
+        axes.set_aspect('equal')
 
     if show_cell:
         
@@ -1078,12 +1137,44 @@ def matplotlib_scalar(
         for e in edges:
             axes.plot([e[0,0],e[1,0]],[e[0,1],e[1,1]], color = "black")
     
-    axes.set_xlim([mn[0]/units,mx[0]/units])
-    axes.set_ylim([mn[1]/units,mx[1]/units])
+    axes.set_xlim([mn_a[0]/units,mx_a[0]/units])
+    axes.set_ylim([mn_a[1]/units,mx_a[1]/units])
     
     if not units_name is None:
         axes.set_xlabel(units_name)
         axes.set_ylabel(units_name)
+        
+    if not scale_bar is None:
+        
+        from matplotlib.patches import Rectangle
+        
+        t1 = axes.transData
+        t2 = axes.transAxes
+        t = t2-t1
+        
+        if scale_bar_location == 1:
+            x,y = .9,.9
+            w,h = -1,-.05
+            
+        elif scale_bar_location == 2:
+            x,y = .1,.9
+            w,h = 1,-.05
+            
+        elif scale_bar_location == 3:
+            x,y = .1,.1
+            w,h = 1,.05
+            
+        elif scale_bar_location == 4:
+            x,y = .9, .1
+            w,h = -1,.05
+            
+        else:
+            raise ValueError("Unknown location for the scale bar: {:r}".format(scale_bar_location))
+            
+        ((x,y),(_,h)) = t.transform(((x,y),(w,y+h)))
+        h -= y
+        w = (scale_bar / units)*w
+        axes.add_patch(Rectangle((x,y),w,h,color = 'white'))
     
     return image
 

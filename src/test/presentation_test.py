@@ -334,9 +334,6 @@ class ScalarGridPlotTest(unittest.TestCase):
         )
         self.grid.values = numpy.prod(numpy.sin(self.grid.explicit_coordinates()*2*math.pi), axis = -1)
         
-        self.wrong_grid = self.grid.copy()
-        self.wrong_grid.values = self.wrong_grid.values[...,numpy.newaxis]*numpy.array(((((1,2),),),))
-        
         self.wrong_dims = Grid(
             Basis(((1*angstrom,0),(0,1*angstrom))),
             (
@@ -374,11 +371,6 @@ class ScalarGridPlotTest(unittest.TestCase):
         l = list(i for i in pyplot.gca().get_children() if isinstance(i, Line2D))
         print len(l)
         assert len(l) == 12
-
-    @cleanup
-    def test_plot_error_0(self):
-        with self.assertRaises(TypeError):
-            matplotlib_scalar(self.wrong_grid, pyplot.gca(), (0.1,0.1,0.1), 'z')
             
     @cleanup
     def test_plot_error_1(self):

@@ -362,7 +362,7 @@ class ScalarGridPlotTest(unittest.TestCase):
         
     @cleanup
     def test_plot_2(self):
-        im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1,0.1,0.1), 'z', ppu = 10)
+        im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1,0.1,0.1), 'z', ppu = 10, margins = 0)
         testing.assert_equal(im.get_size(), (round(10*3.**.5/2), 15))
 
     @cleanup

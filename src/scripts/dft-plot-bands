@@ -16,7 +16,36 @@ options = parser.parse_args()
 from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
 
-from numericalunits import eV
+from numericalunits import eV, angstrom
+import numpy
+    
+def report(bands):
+    
+    fermi_present = "Fermi" in bands.meta.keys()
+    print("Fermi present: {}".format("yes" if fermi_present else "no"))
+    
+    if fermi_present:
+        
+        print("Fermi value: {:.6f}".format(bands.meta["Fermi"]/eV))
+        
+        vb = (bands.values < bands.meta["Fermi"]).sum(axis = -1)
+        ref = vb.ravel()[0]
+        
+        if numpy.all(vb == ref):
+            
+            if ref < bands.values.shape[-1] and ref>0:
+                
+                cbb = bands.values[...,ref].min()
+                vbt = bands.values[...,ref-1].max()
+                print("Gap size: {:.6f} eV".format((cbb-vbt)/eV))
+                
+            else:
+                
+                print("Gap size unknown (not enough bands)")
+                
+        else:
+            
+            print("Gap absent")
 
 if not options.fermi is None:
     options.fermi = float(options.fermi[0])*eV
@@ -36,7 +65,8 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if "
                 
                 try:
                     if options.verbose:
-                        print "Parsing {} ...".format(file_name)
+                        print("Parsing {} ...".format(file_name))
+                        
                     bands = parse(f, 'band-structure')
                 except ParseError:
                     print("Could not parse file '{}'\n".format(file_name))
@@ -44,13 +74,16 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if "
                 
                 if not options.fermi is None:
                     bands.meta["Fermi"] = options.fermi
-                    
+                
                 data[destination] = bands
                 
         except IOError:
             
             print("Could no read file '{}'\n".format(options.file))
             raise
+            
+        if options.verbose:
+            report(bands)
 
 if not options.color is None:
     with open(options.color[0],'r') as f:
@@ -74,7 +107,7 @@ if not "density" in data:
     if options.density:
         
         if options.verbose:
-            print "Plotting density only ..."
+            print("Plotting density only ...")
             
         matplotlib_bands_density(
             data["bands"],
@@ -82,12 +115,13 @@ if not "density" in data:
             200,
             orientation = "landscape",
             energy_range = options.range,
+            method = 'optimal',
         )
         
     else:
         
         if options.verbose:
-            print "Plotting bands only ..."
+            print("Plotting bands only ...")
             
         plot = matplotlib_bands(
             data["bands"],
@@ -108,7 +142,7 @@ else:
     ax_right = pyplot.subplot(gs[1], sharey = ax_left)
 
     if options.verbose:
-        print "Plotting bands (next: density) ..."
+        print("Plotting bands (next: density) ...")
             
     matplotlib_bands(
         data["bands"],
@@ -119,7 +153,7 @@ else:
     )
     
     if options.verbose:
-        print "Plotting density ..."
+        print("Plotting density ...")
         
     matplotlib_bands_density(
         data["density"],
@@ -127,6 +161,7 @@ else:
         200,
         energy_range = ax_left.get_ylim(),
         orientation = "portrait",
+        method = 'optimal',
     )
 
     if not options.color is None:
@@ -136,4 +171,4 @@ if not options.output is None:
     pyplot.savefig(options.output[0])
 else:
     pyplot.show()
-            
+    

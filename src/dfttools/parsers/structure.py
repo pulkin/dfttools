@@ -251,7 +251,55 @@ class GaussianCube(AbstractParser):
                 c.append(ac*numericalunits.aBohr)
                 
         return UnitCell(Basis(shape), c, v, c_basis="cartesian")
+
+class XYZ(AbstractParser):
+    """
+    Class for parsing XYZ structure files.
+    
+    Args:
+    
+        data (str): string with the contents of the XYZ file.
+    """
+    
+    vacuum_size = numericalunits.nm
         
+    @staticmethod
+    def valid_filename(name):
+        return name.lower().endswith(".xyz")
+
+    @unit_cell
+    def unitCell(self):
+        """
+        Retrieves a unit cell.
+        
+        Returns:
+        
+            A unit cell with atomic positions data.
+        """
+        result = []
+        
+        self.parser.reset()
+        
+        # Number of atoms
+        n = self.parser.nextInt()
+        self.parser.nextLine(2)
+        
+        c = []
+        v = []
+        
+        for i in range(abs(n)):
+            
+            v.append(self.parser.nextMatch(cre_word))
+            c.append(self.parser.nextFloat(3)*numericalunits.angstrom)
+            
+        c = numpy.array(c)
+        mx = c.max(axis = 0)
+        mn = c.min(axis = 0)
+        shape = mx-mn+XYZ.vacuum_size
+                
+        return UnitCell(Basis(shape, kind = 'orthorombic'), c, v, c_basis="cartesian")
+
 # Lower case versions
 xsf = XSF
 cube = GaussianCube
+xyz = XYZ

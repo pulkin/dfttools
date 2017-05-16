@@ -8,7 +8,7 @@ import numpy
 import numericalunits
 
 from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, re_float, cre_int, ParseError, AbstractParser
-from .native import qe_proj_weights
+from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
 from ..types import UnitCell, Basis
 

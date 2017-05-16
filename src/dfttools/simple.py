@@ -91,7 +91,7 @@ def guess_parser(f):
     
     # Guess by contents
     f.seek(0)
-    header = f.read(10000)
+    header = f.read(1024*1024)
     for parser_class in get_all_parsers():
         try:
             if parser_class.valid_header(header):

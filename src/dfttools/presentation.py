@@ -568,8 +568,10 @@ def matplotlib_bands(
     axes,
     show_fermi = True,
     energy_range = None,
-    units = "eV",
-    units_name = None,
+    energy_units = "eV",
+    energy_units_name = None,
+    coordinate_units = None,
+    coordinate_units_name = None,
     threshold = 1e-2,
     weights = None,
     weights_color = None,
@@ -577,6 +579,7 @@ def matplotlib_bands(
     optimize_visible = False,
     edge_names = [],
     mark_points = None,
+    project = None,
     **kwargs
 ):
     """
@@ -595,11 +598,17 @@ def matplotlib_bands(
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
         
-        units (str, float): either a field from ``numericalunits``
+        energy_units (str, float): either a field from ``numericalunits``
         package or a float with energy units;
         
-        units_name (str): a string used for the units. Used only if the
-        ``units`` keyword is a float;
+        energy_units_name (str): a string used for the units. Used only if the
+        ``energy_units`` keyword is a float;
+        
+        coordinate_units (str, float): either a field from ``numericalunits``
+        package or a float with coordinate units or None;
+        
+        coordinate_units_name (str): a string used for the coordinate
+        units. Used only if the ``coordinate_units`` keyword is a float;
         
         threshold (float): threshold for determining edges of k point
         path;
@@ -618,6 +627,11 @@ def matplotlib_bands(
         mark_points (list): marks specific points on the band structure,
         the first number in each list element is interpreted as k-point
         while the second number is band number;
+        
+        project (array): projects k-points along specified direction
+        instead of unfolding the entire bands path. If ``coordinate_units``
+        specified the direction is expressed in the unit cell vectors,
+        otherwise cartesian basis is used;
         
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
@@ -641,19 +655,59 @@ def matplotlib_bands(
     if not weights is None and weights_color is None:
         weights_color = weights
     
-    if isinstance(units, str):
-        units_name = units
-        units = getattr(numericalunits, units)
+    if isinstance(energy_units, str):
+        energy_units_name = energy_units
+        energy_units = getattr(numericalunits, energy_units)
+        
+    if isinstance(coordinate_units, str):
+        coordinate_units_name = coordinate_units
+        coordinate_units = getattr(numericalunits, coordinate_units)
         
     # Set energy range
     if energy_range is None:
-        energy_range = __guess_energy_range__(cell)/units
+        energy_range = __guess_energy_range__(cell)/energy_units
         
-    # Fold K points to 0- > 1 line
-    kpoints = cell.distances((0,)+tuple(range(cell.size())))
-    for i in range(1,kpoints.shape[0]):
-        kpoints[i] += kpoints[i-1]
-    kpoints /= kpoints[-1]
+    # Fold K points to 0- > 1 line or project
+    if not project is None:
+        __ = {"kx":0, "ky":1, "kz":2}
+        if project in __.keys():
+            x_label = project
+            v = [0] * cell.vectors.shape[0]
+            v[__[project]] = 1
+            project = v
+            
+        else:
+            x_label = ("("+(",".join(("{:.2f}",)*len(project)))+") direction").format(*project)
+        
+        project = numpy.array(project, dtype = numpy.float)
+        project /= (project**2).sum()**.5
+        
+        if coordinate_units is None:
+            kpoints = numpy.dot(cell.coordinates,project)
+            
+        else:
+            kpoints = numpy.dot(cell.cartesian(),project) / coordinate_units
+        
+    else:
+        x_label = None
+        
+        kpoints = cell.distances((0,)+tuple(range(cell.size())))
+        for i in range(1,kpoints.shape[0]):
+            kpoints[i] += kpoints[i-1]
+        
+        if coordinate_units is None:
+            kpoints /= kpoints[-1]
+            
+        else:
+            kpoints /= coordinate_units
+            
+    if not coordinate_units_name is None:
+        if x_label is None:
+            x_label = "("+coordinate_units_name+")"
+            
+        else:
+            
+            x_label += " ("+coordinate_units_name+")"
     
     # Find location of edges on the K axis
     makes_turn = numpy.abs(1.+cell.angles(range(cell.size())))>threshold
@@ -661,8 +715,9 @@ def matplotlib_bands(
     edges = kpoints[makes_turn]
 
     # Plot edges
-    for e in edges[1:-1]:
-        axes.axvline(x=e,color='black',linewidth = 2)
+    if project is None:
+        for e in edges[1:-1]:
+            axes.axvline(x=e,color='black',linewidth = 0.5)
         
     # Get continious parts
     continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])
@@ -672,7 +727,7 @@ def matplotlib_bands(
     
     # Optimize visible segments
     if optimize_visible:
-        visible_point = numpy.logical_and(cell.values/units > energy_range[0], cell.values/units < energy_range[1])
+        visible_point = numpy.logical_and(cell.values/energy_units > energy_range[0], cell.values/energy_units < energy_range[1])
         visible_segment = numpy.logical_and(
             numpy.logical_or(visible_point[:-1,:],visible_point[1:,:]),
             visible_segment
@@ -681,14 +736,15 @@ def matplotlib_bands(
     # Prepare LineCollection
     segment_sets = []
     for i in range(cell.values.shape[1]):
-        points = numpy.array([kpoints, cell.values[:,i]/units]).T.reshape(-1, 1, 2)
+        points = numpy.array([kpoints, cell.values[:,i]/energy_units]).T.reshape(-1, 1, 2)
         segments = numpy.concatenate([points[:-1][visible_segment[:,i]], points[1:][visible_segment[:,i]]], axis=1)
         
         segment_sets.append(segments)
         
     segments = numpy.concatenate(segment_sets,axis = 0)
     
-    kwargs.update(next(axes._get_lines.prop_cycler))
+    if not "colors" in kwargs:
+        kwargs.update(next(axes._get_lines.prop_cycler))
         
     lc = LineCollection(segments, **kwargs)
     
@@ -707,26 +763,30 @@ def matplotlib_bands(
         mark_points = numpy.array(mark_points)
         axes.scatter(
             list(kpoints[i] for i,j in mark_points),
-            list(cell.values[i,j]/units for i,j in mark_points),
+            list(cell.values[i,j]/energy_units for i,j in mark_points),
             marker = "+",
             s = 50,
         )
     
     # Plot Fermi energy
     if show_fermi and "Fermi" in cell.meta:
-        axes.axhline(y = cell.meta["Fermi"]/units, color='black', ls = "--", lw = 0.5)
+        axes.axhline(y = cell.meta["Fermi"]/energy_units, color='black', ls = "--", lw = 0.5)
                 
     axes.set_ylim(energy_range)
-    axes.set_xlim((0,1))
     
-    axes.set_xticks(edges)
-    axes.set_xticklabels(list(
-        edge_names[i] if i<len(edge_names) else " ".join(("{:.2f}",)*cell.coordinates.shape[1]).format(*cell.coordinates[makes_turn,:][i])
-        for i in range(makes_turn.sum())
-    ))
+    axes.set_xlim((kpoints.min(),kpoints.max()))
+    if not x_label is None:
+        axes.set_xlabel(x_label)
     
-    if not units_name is None:
-        axes.set_ylabel('Energy ({})'.format(units_name))
+    if project is None:
+        axes.set_xticks(edges)
+        axes.set_xticklabels(list(
+            edge_names[i] if i<len(edge_names) else " ".join(("{:.2f}",)*cell.coordinates.shape[1]).format(*cell.coordinates[makes_turn,:][i])
+            for i in range(makes_turn.sum())
+        ))
+        
+    if not energy_units_name is None:
+        axes.set_ylabel('Energy ({})'.format(energy_units_name))
         
     else:
         axes.set_ylabel('Energy')

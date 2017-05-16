@@ -13,7 +13,7 @@ import numericalunits
 
 from .generic import parse, cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, AbstractJSONParser, ParseError
 from .structure import cube
-from .native import openmx_hks_load, openmx_hks_unload, openmx_hks_blocks, openmx_hks_basis, openmx_hks_slice_basis
+from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, parse, tag_method
 from ..types import UnitCell, Basis
 
@@ -675,34 +675,15 @@ class Bands(AbstractParser):
         self.parser.reset()
         p = self.parser
         
-        bands = p.nextInt()
-        p.nextInt()
-        p.nextFloat()
-        shape = 2*math.pi*p.nextFloat((3,3))/numericalunits.aBohr
-
-        # nk = number of K points
-        npath = p.nextInt()
-        nk = 0
-        for i in range(npath):
-            nk += p.nextInt()
-            p.nextLine()
+        p.nextLine()
+        shape = p.nextFloat((3,3))/numericalunits.aBohr
         
-        # initialize    
-        coordinates = []
-        values = []
+        data = openmx_bands_bands(self.data)
         
-        for i in range(nk):
-            
-            bands = p.nextInt()
-            coordinates.append(p.nextFloat(3))
-            p.nextLine()
-            values.append(2*numericalunits.Ry*p.nextFloat(bands))
-            p.nextLine()
-            
         return UnitCell(
             Basis(shape, meta = {"Fermi":self.fermi(), "special-points":self.captions()}),
-            coordinates,
-            values,
+            data[:,:3],
+            data[:,3:]*2*numericalunits.Ry,
         )
 
 class Transmission(AbstractParser):

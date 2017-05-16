@@ -34,7 +34,7 @@ class Test_bands0(unittest.TestCase):
             (1.011228, -0.583833, 0.000000),
             (0.000000, 1.167666, 0.000000),
             (0.000000, 0.000000, 0.033249),
-        ))*2*math.pi/numericalunits.aBohr)
+        ))/numericalunits.aBohr)
         assert b.coordinates.shape[0] == 250
         assert b.values.shape[1] == 118
         

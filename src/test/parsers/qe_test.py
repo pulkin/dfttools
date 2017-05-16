@@ -417,7 +417,7 @@ class Test_proj0(unittest.TestCase):
         assert b.shape[0] == 8
         testing.assert_array_equal(b["state"],numpy.arange(1,9))
         testing.assert_array_equal(b["atom"],(1,)*4+(2,)*4)
-        testing.assert_array_equal(b["atomName"],("Si",)*8)
+        testing.assert_array_equal(b["name"],("Si",)*8)
         testing.assert_array_equal(b["wfc"],(1,2,2,2,1,2,2,2))
         testing.assert_array_equal(b["l"],(0,1,1,1,0,1,1,1))
         testing.assert_array_equal(b["m"],(1,1,2,3,1,1,2,3))
@@ -466,7 +466,7 @@ class Test_proj1(unittest.TestCase):
         assert b.shape[0] == 42
         testing.assert_array_equal(b["state"],numpy.arange(1,43))
         testing.assert_array_equal(b["atom"],(1,)*26+(2,)*8+(3,)*8)
-        testing.assert_array_equal(b["atomName"],("Mo",)*26+("S",)*16)
+        testing.assert_array_equal(b["name"],("Mo",)*26+("S",)*16)
         testing.assert_array_equal(b["wfc"],(1,1,2,2,3,3,4,4,4,4,5,5,6,6,6,6,7,7,7,7,8,8,8,8,8,8,1,1,2,2,3,3,3,3,1,1,2,2,3,3,3,3))
         testing.assert_array_equal(b["j"],(.5,)*6+(1.5,)*4+(.5,)*2+(1.5,)*8+(2.5,)*6+(.5,)*4+(1.5,)*4+(.5,)*4+(1.5,)*4)
         testing.assert_array_equal(b["l"],(0,)*4+(1,)*12+(2,)*10+(0,)*2+(1,)*6+(0,)*2+(1,)*6)

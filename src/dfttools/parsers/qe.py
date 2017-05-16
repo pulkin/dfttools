@@ -553,7 +553,7 @@ class Proj(AbstractParser):
             dataType = numpy.dtype([
                 ('state',numpy.int64,1),
                 ('atom',numpy.int64,1),
-                ('atomName', numpy.str_, 2),
+                ('name', numpy.str_, 2),
                 ('wfc', numpy.int64, 1),
                 ('l', numpy.float64, 1),
                 ('m', numpy.float64, 1)
@@ -585,7 +585,7 @@ class Proj(AbstractParser):
             dataType = numpy.dtype([
                 ('state',numpy.int64,1),
                 ('atom',numpy.int64,1),
-                ('atomName', numpy.str_, 2),
+                ('name', numpy.str_, 2),
                 ('wfc', numpy.int64, 1),
                 ('j', numpy.float64, 1),
                 ('l', numpy.float64, 1),
@@ -896,9 +896,10 @@ class Input(AbstractParser):
         data (str): string with the contents of the input file.
     """
 
-    def __init__(self, data):
+    def __init__(self, file):
+        super(Input,self).__init__(file)
         lines = []
-        for line in data.split('\n'):
+        for line in self.data.split('\n'):
             if not line.strip().startswith('!'):
                 lines.append(line)
         self.data = "\n".join(lines)
@@ -907,7 +908,7 @@ class Input(AbstractParser):
     @staticmethod
     def valid_header(header):
         l = header.lower()
-        return "&control" in l or "&system" in l or "&electrons" in l or "&ions" in l
+        return ("&control" in l or "&system" in l or "&electrons" in l or "&ions" in l) and not "program pwscf" in l
         
     def namelists(self):
         """
@@ -996,10 +997,8 @@ class Input(AbstractParser):
         self.parser.reset()
         self.parser.skip("atomic_positions")
         units = self.parser.nextMatch(cre_word)
-        if not int(nl["system"]["nat"]) == nl["system"]["nat"]:
-			raise ValueError("The number of atoms (`nat` field in `systems` namelist) is non-integer")
         coordinates = numpy.zeros((int(nl["system"]["nat"]),3))
-        statics = numpy.ones(coordinates.shape)
+        statics = numpy.ones(coordinates.shape, dtype = numpy.float)
         values = numpy.zeros(coordinates.shape[0],"S2")
         
         for i in range(coordinates.shape[0]):
@@ -1014,13 +1013,17 @@ class Input(AbstractParser):
             self.parser.nextLine()
             
         if units == "alat":
-            return UnitCell(basis, coordinates*alat, values, c_basis = "cartesian")
+            result = UnitCell(basis, coordinates*alat, values, c_basis = "cartesian")
         elif units == "bohr":
-            return UnitCell(basis, coordinates*numericalunits.aBohr, values, c_basis = "cartesian")
+            result = UnitCell(basis, coordinates*numericalunits.aBohr, values, c_basis = "cartesian")
         elif units == "angstrom":
-            return UnitCell(basis, coordinates*numericalunits.angstrom, values, c_basis = "cartesian")
+            result = UnitCell(basis, coordinates*numericalunits.angstrom, values, c_basis = "cartesian")
         elif units == "crystal":
-            return UnitCell(basis, coordinates, values)
+            result = UnitCell(basis, coordinates, values)
+            
+        result.meta["force-factors"] = statics
+        
+        return result
 
 # Lower case versions
 bands = Bands

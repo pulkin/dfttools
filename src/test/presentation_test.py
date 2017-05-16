@@ -297,7 +297,7 @@ class BandDensityPlotTest(unittest.TestCase):
     @cleanup
     def test_plot_grid(self):
         matplotlib_bands_density(self.grid, pyplot.gca(), 100, energy_range = (-3,3), show_fermi = False)
-        matplotlib_bands_density(self.grid, pyplot.gca(), 100, energy_range = (-3,3), force_gaussian = True, show_fermi = False)
+        matplotlib_bands_density(self.grid, pyplot.gca(), 100, energy_range = (-3,3), method = 'gaussian', show_fermi = False)
         
         l = list(i for i in pyplot.gca().get_children() if isinstance(i, Line2D))
         assert len(l) == 2

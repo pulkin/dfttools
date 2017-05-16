@@ -806,7 +806,7 @@ def matplotlib_bands_density(
     use_fill = False,
     orientation = "landscape",
     gaussian_spread = None,
-    force_gaussian = False,
+    method = "default",
     **kwargs
 ):
     """
@@ -853,8 +853,8 @@ def matplotlib_bands_density(
         states. This value is used only if the provided ``cell`` is not
         a Grid;
         
-        force_gaussian (bool): use gaussians for the grids instead of a
-        faster tetrahedron method;
+        method (bool): method to calculate density: 'default', 'gaussian'
+        or 'optimal';
         
         The rest of kwargs are passed to pyplot plotting functions.
         
@@ -880,23 +880,27 @@ def matplotlib_bands_density(
         energies = numpy.array(energies, dtype = numpy.float64)
     
     if weights is None:
-        weights = numpy.ones(cell.values.shape, dtype = numpy.float64)
+        weights = 1
+        
+    if not isinstance(weights, numpy.ndarray):
+        weights = weights*numpy.ones(cell.values.shape, dtype = numpy.float64)
         
     if on_top_of is None:
         on_top_of = numpy.zeros(cell.values.shape, dtype = numpy.float64)
     
-    # Calculate DoS using tetrahedron method ...
-    if isinstance(cell, Grid) and not force_gaussian:
-        
-        grid = cell.tetrahedron_density(energies*units, resolved = True)
-        
-        data = (grid.values * weights[...,numpy.newaxis])
-        for i in range(4):
-            data = data.sum(axis = 0)
+    # Try converting to grid
+    if isinstance(cell, UnitCell) and method == 'optimal':
+        grid = cell.as_grid()
+        if grid.size() == cell.size():
+            cell = grid
+        weights = numpy.reshape(weights, grid.values.shape)
+        on_top_of = numpy.reshape(on_top_of, grid.values.shape)
             
-        data_baseline = (grid.values * on_top_of[...,numpy.newaxis])
-        for i in range(4):
-            data_baseline = data_baseline.sum(axis = 0)
+    # Calculate DoS using tetrahedron method ...
+    if isinstance(cell, Grid) and not method == 'gaussian':
+        
+        data = cell.tetrahedron_density(energies*units, resolved = False, weights = weights)
+        data_baseline = cell.tetrahedron_density(energies*units, resolved = False, weights = on_top_of)
     
     # ... or Gaussian
     else:

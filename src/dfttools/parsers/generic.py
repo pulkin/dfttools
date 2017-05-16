@@ -497,7 +497,7 @@ class StringParser(object):
         """
         result = self.nextMatch(cre_float, n = n)
         if n is None:
-            return float(result)
+            return float(result.replace('d','e').replace('D','E'))
         else:
             return result.astype(numpy.float)
             

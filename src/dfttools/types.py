@@ -1274,6 +1274,20 @@ class Grid(Basis):
         for a in self.coordinates:
             r *= a.size
         return r
+        
+    @staticmethod
+    def combine_arrays(*args):
+        """
+        Transforms input 1D arrays of coordinates into (N+1)D mesh array
+        where first N dimensions correspond to a particular grid point
+        and the last dimension specifies all coordinates of this grid point.
+        
+        Returns:
+        
+            A meshgrid array with coordinates.
+        """
+        mg = numpy.meshgrid(*args, indexing='ij')
+        return numpy.concatenate(tuple(i[...,numpy.newaxis] for i in mg), axis = len(mg))
     
     def explicit_coordinates(self):
         """
@@ -1284,8 +1298,7 @@ class Grid(Basis):
         
             An (N+1)D array with coordinates.
         """
-        mg = numpy.meshgrid(*self.coordinates, indexing='ij')
-        return numpy.concatenate(tuple(i[...,numpy.newaxis] for i in mg), axis = len(mg))
+        return Grid.combine_arrays(*self.coordinates)
         
     def cartesian(self):
         """
@@ -1670,7 +1683,8 @@ class Grid(Basis):
         if driver is None:
             from scipy import interpolate
             driver = interpolate.interpn
-            
+         
+        points = numpy.array(points)           
         normalized = self.normalized()
         
         if periodic:
@@ -1701,7 +1715,7 @@ class Grid(Basis):
         # Interpolate
         return driver(data_points, data_values, points, **kwargs)
 
-    def interpolate_to_grid(self, points, driver = None, periodic = True, **kwargs):
+    def interpolate_to_grid(self, points, **kwargs):
         """
         Interpolates values at specified points and returns a grid.
         By default uses ``scipy.interpolate.interpn``.
@@ -1710,27 +1724,15 @@ class Grid(Basis):
         
             points (array): points to interpolate at.
             
-        Kwargs:
-        
-            driver (func): interpolation driver.
-            
-            periodic (bool): employs periodicity of a unit cell.
-            
-            kwargs: keywords to the driver.
+        Kwargs are passed to ``self.interpolate_to_array``.
             
         Returns:
         
             A grid with interpolated values.
         """
-        # A dummy grid
-        result = Grid(self, points, numpy.zeros(
-            tuple(i.shape[0] for i in points) + (0,)
-        ))
+        return Grid(self, points, self.interpolate_to_array(Grid.combine_arrays(*points), **kwargs))
         
-        result.values = self.interpolate_to_array(result.explicit_coordinates(), driver = driver, periodic = periodic, **kwargs)
-        return result
-        
-    def interpolate_to_cell(self, points, driver = None, periodic = True, **kwargs):
+    def interpolate_to_cell(self, points, **kwargs):
         """
         Interpolates values at specified points and returns a unit cell.
         By default uses ``scipy.interpolate.interpn``.
@@ -1739,23 +1741,13 @@ class Grid(Basis):
         
             points (array): points to interpolate at.
             
-        Kwargs:
-        
-            driver (func): interpolation driver.
-            
-            periodic (bool): employs periodicity of a unit cell.
-            
-            kwargs: keywords to the driver.
+        Kwargs are passed to ``self.interpolate_to_array``.
             
         Returns:
         
             A unit cell interpolated values.
         """
-        # A dummy unit cell
-        result = UnitCell(Basis(self.vectors, meta = self.meta), points, points)
-        
-        result.values = self.interpolate_to_array(result.coordinates, driver = driver, periodic = periodic, **kwargs)
-        return result
+        return UnitCell(self, points, self.interpolate_to_array(points, **kwargs))
         
     def interpolate_to_path(self, points, n, anchor = True, **kwargs):
         """

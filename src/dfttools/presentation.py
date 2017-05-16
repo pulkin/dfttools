@@ -128,7 +128,7 @@ __elements_name_lookup_table__ = dict((i[0].lower(), [n]+list(i)) for n, i in en
 
 def __fadeout_z__(color, z, mx, mn, strength, bg):
     
-    alpha = min(max((mx - z)/(mx - mn)*strength,0),1)
+    alpha = min(max((z - mn)/(mx - mn)*strength,0),1)
     return (numpy.array(color, dtype = numpy.float64)*(1-alpha) + numpy.array(bg, dtype = numpy.float64)*alpha).astype(numpy.int64)
     
 def __dark__(color, delta = 0.4):
@@ -140,22 +140,53 @@ def __light__(color, delta = 0.4):
 def __svg_color__(color):
     return "rgb({:d},{:d},{:d})".format(*color)
     
+def __window__(p1,p2, window):
+    inside = lambda x,y: (x>window[0]) and (y>window[1]) and (x<window[2]) and (y<window[3])
+    
+    if not inside(*p1):
+        p1,p2 = p2,p1
+        
+    if not inside(*p1):
+        return None, None
+
+    if inside(*p2):
+        return p1,p2
+        
+    if p2[0]<window[0] or p2[0]>window[2]:
+        k = (p2[1]-p1[1])/(p2[0]-p1[0])
+        b = p2[1] - k*p2[0]
+        p2[0] = window[0] if p2[0]<window[0] else window[2]
+        p2[1] = k*p2[0] + b
+        
+    if p2[1]<window[1] or p2[1]>window[3]:
+        k = (p2[0]-p1[0])/(p2[1]-p1[1])
+        b = p2[0] - k*p2[1]
+        p2[1] = window[1] if p2[1]<window[1] else window[3]
+        p2[0] = k*p2[1] + b
+        
+    return p1,p2
+    
 def svgwrite_unit_cell(
     cell,
     svg,
-    camera = 'z',
+    camera = None,
     camera_top = None,
     insert = (0,0),
     size = (600,600),
     circle_size = 0.4,
+    circle_opacity = None,
+    margin = 6,
     show_cell = False,
     show_atoms = True,
     show_bonds = True,
     show_legend = True,
+    show_numbers = False,
     fadeout_strength = 0.8,
     bg = (0xFF,0xFF,0xFF),
     bond_ratio = 1,
     hook_atomic_color = None,
+    coordinates = 'right',
+    invisible = None,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -181,6 +212,10 @@ def svgwrite_unit_cell(
         circle_size (float): size of the circles representing atoms,
         arbitrary units;
         
+        circle_opacity (float,array): opacity of circles;
+        
+        margin (float): size of the margin in all directions;
+        
         show_cell (bool, str): if True draws the unit cell edges projected,
         if 'invisible' the unit cell is invisible;
         
@@ -189,6 +224,9 @@ def svgwrite_unit_cell(
         show_bonds (bool): if True draws bonds;
         
         show_legend (bool): if True draws legend;
+        
+        show_numbers (bool): if True shows numbers corresponding to the
+        atomic order in the unit cell;
     
         fadeout_strength (float): amount of fadeout applied to more distant atoms;
         
@@ -197,9 +235,16 @@ def svgwrite_unit_cell(
         bond_ratio (float): scale factor to determine whether the bond
         is rendered;
         
-        hook_atomic_color (float): a function accepting integer (atom
+        coordinates (str): the coordinate system, either 'left' or 'right';
+        
+        hook_atomic_color (function): a function accepting integer (atom
         ID) and a 3-element list (suggested RGB color) and returning a
-        new color of the atom
+        new color of the atom;
+        
+        invisible (str,array): make specified atoms invisible. If 'auto'
+        specified, creates a supercell and makes all cell replica
+        invisible. The bonds of invisible atoms will still be present on
+        the final image;
         
     Returns:
     
@@ -207,17 +252,34 @@ def svgwrite_unit_cell(
         created inside this method.
     """
     
+    if invisible is None:
+        visible = numpy.ones(cell.size(), dtype = bool)
+    
+    elif isinstance(invisible,str) and invisible == 'auto':
+        N = cell.size()
+        initial_cell = cell
+        cell = cell.repeated(3,3,3)
+        visible = numpy.array([False]*13*N+[True]*N+[False]*13*N, dtype = bool)
+        
+    else:
+        visible = numpy.logical_not(invisible)
+    
     insert = numpy.array(insert, dtype = numpy.float64)
     size = numpy.array(size, dtype = numpy.float64)
     
     if isinstance(svg, str):
         import svgwrite
         save = True
-        svg = svgwrite.Drawing(svg, size = size.tolist(), profile='tiny')
+        svg = svgwrite.Drawing(svg, size = (size).tolist(), profile='tiny')
     else:
         save = False
 
     # Camera vector
+    if camera is None:
+        # Determine the largest face
+        areas = list((numpy.cross(cell.vectors[(i+1)%3],cell.vectors[(i+2)%3])**2).sum() for i in range(3))
+        camera = "xyz"[numpy.argmax(areas)]
+    
     try:
         camera = {
             "x": (1,0,0),
@@ -227,27 +289,29 @@ def svgwrite_unit_cell(
     except KeyError:
         pass     
     camera = numpy.array(camera, dtype = numpy.float64)
+    camera = camera / (camera**2).sum()**.5
     
     # Camera top vector
     if camera_top is None:
-        camera_top = numpy.array((0,0,1))
-        if numpy.linalg.norm(numpy.cross(camera_top,camera)) == 0:
-            camera_top = numpy.array((0,1,0))
+        # Determine lattice vector with the longest projection
+        proj = ((cell.vectors - numpy.dot(cell.vectors, camera)[:,numpy.newaxis] * camera[numpy.newaxis,:])**2).sum(axis = -1)
+        camera_top = numpy.cross(camera,cell.vectors[numpy.argmax(proj)])
+        
     else:
         camera_top = numpy.array(camera_top, dtype = numpy.float64)
         if numpy.linalg.norm(numpy.cross(camera_top,camera)) == 0:
             raise ValueError("The 'camera' and 'camera_top' vectors cannot be collinear")
     
     # Calculate projection matrix
-    projection = numpy.zeros((3,3), dtype = numpy.float64)
-    projection[:,2] = camera
-    projection[:,0] = numpy.cross(camera_top, projection[:,2])
-    projection[:,1] = numpy.cross(projection[:,2], projection[:,0])
-    
-    projection /= ((projection**2).sum(axis = 1)**.5)[:,numpy.newaxis]
+    camera_top /= (camera_top**2).sum()**.5
+    projection = Basis((
+        numpy.cross(camera, camera_top),
+        camera_top,
+        camera,
+    ))
     
     # Project atomic coordinates onto the plane    
-    projected = numpy.tensordot(cell.cartesian(),projection,axes = ((1,),(0,)))
+    projected = projection.transform_from(cell, cell.coordinates)
     
     # Collect elements
     elements = tuple(__elements_name_lookup_table__[i.lower()] if i.lower() in __elements_name_lookup_table__ else (-1,) + __unknown_element__ for i in cell.values)
@@ -256,21 +320,24 @@ def svgwrite_unit_cell(
     e_covsize = numpy.array(tuple(i[4] for i in elements))*numericalunits.angstrom
     
     # Determine boundaries
-    b_min = numpy.min(projected - e_size[...,numpy.newaxis]*circle_size, axis = 0)
-    b_max = numpy.max(projected + e_size[...,numpy.newaxis]*circle_size, axis = 0)
+    b_min = numpy.min((projected - e_size[...,numpy.newaxis]*circle_size)[visible,:], axis = 0)
+    b_max = numpy.max((projected + e_size[...,numpy.newaxis]*circle_size)[visible,:], axis = 0)
     
     if show_cell:
         
-        # Project unit cell edges and 
-        projected_edges = numpy.tensordot(cell.edges(),projection,axes = ((2,),(0,)))
+        # Project unit cell edges ...
+        if isinstance(invisible,str) and invisible == 'auto':
+            projected_edges = projection.transform_from_cartesian(initial_cell.edges()+initial_cell.vectors.sum(axis = 0)[numpy.newaxis,:])
+        else:
+            projected_edges = projection.transform_from_cartesian(cell.edges())
         
-        # Modify boundaries
+        # ... and modify boundaries
         b_min = numpy.minimum(b_min, projected_edges.reshape(-1, projected_edges.shape[-1]).min(axis = 0))
         b_max = numpy.maximum(b_max, projected_edges.reshape(-1, projected_edges.shape[-1]).max(axis = 0))
     
     center = 0.5*(b_min + b_max)[:2]
-    scale = (size/(b_max[:2]-b_min[:2])).min()
-    shift = insert + 0.5*size - center*scale
+    scale = ((size-2*margin)/(b_max[:2]-b_min[:2])).min()
+    shift = 0.5*(size-2*margin) - center*scale
     
     # Calculate base colors
     colors_base = tuple(__fadeout_z__(e_color[i], projected[i,2], b_max[2], b_min[2], fadeout_strength, bg) for i in range(cell.size()))
@@ -280,6 +347,33 @@ def svgwrite_unit_cell(
     # Arrays for storing objects with z-index
     obj = []
     obj_z = []
+    
+    # Group holding the image
+    group = svg.g()
+    group.translate(*tuple(insert))
+    svg.add(group)
+    
+    # BG
+    if not bg is None:
+        group.add(svg.rect(
+            insert = (0,0),
+            size = size,
+            fill = __svg_color__(bg),
+        ))
+    
+    # Subgroup with atoms etc
+    subgroup = svg.g()
+    group.add(subgroup)
+    
+    if coordinates == 'left':
+        subgroup.translate(margin,margin)
+        
+    elif coordinates == 'right':
+        subgroup.scale(1.0,-1.0)
+        subgroup.translate(margin,-size[1]+margin)
+            
+    else:
+        raise ValueError("Parameter 'coordinates' should be either 'left' or 'right'")
     
     if show_cell == True:
         
@@ -299,17 +393,44 @@ def svgwrite_unit_cell(
         # Draw circles
         for i in range(cell.size()):
             
-            radius = e_size[i]*scale*circle_size
-            
-            obj.append(svg.circle(
-                center = projected[i,:2]*scale+shift,
-                r = radius,
-                fill = __svg_color__(colors_base[i]),
-                stroke = __svg_color__(__dark__(colors_base[i])),
-                stroke_width = 0.1*radius,
-            ))
-            
-            obj_z.append(projected[i,2])
+            if visible[i]:
+                
+                radius = e_size[i]*scale*circle_size
+                
+                g = svg.g()
+                g.translate(*tuple(projected[i,:2]*scale+shift))
+                if coordinates == 'right':
+                    g.scale(1.0,-1.0)
+                    
+                circle = svg.circle(
+                    center = (0,0),
+                    r = radius,
+                    fill = __svg_color__(colors_base[i]),
+                    stroke = __svg_color__(__dark__(colors_base[i])),
+                    stroke_width = 0.1*radius,
+                )
+                
+                if not circle_opacity is None:
+                    if isinstance(circle_opacity, (int, float)):
+                        circle.fill(opacity = circle_opacity)
+                        circle.stroke(opacity = circle_opacity)
+                    else:
+                        circle.fill(opacity = circle_opacity[i])
+                        circle.stroke(opacity = circle_opacity[i])
+                
+                g.add(circle)
+                
+                if show_numbers:
+                    
+                    g.add(svg.text(str(i),
+                        insert = (0,radius/4),
+                        fill = __svg_color__(__dark__(colors_base[i])),
+                        text_anchor = "middle",
+                        font_size = radius,
+                    ))
+                
+                obj.append(g)
+                obj_z.append(projected[i,2])
         
     d = cell.distances()
     
@@ -318,7 +439,7 @@ def svgwrite_unit_cell(
         # Draw lines
         for i in range(d.shape[0]):
             for j in range(i,d.shape[1]):
-                if (d[i,j]<(e_covsize[i]+e_covsize[j])*bond_ratio) and (d[i,j]>(e_size[i]+e_size[j])*circle_size):
+                if (visible[i] or visible[j]) and (d[i,j]<(e_covsize[i]+e_covsize[j])*bond_ratio) and (d[i,j]>(e_size[i]+e_size[j])*circle_size):
                     
                     unit = projected[j] - projected[i]
                     unit = unit / ((unit**2).sum())**0.5
@@ -330,25 +451,23 @@ def svgwrite_unit_cell(
                     else:
                         start = projected[i,:2]*scale + shift
                         end = projected[j,:2]*scale + shift
+                        
+                    start,end = __window__(start,end,(0,0,size[0]-2*margin,size[1]-2*margin))
                     
-                    obj.append(svg.line(
-                        start = start,
-                        end = end,
-                        stroke = __svg_color__(__dark__((colors_base[i] + colors_base[j])/2)),
-                        stroke_width = scale*(e_size[i]+e_size[j])*circle_size/5,
-                    ))
-                    
-                    obj_z.append((projected[j,2] + projected[i,2])/2)
-                
-    svg.add(svg.rect(
-        insert = insert,
-        size = size,
-        fill = __svg_color__(bg),
-    ))
+                    if not start is None:
+                        
+                        obj.append(svg.line(
+                            start = start,
+                            end = end,
+                            stroke = __svg_color__(__dark__((colors_base[i] + colors_base[j])/2)),
+                            stroke_width = scale*(e_size[i]+e_size[j])*circle_size/5,
+                        ))
+                        
+                        obj_z.append((projected[j,2] + projected[i,2])/2)
     
     order = numpy.argsort(obj_z)
-    for i in range(order.shape[0]):
-        svg.add(obj[order[i]])
+    for i in order[::-1]:
+        subgroup.add(obj[i])
         
     if show_legend:
         
@@ -364,8 +483,8 @@ def svgwrite_unit_cell(
         __i_size__ = 10
         __i_x__ = 7
         __i_y__ = 10
-        x = insert[0] + size[0] - (__legend_margin__ + __box_size__)*len(unique)
-        y = insert[1] + __legend_margin__
+        x = size[0] - (__legend_margin__ + __box_size__)*len(unique)
+        y = __legend_margin__
         
         for i, e in enumerate(sorted(unique)):
             
@@ -374,7 +493,7 @@ def svgwrite_unit_cell(
             
             color_1 = __dark__(e[2], delta = 0.8) if sum(e[2])>0x180 else __light__(e[2], delta = 0.8)
                 
-            svg.add(svg.rect(
+            group.add(svg.rect(
                 insert = (xx,yy),
                 size = (__box_size__, __box_size__),
                 fill = __svg_color__(e[2]),
@@ -384,14 +503,14 @@ def svgwrite_unit_cell(
                 ry = 2,
             ))
             
-            svg.add(svg.text(str(e[0]+1),
+            group.add(svg.text(str(e[0]+1),
                 insert = (xx + __i_x__,yy + __i_y__),
                 fill = __svg_color__(color_1),
                 text_anchor = "middle",
                 font_size = __i_size__,
             ))
 
-            svg.add(svg.text(e[1],
+            group.add(svg.text(e[1],
                 insert = (xx + __box_size__/2,yy + __box_size__ - __text_baseline__),
                 fill = __svg_color__(color_1),
                 text_anchor = "middle",

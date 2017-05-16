@@ -56,7 +56,7 @@ class BandPlotTest(unittest.TestCase):
     
     def _test_plot(self, units):
             
-        rlc = matplotlib_bands(self.bands, pyplot.gca(), units = units)
+        rlc = matplotlib_bands(self.bands, pyplot.gca(), energy_units = units)
         
         axes = pyplot.gcf().axes
         assert len(axes) == 1
@@ -83,12 +83,12 @@ class BandPlotTest(unittest.TestCase):
         
     @cleanup
     def test_custom_units(self):
-        matplotlib_bands(self.bands, pyplot.gca(), units = 2*Ry, units_name = "Hartree")
+        matplotlib_bands(self.bands, pyplot.gca(), energy_units = 2*Ry, energy_units_name = "Hartree")
         assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(Hartree)")
         
     @cleanup
     def test_unknown_units(self):
-        matplotlib_bands(self.bands, pyplot.gca(), units = 2*Ry)
+        matplotlib_bands(self.bands, pyplot.gca(), energy_units = 2*Ry)
         assert pyplot.gca().get_yaxis().get_label().get_text() == 'Energy'
     
     @cleanup
@@ -257,15 +257,15 @@ class BandDensityPlotTest(unittest.TestCase):
     def test_units(self):
         matplotlib_bands_density(self.cell, pyplot.gca(), 100, units = "eV")
         
-        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("eV")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("eV")
+        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(eV)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(bands per eV)")
         
     @cleanup
     def test_custom_units(self):
         matplotlib_bands_density(self.cell, pyplot.gca(), 100, units = 2*Ry, units_name = "Hartree")
         
-        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("Hartree")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("Hartree")
+        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(Hartree)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(bands per Hartree)")
 
     @cleanup
     def test_unknown_units_landscape(self):

@@ -71,3 +71,21 @@ class Test_methods(unittest.TestCase):
         
         for i,j in zip(c1,c2):
             assert i==j
+
+class TestNameGuess(unittest.TestCase):
+    
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/openmx.bands.0.testcase")
+    
+    def setUp(self):
+        with open(self.path,'r') as f:
+            with open(self.path+'.Band','w') as f2:
+                f2.write(f.read())
+                
+    def tearDown(self):
+        os.remove(self.path+'.Band')
+        
+    def test_guess_by_name(self):
+        with open(self.path+'.Band','r') as f:
+            parsers = guess_parser(f)
+            assert len(parsers) == 1
+            assert parsers[0] == openmx.Bands

@@ -1,0 +1,54 @@
+#!/usr/bin/env python
+import argparse
+
+parser = argparse.ArgumentParser(description = "Prints atomic structure into SVG image file")
+parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose output")
+parser.add_argument("-c", "--unitcell", action = "store_true", help = "Plot unit cell")
+parser.add_argument("-p", "--projection", help = "Projection to plot: x,y or z")
+parser.add_argument("-s", "--size", help = "Size of the image in px, example: 600x600")
+parser.add_argument("file", help = "file with the atomic structure", metavar = "FILENAME")
+parser.add_argument("output", help = "SVG file name for output", metavar = "FILENAME")
+
+options = parser.parse_args()
+
+from dfttools.parsers.generic import ParseError
+from dfttools.simple import parse
+from dfttools.presentation import svgwrite_unit_cell
+
+from numericalunits import angstrom
+
+try:
+    
+    if options.verbose:
+        print("Parsing {} ...".format(options.file))
+    
+    with open(options.file,'r') as f:
+        structure = parse(f, 'unit-cell')
+        
+    if isinstance(structure, list):
+        structure = structure[-1]
+    
+except ParseError:
+    print("Could not parse file '{}'\n".format(options.file))
+    raise
+    
+except IOError:
+    print("Problem with opening file '{}' for reading\n".format(options.file))
+    raise
+    
+if options.verbose:
+    d = structure.repeated(2,2,2).distances()
+    d = d[d>0]
+    print("Minimum interatomic distance: {:.2f}A".format(d.min()/angstrom))
+
+kwargs = dict(
+    show_cell = options.unitcell,
+    camera = options.projection,
+    invisible = 'auto',
+)
+
+if not options.size is None:
+    kwargs["size"] = tuple(int(i) for i in options.size.split("x"))
+    
+svgwrite_unit_cell(structure, options.output, **kwargs)
+    

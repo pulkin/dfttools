@@ -1,0 +1,5 @@
+scipy
+numericalunits
+matplotlib
+svgwrite
+src/

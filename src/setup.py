@@ -41,7 +41,7 @@ setup(
     cmdclass = cmdclass,
     ext_modules=ext_modules,
     install_requires=[
-        'numpy',
+        'scipy',
         'numericalunits',
         'matplotlib',
         'svgwrite',

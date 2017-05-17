@@ -43,9 +43,12 @@ setup(
     install_requires=[
         'numpy',
         'numericalunits',
+        'matplotlib',
+        'svgwrite',
     ],
     scripts=[
         'scripts/dft-plot-bands',
+        'scripts/dft-svg-structure',
     ],
 )
 

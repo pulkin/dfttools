@@ -403,7 +403,7 @@ class Output(AbstractParser):
         
         Kwargs:
         
-            index (int or None): index of a band structure or ``None''
+            index (int or None): index of a band structure or ``None``
             if all band structures need to be parsed. Supports negative
             indexing.
         

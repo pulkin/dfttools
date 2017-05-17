@@ -1,6 +1,6 @@
 """
 This submodule contains key types for handling coordinate-dependent data:
-``UnitCell`` and ``Grid`` as well as ``Basis``.
+``UnitCell``, ``Grid`` and ``Basis``.
 """
 import itertools
 from functools import wraps
@@ -1669,11 +1669,11 @@ class Grid(Basis):
             
         Kwargs:
         
-            driver (func): interpolation driver.
+            driver (func): interpolation driver;
             
-            periodic (bool): employs periodicity of a unit cell.
+            periodic (bool): employs periodicity of a unit cell;
             
-            **kwargs: keywords to the driver.
+            The rest of keyword arguments are passed to the driver.
             
         Returns:
         

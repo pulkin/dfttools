@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'DFT Tools'
-copyright = u'2015, Artem Pulkin'
+copyright = u'2017, Artem Pulkin'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

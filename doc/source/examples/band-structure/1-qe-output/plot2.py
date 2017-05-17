@@ -6,7 +6,7 @@ from matplotlib import pyplot
 with open("plot.py.data",'r') as f:
 
     # Read bands data
-    bands = parse(f, "band-structure")[0]
+    bands = parse(f, "band-structure")
 
     # Prepare axes
     ax_left  = pyplot.subplot2grid((1,3), (0, 0), colspan=2)

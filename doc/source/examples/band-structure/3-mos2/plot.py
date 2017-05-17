@@ -6,7 +6,7 @@ from matplotlib import pyplot
 with open("plot.py.data",'r') as f:
     
     # Retrieve the last band structure from the file
-    bands = parse(f, "band-structure")[-1]
+    bands = parse(f, "band-structure")
     
     # Convert to a grid
     grid = bands.as_grid()

@@ -1177,6 +1177,39 @@ class GridTest(unittest.TestCase):
         )
         interpolated = grid.interpolate_to_array(((.25,0,0),(.75,0,0)), periodic = True)
         testing.assert_equal(interpolated, (.25,.25))
+            
+    def test_interpolate_path_2D(self):
+        x = numpy.linspace(0,1,10, endpoint = False)
+        y = numpy.linspace(0,1,10, endpoint = False)
+        xx,yy = numpy.meshgrid(x,y,indexing='ij')
+        data = (xx-.5)**2+(yy-.5)**2
+        grid = Grid(
+            Basis((1,1), kind = 'orthorombic'),
+            (x, y),
+            data,
+        )
+        path = numpy.array((
+            (0,0),
+            (0,1),
+            (1,0),
+        ))
+        cell = grid.interpolate_to_path(path,100)
+        # Check values
+        testing.assert_allclose(cell.values, ((cell.coordinates-.5)**2).sum(axis = -1), atol = 1e-2)
+        
+        # Check if all coordinates are on the path
+        A = path[numpy.newaxis,:-1,:]
+        B = path[numpy.newaxis, 1:,:]
+        C = cell.coordinates[:,numpy.newaxis,:]
+        Ax,Ay,Bx,By,Cx,Cy = A[...,0], A[...,1], B[...,0], B[...,1], C[...,0], C[...,1]
+        area = Ax*(By-Cy) + Bx*(Cy-Ay) + Cx*(Ay-By)
+        testing.assert_equal(numpy.any(area<1e-14, axis = 1), True)
+        
+        # Check if sum of spacings is equal to total path length
+        assert abs(cell.distances(numpy.arange(cell.size())).sum()-1-2.**.5) < 1e-14
+        
+        # Check if spacings are uniform
+        testing.assert_allclose(cell.distances(numpy.arange(cell.size())), (1+2.**.5) / (cell.size() - 1), rtol = 2./cell.size())
 
 class TetrahedronDensityTest(unittest.TestCase):
     

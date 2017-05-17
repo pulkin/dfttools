@@ -261,12 +261,19 @@ class BandDensityPlotTest(unittest.TestCase):
         assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(bands per eV)")
         
     @cleanup
-    def test_custom_units(self):
-        matplotlib_bands_density(self.cell, pyplot.gca(), 100, units = 2*Ry, units_name = "Hartree")
+    def test_custom_units_landscape(self):
+        matplotlib_bands_density(self.cell, pyplot.gca(), 100, units = 2*Ry, units_name = "Hartree", orientation = 'landscape')
         
         assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(Hartree)")
         assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(bands per Hartree)")
 
+    @cleanup
+    def test_custom_units_portrait(self):
+        matplotlib_bands_density(self.cell, pyplot.gca(), 100, units = 2*Ry, units_name = "Hartree", orientation = 'portrait')
+        
+        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(bands per Hartree)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(Hartree)")
+        
     @cleanup
     def test_unknown_units_landscape(self):
         matplotlib_bands_density(self.grid, pyplot.gca(), 100, units = 2*Ry, orientation = 'landscape')

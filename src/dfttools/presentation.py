@@ -1074,8 +1074,8 @@ def matplotlib_scalar(
         ppu /= units
 
     # In-plane grid size: px, py
-    px = round((mx[0]-mn[0])*ppu)
-    py = round((mx[1]-mn[1])*ppu)
+    px = int(round((mx[0]-mn[0])*ppu))
+    py = int(round((mx[1]-mn[1])*ppu))
     if px*py == 0:
         raise ValueError("The data is too sparse: the suggested ppu is {:e} points per {:s} while grid dimensions are {:e} and {:e} {:s}. Please set the ppu parameter manually".format(
             ppu * units,

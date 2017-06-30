@@ -501,6 +501,21 @@ class Basis(object):
             
         return numpy.array(path)
 
+def diamond_basis(a):
+    """
+    Creates a diamond basis with a given lattice constant.
+    
+    Args:
+    
+        a (float): the lattice constant;
+        
+    Returns:
+    
+        A diamond Basis.
+    """
+    a = 0.5*a
+    return Basis([[a,a,0],[a,0,a],[0,a,a]])
+    
 class UnitCell(Basis):
     """
     A class describing a crystal unit cell in a periodic environment.

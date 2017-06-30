@@ -241,6 +241,12 @@ class BasisTest(unittest.TestCase):
             (-s2,s2,0),
             (0,0,1),
         ))
+        
+class BasisMacroTests(unittest.TestCase):
+    
+    def test_diamond(self):
+        a = diamond_basis(3.14)
+        testing.assert_allclose(a.volume(), 3.14**3/4)
 
 class CellInitializationTest(unittest.TestCase):
     

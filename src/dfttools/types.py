@@ -481,7 +481,7 @@ class Basis(object):
         
         if anchor:
             
-            lengths_n = numpy.round(lengths * n / lengths_cs[-1])
+            lengths_n = numpy.round(lengths * n / lengths_cs[-1]).astype(numpy.int)
             path = []
             
             for i in range(lengths_n.size):

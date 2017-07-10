@@ -3,7 +3,7 @@ import os
 import unittest
 
 from dfttools.simple import get_all_parsers, guess_parser, parse
-from dfttools.parsers.generic import AbstractParser
+from dfttools.parsers.generic import AbstractParser, ParseError
 from dfttools.parsers import qe, openmx, elk, structure
 
 class Test_methods(unittest.TestCase):
@@ -89,3 +89,31 @@ class TestNameGuess(unittest.TestCase):
             parsers = guess_parser(f)
             assert len(parsers) == 1
             assert parsers[0] == openmx.Bands
+
+class TestParserFailures(unittest.TestCase):
+    
+    file_no_band_structure = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/elk.input.1.testcase")
+    __file_truncated_structure__ = os.path.join(os.path.dirname(os.path.realpath(__file__)),"parsers/cases/structure.xsf.0.testcase")
+    file_truncated_structure = __file_truncated_structure__+"_TEMP"
+    
+    def setUp(self):
+        with open(self.__file_truncated_structure__,'r') as f:
+            with open(self.file_truncated_structure,'w') as f2:
+                f2.write(f.read(128))
+        
+    def tearDown(self):
+        os.remove(self.file_truncated_structure)
+            
+    def test_parse_failed_0(self):
+        with open(self.file_no_band_structure,'r') as f:
+            with self.assertRaises(ParseError):
+                parse(f,'band-structure')
+            with self.assertRaises(ParseError):
+                parse(f,'some-non-existing-data')
+                
+    def test_parse_failed_1(self):
+        with open(self.__file_truncated_structure__,'r') as f:
+            parse(f,'unit-cell')
+        with open(self.file_truncated_structure,'r') as f:
+            with self.assertRaises(ParseError):
+                parse(f,'unit-cell')

@@ -1,5 +1,6 @@
 from setuptools import setup
 from setuptools.extension import Extension
+from setuptools.command.build_ext import build_ext as _build_ext
 
 try:
     from Cython.Distutils import build_ext
@@ -8,7 +9,15 @@ except ImportError:
 else:
     use_cython = True
 
-cmdclass = { }
+class build_ext(_build_ext):
+    def finalize_options(self):
+        _build_ext.finalize_options(self)
+        # Prevent numpy from thinking it is still in its setup process:
+        __builtins__.__NUMPY_SETUP__ = False
+        import numpy
+        self.include_dirs.append(numpy.get_include())
+
+cmdclass = {"build_ext":build_ext}
 ext_modules = [ ]
 
 if use_cython:
@@ -40,6 +49,9 @@ setup(
     long_description=open('README.md').read(),
     cmdclass = cmdclass,
     ext_modules=ext_modules,
+    setup_requires=[
+        'numpy',
+    ],
     install_requires=[
         'scipy',
         'numericalunits',

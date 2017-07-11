@@ -514,7 +514,7 @@ def diamond_basis(a):
         A diamond Basis.
     """
     a = 0.5*a
-    return Basis([[a,a,0],[a,0,a],[0,a,a]])
+    return Basis([[0,a,a],[a,0,a],[a,a,0]])
     
 class UnitCell(Basis):
     """

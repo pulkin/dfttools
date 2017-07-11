@@ -375,3 +375,39 @@ RightLeadAtoms.SpeciesAndCoordinates>
 """
 
     return result
+
+def pyscf_cell(cell, **kwargs):
+    """
+    Constructs a unit cell object in pyscf.
+    
+    Args:
+    
+        cell (UnitCell): a unit cell object to convert from;
+        
+    Kwargs are passed to pyscf.pbc.gto.M.
+    
+    Returns:
+    
+        A Pyscf Cell object.
+    """
+    from pyscf.pbc.gto import Cell
+
+    if not "unit" in kwargs:
+        kwargs["unit"] = "Angstrom"
+
+    if kwargs["unit"] == "Angstrom":
+        geometry = zip(cell.values, cell.cartesian() / angstrom)
+        vectors = cell.vectors / angstrom
+
+    elif kwargs["unit"] == "Bohr":
+        geometry = zip(cell.values, cell.cartesian() / aBohr)
+        vectors = cell.vectors / aBohr
+
+    kwargs['atom'] = geometry
+    kwargs['a'] = vectors
+    kwargs['dimension'] = 3
+    c = Cell()
+    for k,v in kwargs.items():
+        setattr(c,k,v)
+    c.build()
+    return c

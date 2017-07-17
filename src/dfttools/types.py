@@ -145,7 +145,8 @@ class Basis(object):
         return result
         
     def __setstate__(self,data):
-        self.__init__(
+        Basis.__init__(
+            self,
             data["vectors"],
             meta = data["meta"],
         )
@@ -578,7 +579,7 @@ class UnitCell(Basis):
         if coordinates are passed in the cartesian basis.
     """
 
-    def __init__(self, basis, coordinates, values, c_basis = None):
+    def __init__(self, basis, coordinates, values, c_basis = None, units = None):
         
         Basis.__init__(self, basis.vectors, meta = basis.meta)
         
@@ -623,18 +624,18 @@ class UnitCell(Basis):
             
         else:
             self.coordinates = self.transform_from(c_basis, self.coordinates)
+            
+        if not units is None:
+            self.meta["units"] = units
         
     def __getstate__(self):
-        return {
-            "vectors":self.vectors,
-            "coordinates":self.coordinates,
-            "values":self.values,
-            "meta":self.meta,
-        }
+        result = super(UnitCell,self).__getstate__()
+        result["coordinates"] = self.coordinates.tolist()
+        result["values"] = self.values.tolist()
+        return result
         
     def __setstate__(self,data):
-        self.vectors = data["vectors"]
-        self.meta = data["meta"]
+        super(UnitCell,self).__setstate__(data)
         self.coordinates = data["coordinates"]
         self.values = data["values"]
     

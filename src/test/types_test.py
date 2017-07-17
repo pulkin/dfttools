@@ -1216,6 +1216,20 @@ class GridTest(unittest.TestCase):
         
         # Check if spacings are uniform
         testing.assert_allclose(cell.distances(numpy.arange(cell.size())), (1+2.**.5) / (cell.size() - 1), rtol = 2./cell.size())
+        
+    def test_uniform(self):
+        c = Grid.uniform((1,2,3))
+        testing.assert_equal(c,[[
+            [
+                (0,0,0),
+                (0,0,1./3),
+                (0,0,2./3),
+            ],[
+                (0,.5,0),
+                (0,.5,1./3),
+                (0,.5,2./3),
+            ],
+        ]])
 
 class TetrahedronDensityTest(unittest.TestCase):
     

@@ -1289,21 +1289,48 @@ class Grid(Basis):
         for a in self.coordinates:
             r *= a.size
         return r
-        
+    
     @staticmethod
-    def combine_arrays(*args):
+    def combine_arrays(arrays):
         """
         Transforms input 1D arrays of coordinates into (N+1)D mesh array
         where first N dimensions correspond to a particular grid point
         and the last dimension specifies all coordinates of this grid point.
         
+        Args:
+        
+            arrays (list): a list of 1D arrays;
+            
         Returns:
         
             A meshgrid array with coordinates.
         """
-        mg = numpy.meshgrid(*args, indexing='ij')
+        mg = numpy.meshgrid(*arrays, indexing='ij')
         return numpy.concatenate(tuple(i[...,numpy.newaxis] for i in mg), axis = len(mg))
     
+    @staticmethod
+    def uniform(size, endpoint = False):
+        """
+        Transform positive integers `size` into a meshgrid array
+        representing a grid where grid points span uniformly zero to one
+        intervals.
+        
+        Args:
+        
+            size (array): an array with positive integers;
+            
+        Kwargs:
+        
+            endpoint (bool): indicates whether to include x=1 into grids.
+            
+        Returns:
+        
+            A meshgrid array with coordinates.
+        """
+        return Grid.combine_arrays(tuple(
+            numpy.linspace(0,1,i,endpoint = endpoint) for i in size
+        ))
+        
     def explicit_coordinates(self):
         """
         Creates an (N+1)D array with explicit coordinates at each grid
@@ -1313,7 +1340,7 @@ class Grid(Basis):
         
             An (N+1)D array with coordinates.
         """
-        return Grid.combine_arrays(*self.coordinates)
+        return Grid.combine_arrays(self.coordinates)
         
     def cartesian(self):
         """
@@ -1745,7 +1772,7 @@ class Grid(Basis):
         
             A grid with interpolated values.
         """
-        return Grid(self, points, self.interpolate_to_array(Grid.combine_arrays(*points), **kwargs))
+        return Grid(self, points, self.interpolate_to_array(Grid.combine_arrays(points), **kwargs))
         
     def interpolate_to_cell(self, points, **kwargs):
         """

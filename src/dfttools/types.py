@@ -172,7 +172,7 @@ class Basis(object):
             A JSON-compatible dict.
         """
         result = self.__getstate__()
-        result["type"] = "dfttools.Basis"
+        result["type"] = "dfttools."+self.__class__.__name__
         return result
         
     @staticmethod
@@ -638,6 +638,25 @@ class UnitCell(Basis):
         super(UnitCell,self).__setstate__(data)
         self.coordinates = data["coordinates"]
         self.values = data["values"]
+        
+    @staticmethod
+    def from_json(j):
+        """
+        Restores a UnitCell from JSON data.
+        
+        Args:
+        
+            j (dict): JSON data.
+            
+        Returns:
+        
+            A UnitCell object.
+        """
+        if not "type" in j or not j["type"] == "dfttools.UnitCell":
+            raise ValueError("This is not a valid UnitCell JSON representation.")
+        result = UnitCell(Basis(j["vectors"], meta = j["meta"]), j["coordinates"], j["values"])
+        result.__setstate__(j)
+        return result
     
     def __eq__(self, another):
         return Basis.__eq__(self,another) and numpy.all(self.coordinates == another.coordinates) and numpy.all(self.values == another.values)

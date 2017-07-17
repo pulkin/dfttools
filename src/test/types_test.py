@@ -727,7 +727,9 @@ class CellTest(unittest.TestCase):
         a = self.a*numericalunits.angstrom
         h = self.h*numericalunits.angstrom
         cell2 = CellTest.__co__(a,h,units = 'angstrom')
-        assert x == cell2
+        testing.assert_allclose(x.vectors,cell2.vectors,atol = 1e-8*numericalunits.angstrom)
+        testing.assert_equal(x.coordinates,cell2.coordinates)
+        testing.assert_equal(x.values,cell2.values)        
         
     def test_save_load_json(self):
         import json
@@ -746,7 +748,9 @@ class CellTest(unittest.TestCase):
         a = self.a*numericalunits.angstrom
         h = self.h*numericalunits.angstrom
         cell2 = CellTest.__co__(a,h,units = 'angstrom')
-        assert x == cell2
+        testing.assert_allclose(x.vectors,cell2.vectors,atol = 1e-8*numericalunits.angstrom)
+        testing.assert_equal(x.coordinates,cell2.coordinates)
+        testing.assert_equal(x.values,cell2.values)        
 
 class FCCCellTest(unittest.TestCase):
     

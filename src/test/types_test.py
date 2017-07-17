@@ -215,7 +215,7 @@ class BasisTest(unittest.TestCase):
     def test_save_load(self):
         import numericalunits
         import pickle
-        x = Basis(
+        x = old = Basis(
             (numericalunits.angstrom,)*3,
             kind = 'orthorombic',
             units = 'angstrom',
@@ -224,10 +224,11 @@ class BasisTest(unittest.TestCase):
         numericalunits.reset_units()
         x = pickle.loads(data)
         testing.assert_allclose(x.vectors, numpy.eye(3)*numericalunits.angstrom)
+        assert x == old
         
     def test_save_load_json(self):
         import json
-        x = Basis(
+        x = old = Basis(
             (numericalunits.angstrom,)*3,
             kind = 'orthorombic',
             units = 'angstrom',
@@ -236,6 +237,7 @@ class BasisTest(unittest.TestCase):
         numericalunits.reset_units()
         x = Basis.from_json(json.loads(data))
         testing.assert_allclose(x.vectors, numpy.eye(3)*numericalunits.angstrom)
+        assert x == old
     
     def test_rotated(self):
         b1 = self.b.rotated((0,0,-1),numpy.pi/2)

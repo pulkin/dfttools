@@ -351,14 +351,19 @@ class CellInitializationTest(unittest.TestCase):
 
 class CellTest(unittest.TestCase):
     
+    @staticmethod
+    def __co__(a,h,**kwargs):
+        return UnitCell(
+            Basis((a, a, h, 0., 0., 0.5), kind = 'triclinic'),
+            ((0.,0.,0.),(1./3.,1./3.,0.5)),
+            'Co',
+            **kwargs
+        )
+        
     def setUp(self):
         self.a = 2.510e-10
         self.h = 2*self.a*(2./3.)**0.5
-        self.cell = UnitCell(
-            Basis((self.a, self.a, self.h, 0., 0., 0.5), kind = 'triclinic'),
-            ((0.,0.,0.),(1./3.,1./3.,0.5)),
-            'Co'
-        )
+        self.cell = CellTest.__co__(self.a,self.h)
         self.cell2 = UnitCell(
             Basis((self.a,self.a,self.a,0.5,0.5,0.5), kind = 'triclinic'),
             (0,0,0),
@@ -707,17 +712,41 @@ class CellTest(unittest.TestCase):
     def test_save_load(self):
         import numericalunits
         import pickle
-        data = pickle.dumps(self.cell)
+        a = self.a*numericalunits.angstrom
+        h = self.h*numericalunits.angstrom
+        cell = CellTest.__co__(a,h,units = 'angstrom')
+        
+        data = pickle.dumps(cell)
         numericalunits.reset_units()
         x = pickle.loads(data)
-        assert x == self.cell
+        
+        # Assert object changed
+        assert x != cell
+        
+        # Assert object is the same wrt numericalunits
+        a = self.a*numericalunits.angstrom
+        h = self.h*numericalunits.angstrom
+        cell2 = CellTest.__co__(a,h,units = 'angstrom')
+        assert x == cell2
         
     def test_save_load_json(self):
         import json
-        data = json.dumps(self.cell.to_json())
+        a = self.a*numericalunits.angstrom
+        h = self.h*numericalunits.angstrom
+        cell = CellTest.__co__(a,h,units = 'angstrom')
+        
+        data = json.dumps(cell.to_json())
         numericalunits.reset_units()
         x = UnitCell.from_json(json.loads(data))
-        assert x == self.cell
+        
+        # Assert object changed
+        assert x != cell
+        
+        # Assert object is the same wrt numericalunits
+        a = self.a*numericalunits.angstrom
+        h = self.h*numericalunits.angstrom
+        cell2 = CellTest.__co__(a,h,units = 'angstrom')
+        assert x == cell2
 
 class FCCCellTest(unittest.TestCase):
     

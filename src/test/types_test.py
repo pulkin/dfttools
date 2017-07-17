@@ -223,8 +223,9 @@ class BasisTest(unittest.TestCase):
         data = pickle.dumps(x)
         numericalunits.reset_units()
         x = pickle.loads(data)
+        # Assert object changed
+        assert x != old
         testing.assert_allclose(x.vectors, numpy.eye(3)*numericalunits.angstrom)
-        assert x == old
         
     def test_save_load_json(self):
         import json
@@ -236,8 +237,9 @@ class BasisTest(unittest.TestCase):
         data = json.dumps(x.to_json())
         numericalunits.reset_units()
         x = Basis.from_json(json.loads(data))
+        # Assert object changed
+        assert x != old
         testing.assert_allclose(x.vectors, numpy.eye(3)*numericalunits.angstrom)
-        assert x == old
     
     def test_rotated(self):
         b1 = self.b.rotated((0,0,-1),numpy.pi/2)

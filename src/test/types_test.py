@@ -700,6 +700,21 @@ class CellTest(unittest.TestCase):
             testing.assert_equal(c2.coordinates, ((0,0),(.5,.5)))
             testing.assert_allclose(c2.values, ((2,6),(1,5)))
             
+    def test_save_load(self):
+        import numericalunits
+        import pickle
+        data = pickle.dumps(self.cell)
+        numericalunits.reset_units()
+        x = pickle.loads(data)
+        assert x == self.cell
+        
+    def test_save_load_json(self):
+        import json
+        data = json.dumps(self.cell.to_json())
+        numericalunits.reset_units()
+        x = UnitCell.from_json(json.loads(data))
+        assert x == self.cell
+
 class FCCCellTest(unittest.TestCase):
     
     def test_sc_roundoff(self):

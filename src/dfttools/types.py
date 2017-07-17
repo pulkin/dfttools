@@ -157,7 +157,6 @@ class Basis(object):
                 value = getattr(numericalunits,u)
             else:
                 value = u
-            print u, value
             self.vectors *= value
         
     def __eq__(self, another):

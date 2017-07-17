@@ -82,10 +82,15 @@ class Basis(object):
         * 'triclinic': expects ``vectors`` to be a 1D array with 3
           lengths of edges and 3 cosines of face angles.
         
+        units (str,float): optional units for the Basis. The units are
+        stored in `self.meta['units']` and are used during save/load
+        process. The string value should correspond to one of the values
+        in `numericalunits` package.
+        
         meta (dict): a metadata for this Basis.
     """
     
-    def __init__(self, vectors, kind = 'default', meta = None):
+    def __init__(self, vectors, kind = 'default', meta = None, units = None):
         
         vectors = numpy.array(vectors, dtype = numpy.float64)
         
@@ -119,38 +124,75 @@ class Basis(object):
         else:
             self.meta = {}
             
-        self.units = {}
-
-    def __export_units__(self, attr):
-        x = getattr(self, attr)
-        if not attr in self.units:
-            return x
-        measure = getattr(numericalunits, self.units[attr]) 
-        return x/measure
-
-    def __import_units__(self, attr):
-        x = getattr(self, attr)
-        if attr in self.units:
-            measure = getattr(numericalunits, self.units[attr]) 
-            setattr(self, attr, x*measure)
+        if not units is None:
+            self.meta["units"] = units
         
     def __getstate__(self):
-        return {
-            "vectors":self.__export_units__("vectors"),
+        result = {
+            "vectors":self.vectors,
             "meta":self.meta,
-            "units":self.units,
         }
+        # Release units
+        if "units" in self.meta:
+            u = self.meta["units"]
+            if isinstance(u, str):
+                import numericalunits
+                value = getattr(numericalunits,u)
+            else:
+                value = u
+            result['vectors'] /= value
+        result['vectors'] = result['vectors'].tolist()
+        return result
         
     def __setstate__(self,data):
         self.__init__(
             data["vectors"],
             meta = data["meta"],
         )
-        self.units = data["units"]
-        self.__import_units__("vectors")
+        # Set units
+        if "units" in self.meta:
+            u = self.meta["units"]
+            if isinstance(u, (str,unicode)):
+                import numericalunits
+                value = getattr(numericalunits,u)
+            else:
+                value = u
+            print u, value
+            self.vectors *= value
         
     def __eq__(self, another):
         return type(another) == type(self) and numpy.all(self.vectors == another.vectors)
+        
+    def to_json(self):
+        """
+        Prepares a JSON-compatible object representing this Basis.
+        
+        Returns:
+        
+            A JSON-compatible dict.
+        """
+        result = self.__getstate__()
+        result["type"] = "dfttools.Basis"
+        return result
+        
+    @staticmethod
+    def from_json(j):
+        """
+        Restores a Basis from JSON data.
+        
+        Args:
+        
+            j (dict): JSON data.
+            
+        Returns:
+        
+            A Basis object.
+        """
+        if not "type" in j or not j["type"] == "dfttools.Basis":
+            raise ValueError("This is not a valid Basis JSON representation.")
+        result = Basis(j["vectors"], meta = j["meta"])
+        result.__setstate__(j)
+        return result
         
     def transform_to(self, basis, coordinates):
         """

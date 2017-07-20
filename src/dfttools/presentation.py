@@ -187,6 +187,7 @@ def svgwrite_unit_cell(
     hook_atomic_color = None,
     coordinates = 'right',
     invisible = None,
+    title = None,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -245,6 +246,9 @@ def svgwrite_unit_cell(
         specified, creates a supercell and makes all cell replica
         invisible. The bonds of invisible atoms will still be present on
         the final image;
+        
+        title (str): a title to the drawing presented in the top left
+        corner;
         
     Returns:
     
@@ -516,6 +520,20 @@ def svgwrite_unit_cell(
                 text_anchor = "middle",
                 font_size = __text_size__,
             ))
+            
+    if not title is None:
+        
+        __text_margin__ = 10
+        __text_baseline__ = 35
+        __text_size__ = 18
+            
+        group.add(svg.text(title,
+            insert = (__text_margin__,__text_baseline__),
+            fill = "black",
+            text_anchor = "start",
+            font_size = __text_size__,
+            font_family = "monospace",
+        ))
         
     if save:
         svg.save()

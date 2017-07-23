@@ -636,8 +636,7 @@ class UnitCell(Basis):
         
     def __setstate__(self,data):
         super(UnitCell,self).__setstate__(data)
-        self.coordinates = data["coordinates"]
-        self.values = data["values"]
+        self.__init__(self, data["coordinates"], data["values"])
         
     @staticmethod
     def from_json(j):

@@ -133,7 +133,7 @@ class Basis(object):
             "meta":self.meta,
         }
         # Release units
-        if "units" in self.meta:
+        if self.units_aware():
             u = self.meta["units"]
             if isinstance(u, str):
                 import numericalunits
@@ -151,7 +151,7 @@ class Basis(object):
             meta = data["meta"],
         )
         # Set units
-        if "units" in self.meta:
+        if self.units_aware():
             u = self.meta["units"]
             if isinstance(u, (str,unicode)):
                 import numericalunits

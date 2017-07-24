@@ -220,6 +220,7 @@ class BasisTest(unittest.TestCase):
             kind = 'orthorombic',
             units = 'angstrom',
         )
+        assert x.units_aware()
         data = pickle.dumps(x)
         numericalunits.reset_units()
         x = pickle.loads(data)
@@ -234,6 +235,7 @@ class BasisTest(unittest.TestCase):
             kind = 'orthorombic',
             units = 'angstrom',
         )
+        assert x.units_aware()
         data = json.dumps(x.to_json())
         numericalunits.reset_units()
         x = Basis.from_json(json.loads(data))
@@ -715,6 +717,7 @@ class CellTest(unittest.TestCase):
         a = self.a*numericalunits.angstrom
         h = self.h*numericalunits.angstrom
         cell = CellTest.__co__(a,h,units = 'angstrom')
+        assert cell.units_aware()
         
         data = pickle.dumps(cell)
         numericalunits.reset_units()
@@ -736,6 +739,7 @@ class CellTest(unittest.TestCase):
         a = self.a*numericalunits.angstrom
         h = self.h*numericalunits.angstrom
         cell = CellTest.__co__(a,h,units = 'angstrom')
+        assert cell.units_aware()
         
         data = json.dumps(cell.to_json())
         numericalunits.reset_units()

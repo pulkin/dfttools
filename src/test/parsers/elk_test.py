@@ -171,7 +171,6 @@ class Test_bands0(unittest.TestCase):
 
     def test_bands(self):
         b = self.parser.bands()
-        assert b.units_aware()
         
         testing.assert_equal(b.values.shape, (100,31714/101))
 

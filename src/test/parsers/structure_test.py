@@ -144,11 +144,9 @@ class Test_xsf3(unittest.TestCase):
         for i in range(2):
             testing.assert_equal(c[0].coordinates[i], numpy.linspace(0,1,4, endpoint = False))
             
-        testing.assert_equal(c[0].meta, {
-            "xsf-grid-origin":numpy.zeros(3),
-            "xsf-block-name":"my_first_example_of_2D_datagrid",
-            "xsf-grid-name":"this_is_2Dgrid#1",
-        })
+        testing.assert_equal(c[0].meta["xsf-grid-origin"], [0,0,0])
+        assert c[0].meta["xsf-block-name"] == "my_first_example_of_2D_datagrid"
+        assert c[0].meta["xsf-grid-name"] == "this_is_2Dgrid#1"
         
         testing.assert_equal(c[2].vectors, numpy.eye(3)*numericalunits.angstrom)
         
@@ -209,11 +207,9 @@ class Test_xsf4(unittest.TestCase):
         for i in range(2):
             testing.assert_equal(c[0].coordinates[i], numpy.linspace(0,1,4, endpoint = False))
             
-        testing.assert_equal(c[0].meta, {
-            "xsf-grid-origin":numpy.zeros(3),
-            "xsf-block-name":"my_first_example_of_2D_datagrid",
-            "xsf-grid-name":"this_is_2Dgrid#1",
-        })
+        testing.assert_equal(c[0].meta["xsf-grid-origin"], [0,0,0])
+        assert c[0].meta["xsf-block-name"] == "my_first_example_of_2D_datagrid"
+        assert c[0].meta["xsf-grid-name"] == "this_is_2Dgrid#1"
             
 class Test_cube0(unittest.TestCase):
 

@@ -284,7 +284,7 @@ class Bands(AbstractParser):
         while self.parser.present(cre_float):
             a = self.parser.nextFloat(n = '\n     \n')
             self.parser.nextLine(2)
-            values.append(a[1::2]*2*numericalunits.Ry)
+            values.append(a[1::2]*numericalunits.Hartree)
             coordinates = a[::2]
 
         return UnitCell(

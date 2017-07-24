@@ -34,7 +34,7 @@ def populations(s):
     for field in ("k", "bands", "energies", "weights"):
         result[field] = numpy.array(result[field])
         
-    result["energies"] *= 2*numericalunits.Ry
+    result["energies"] *= numericalunits.Hartree
         
     for field in result["basis"].keys():
         result["basis"][field] = numpy.array(result["basis"][field])
@@ -112,8 +112,8 @@ class JSON_DOS(AbstractJSONParser):
         
     def __init__(self, data):
         super(JSON_DOS, self).__init__(data)
-        self.__set_units__("energy",2*numericalunits.Ry)
-        self.__set_units__("DOS",1./2/numericalunits.Ry)
+        self.__set_units__("energy",numericalunits.Hartree)
+        self.__set_units__("DOS",1./numericalunits.Hartree)
         
         for field in self.json["basis"].keys():
             self.json["basis"][field] = numpy.array(self.json["basis"][field])
@@ -420,7 +420,7 @@ class Output(AbstractParser):
         
         while self.parser.present("Utot  ="):
             self.parser.skip("Utot  =")
-            result.append(self.parser.nextFloat()*2*numericalunits.Ry)
+            result.append(self.parser.nextFloat()*numericalunits.Hartree)
             
         return numpy.array(result)
         
@@ -627,7 +627,7 @@ class Bands(AbstractParser):
         
         p.nextInt()
         p.nextInt()
-        return p.nextFloat()*2*numericalunits.Ry
+        return p.nextFloat()*numericalunits.Hartree
         
     def captions(self):
         """
@@ -683,7 +683,7 @@ class Bands(AbstractParser):
         return UnitCell(
             Basis(shape, meta = {"Fermi":self.fermi(), "special-points":self.captions()}),
             data[:,:3],
-            data[:,3:]*2*numericalunits.Ry,
+            data[:,3:]*numericalunits.Hartree,
         )
 
 class Transmission(AbstractParser):

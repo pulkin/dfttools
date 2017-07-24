@@ -83,8 +83,8 @@ class Basis(object):
           lengths of edges and 3 cosines of face angles.
         
         units (str,float): optional units for the Basis. The units are
-        stored in `self.meta['units']` and are used during save/load
-        process. The string value should correspond to one of the values
+        stored in `self.meta['units']` and are used only during save/load
+        process. The string value has to correspond to one of the values
         in `numericalunits` package.
         
         meta (dict): a metadata for this Basis.
@@ -193,6 +193,16 @@ class Basis(object):
         result = Basis(j["vectors"], meta = j["meta"])
         result.__setstate__(j)
         return result
+        
+    def units_aware(self):
+        """
+        Checks if units for this Basis are defined.
+        
+        Returns:
+        
+            True if units were defined.
+        """
+        return "units" in self.meta
         
     def transform_to(self, basis, coordinates):
         """

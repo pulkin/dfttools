@@ -17,6 +17,7 @@ class Test_input0(unittest.TestCase):
             
     def test_unitCell(self):
         c = self.parser.unitCell()
+        assert c.units_aware()
         
         testing.assert_equal(c.vectors, numpy.array((
             (11.05491144, 0.000000000,-0.3046858492),
@@ -46,6 +47,7 @@ class Test_input1(unittest.TestCase):
 
     def test_unitCell(self):
         c = self.parser.unitCell()
+        assert c.units_aware()
         
         testing.assert_allclose(c.vectors, numpy.array((
             (5.944039, 0.      , 0.       ),
@@ -83,6 +85,7 @@ class Test_unitcells0(unittest.TestCase):
         c = self.parser.unitCells()
         assert len(c) == 13
         
+        assert c[0].units_aware()
         testing.assert_equal(c[0].vectors, numpy.array((
             (11.05491144, 0.000000000,-0.3046858492),
             (0.000000000, 6.194778086, 0.000000000),
@@ -100,6 +103,7 @@ class Test_unitcells0(unittest.TestCase):
 
         testing.assert_equal(c[0].values, ("W","W","Se","Se","Se","Se"))
         
+        assert c[-1].units_aware()
         testing.assert_equal(c[-1].vectors, numpy.array((
             (11.39760697, 0.000000000,-0.491683336),
             (0.000000000, 6.657114335, 0.000000000),
@@ -128,6 +132,7 @@ class Test_output0(unittest.TestCase):
 
     def test_unitCell(self):
         c = self.parser.unitCell()
+        assert c.units_aware()
         
         testing.assert_equal(c.vectors, numpy.array((
             (11.39760697,  0.000000000, -0.4916833360),
@@ -166,6 +171,7 @@ class Test_bands0(unittest.TestCase):
 
     def test_bands(self):
         b = self.parser.bands()
+        assert b.units_aware()
         
         testing.assert_equal(b.values.shape, (100,31714/101))
 

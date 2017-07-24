@@ -121,6 +121,7 @@ class Test_input0(unittest.TestCase):
         
     def test_unitCell(self):
         c = self.parser.unitCell()
+        assert c.units_aware()
         
         testing.assert_equal(c.vectors,numpy.array((
             (3.288, 0.0, 0.0),
@@ -142,6 +143,7 @@ class Test_input0(unittest.TestCase):
         
     def test_unitCell_au(self):
         c = self.parser_au.unitCell()
+        assert c.units_aware()
         
         testing.assert_equal(c.vectors,numpy.array((
             (3.288, 0.0, 0.0),
@@ -163,6 +165,7 @@ class Test_input1(unittest.TestCase):
 
     def test_unitCell(self):
         c = self.parser.unitCell()
+        assert c.units_aware()
         
         testing.assert_equal(c.vectors,numpy.array((
             (55.66990773701619, 0.0, 0.0),
@@ -201,6 +204,8 @@ class Test_input2(unittest.TestCase):
         
         l = self.l.unitCell()
         s = self.s.unitCell(l = l, r = l)
+        assert l.units_aware()
+        assert s.units_aware()
         
         testing.assert_allclose(l.vectors, s.vectors)
         testing.assert_allclose(l.coordinates, s.coordinates)
@@ -212,6 +217,8 @@ class Test_input2(unittest.TestCase):
         
         l = self.l_au.unitCell()
         s = self.s_au.unitCell(l = l, r = l)
+        assert l.units_aware()
+        assert s.units_aware()
         
         testing.assert_allclose(l.vectors, s.vectors)
         testing.assert_allclose(l.coordinates, s.coordinates)
@@ -265,7 +272,7 @@ class Test_output0(unittest.TestCase):
         ))*numericalunits.angstrom
         
         c = self.parser.unitCells(UnitCell(
-            Basis(vecs),
+            Basis(vecs, units = "angstrom"),
             (
                 (0.33333333333353, 0.33333333333331, 0.50000000000001),
                 (0.66666666666614, 0.66666666666674, 0.48313110391249),
@@ -278,6 +285,7 @@ class Test_output0(unittest.TestCase):
         
         for cc in c:
             assert cc.coordinates.shape[0] == 3
+            assert cc.units_aware()
             
             testing.assert_allclose(cc.vectors,vecs)
             

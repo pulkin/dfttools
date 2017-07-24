@@ -11,6 +11,7 @@ from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, re
 from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
 from ..types import UnitCell, Basis
+from . import default_real_space_basis
 
 class Bands(AbstractParser):
     """
@@ -319,7 +320,7 @@ class Output(AbstractParser):
         
         self.parser.skip("crystal axes: (cart. coord. in units of alat)")
         shape = self.parser.nextFloat((3,4))[:,1:]*alat
-        basis = Basis(shape)
+        basis = default_real_space_basis(shape)
         
         self.parser.skip("Cartesian axes")
         coordinates = numpy.zeros((n,3))
@@ -348,7 +349,7 @@ class Output(AbstractParser):
                 self.parser.skip("CELL_PARAMETERS")
                 alat = self.parser.nextFloat()*numericalunits.aBohr
                 shape = self.parser.nextFloat((3,3))*alat
-                basis = Basis(shape)
+                basis = default_real_space_basis(shape)
             
             # Parse atomic data
             self.parser.skip("ATOMIC_POSITIONS")
@@ -980,7 +981,7 @@ class Input(AbstractParser):
             shape[0] *= numericalunits.aBohr
             shape[1] *= shape[0]
             shape[2] *= shape[0]
-            basis = Basis(shape, kind = 'triclinic')
+            basis = default_real_space_basis(shape, kind = 'triclinic')
             
         elif ibrav == 0:
 
@@ -989,7 +990,7 @@ class Input(AbstractParser):
             units = self.parser.nextMatch(cre_word)
             vectors = self.parser.nextFloat(n = (3,3))*units_dict[units]
                 
-            basis = Basis(vectors)
+            basis = default_real_space_basis(vectors)
             
         else:
             raise NotImplementedError("Cell recovery not implemented for ibrav = {:d}".format(int(ibrav)))

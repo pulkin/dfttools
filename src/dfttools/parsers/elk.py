@@ -10,6 +10,7 @@ import numericalunits
 from .generic import parse, cre_nonspace, cre_float, cre_word, AbstractParser
 from ..simple import band_structure, unit_cell
 from ..types import UnitCell, Basis
+from . import default_real_space_basis
 
 class UnitCellsParser(AbstractParser):
     """
@@ -79,7 +80,7 @@ class UnitCellsParser(AbstractParser):
             values = values + [name]*n_at
             
         return UnitCell(
-            Basis(vectors),
+            default_real_space_basis(vectors),
             numpy.concatenate(coordinates, axis = 0),
             values,
         )
@@ -236,7 +237,7 @@ class Output(AbstractParser):
             
         coordinates = numpy.concatenate(coordinates, axis = 0)
         return UnitCell(
-            Basis(vecs),
+            default_real_space_basis(vecs),
             coordinates,
             values,
         )

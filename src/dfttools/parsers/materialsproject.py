@@ -15,7 +15,8 @@ from .generic import AbstractJSONParser#, parse, cre_varName, cre_word, cre_nons
 #from .structure import cube
 #from .native_openmx import openmx_bands_bands
 from ..simple import unit_cell#, band_structure, guess_parser, parse, tag_method
-from ..types import UnitCell, Basis
+from ..types import UnitCell#, Basis
+from . import default_real_space_basis
 
 class JSONResponse(AbstractJSONParser):
     """
@@ -35,7 +36,7 @@ class JSONResponse(AbstractJSONParser):
                 
         elif isinstance(root, dict):
             if "@class" in root and root["@class"] == "Structure":
-                b = Basis(numpy.array(root["lattice"]["matrix"])*numericalunits.angstrom)
+                b = default_real_space_basis(numpy.array(root["lattice"]["matrix"])*numericalunits.angstrom)
                 coords = []
                 vals = []
                 for s in root["sites"]:

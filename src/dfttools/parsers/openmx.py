@@ -16,6 +16,7 @@ from .structure import cube
 from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, parse, tag_method
 from ..types import UnitCell, Basis
+from . import default_real_space_basis
 
 def populations(s):
     """
@@ -376,7 +377,7 @@ class Input(AbstractParser):
                 shape *= numericalunits.aBohr
 
         return UnitCell(
-            Basis(shape),
+            default_real_space_basis(shape),
             coordinates,
             values,
             c_basis = None if units.lower() == "frac" else "cartesian"
@@ -482,7 +483,7 @@ class Output(AbstractParser):
                     coordinates.append(self.parser.nextFloat(3)*numericalunits.angstrom)
                     
                 cells.append(UnitCell(
-                    Basis(shape),
+                    default_real_space_basis(shape),
                     coordinates,
                     startingCell.values,
                     c_basis = "cartesian",

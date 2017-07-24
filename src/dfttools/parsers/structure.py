@@ -8,6 +8,7 @@ from .generic import parse, cre_word, cre_nonspace, AbstractParser
 from ..simple import band_structure, unit_cell
 from ..types import UnitCell, Basis, Grid
 from ..presentation import __elements_table__
+from . import default_real_space_basis
 
 class XSF(AbstractParser):
     """
@@ -61,7 +62,7 @@ class XSF(AbstractParser):
                     values[i] = self.parser.nextMatch(cre_word)
                     coordinates[i,:] = self.parser.nextFloat(3)*numericalunits.angstrom
                 result.append(UnitCell(
-                    Basis(shape),
+                    default_real_space_basis(shape),
                     coordinates,
                     values,
                     c_basis = 'cartesian'
@@ -135,7 +136,7 @@ class XSF(AbstractParser):
                     "xsf-grid-name": grid_name,
                 }
                 c = Grid(
-                    Basis(vectors, meta = meta),
+                    default_real_space_basis(vectors, meta = meta),
                     tuple(numpy.linspace(0,1,s, endpoint = False) for s in data.shape),
                     data,
                 )
@@ -196,7 +197,7 @@ class GaussianCube(AbstractParser):
         data = self.parser.nextFloat(size)
         
         return Grid(
-            Basis(vectors),
+            default_real_space_basis(vectors),
             tuple(numpy.linspace(0,1,s, endpoint = False) for s in data.shape),
             data,
         )
@@ -250,7 +251,7 @@ class GaussianCube(AbstractParser):
             else:
                 c.append(ac*numericalunits.aBohr)
                 
-        return UnitCell(Basis(shape), c, v, c_basis="cartesian")
+        return UnitCell(default_real_space_basis(shape), c, v, c_basis="cartesian")
 
 class XYZ(AbstractParser):
     """
@@ -297,7 +298,7 @@ class XYZ(AbstractParser):
         mn = c.min(axis = 0)
         shape = mx-mn+XYZ.vacuum_size
                 
-        return UnitCell(Basis(shape, kind = 'orthorombic'), c, v, c_basis="cartesian")
+        return UnitCell(default_real_space_basis(shape, kind = 'orthorombic'), c, v, c_basis="cartesian")
 
 # Lower case versions
 xsf = XSF

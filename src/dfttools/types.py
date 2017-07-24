@@ -135,7 +135,7 @@ class Basis(object):
         # Release units
         if self.units_aware():
             u = self.meta["units"]
-            if isinstance(u, str):
+            if isinstance(u, (str,unicode)):
                 import numericalunits
                 value = getattr(numericalunits,u)
             else:

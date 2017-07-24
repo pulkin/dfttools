@@ -169,5 +169,5 @@ class Test_bands0(unittest.TestCase):
         
         testing.assert_equal(b.values.shape, (100,31714/101))
 
-        testing.assert_equal(b.values[:3,0], numpy.array((-2.729662146, -2.729661982, -2.729661566))*2*numericalunits.Ry)
-        testing.assert_equal(b.values[-3:,-1], numpy.array((0.8610216055, 0.8620398955, 0.8633321818))*2*numericalunits.Ry)
+        testing.assert_equal(b.values[:3,0], numpy.array((-2.729662146, -2.729661982, -2.729661566))*numericalunits.Hartree)
+        testing.assert_equal(b.values[-3:,-1], numpy.array((0.8610216055, 0.8620398955, 0.8633321818))*numericalunits.Hartree)

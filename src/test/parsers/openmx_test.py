@@ -16,7 +16,7 @@ class Test_bands0(unittest.TestCase):
             self.parser = bands(f.read())
 
     def test_fermi(self):
-        assert self.parser.fermi() == -0.161133*2*numericalunits.Ry
+        assert self.parser.fermi() == -0.161133*numericalunits.Hartree
         
     def test_captions(self):
         testing.assert_equal(self.parser.captions(), {
@@ -80,10 +80,10 @@ class Test_bands0(unittest.TestCase):
              1.462964038659094,  1.462964040710026,  1.557730250666156,
              1.557730277121358,  2.148239640563523,  2.148239843439056,
              2.178107733188863,  2.178107969469329,  2.310569568913024,
-             2.310569586463968,  2.675051299060441,  2.675051340334891)))*numericalunits.Ry*2
+             2.310569586463968,  2.675051299060441,  2.675051340334891)))*numericalunits.Hartree
         )
         testing.assert_allclose(b.values[0,:],b.values[-1,:])
-        assert b.meta["Fermi"] == -0.161133*numericalunits.Ry*2
+        assert b.meta["Fermi"] == -0.161133*numericalunits.Hartree
         assert b.meta["special-points"] == {
             0:"M",
             99:"G",
@@ -255,7 +255,7 @@ class Test_output0(unittest.TestCase):
             -89.996202786290, -89.996789948618, -89.996801412745,
             -89.996799134762, -89.996801452498, -89.996801529672,
             -89.996801486036, -89.996801501449,
-        ))*2*numericalunits.Ry)
+        ))*numericalunits.Hartree)
         
     def test_unitCells(self):
         vecs = numpy.array((

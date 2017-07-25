@@ -129,8 +129,7 @@ class Basis(object):
         
     def __getstate__(self):
         result = {
-            "vectors":self.vectors,
-            "meta":self.meta,
+            "meta":self.meta.copy(),
         }
         # Release units
         if self.units_aware():
@@ -140,8 +139,9 @@ class Basis(object):
                 value = getattr(numericalunits,u)
             else:
                 value = u
-            result['vectors'] /= value
-        result['vectors'] = result['vectors'].tolist()
+            result['vectors'] = (self.vectors/value).tolist()
+        else:
+            result['vectors'] = self.vectors.tolist()
         return result
         
     def __setstate__(self,data):

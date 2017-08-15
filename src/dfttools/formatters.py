@@ -173,8 +173,11 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
             "&ELECTRONS":2,
             "&IONS":3,
             "&CELL":4,
+            "ATOMIC_SPECIES":5,
+            "CELL_PARAMETERS":6,
+            "ATOMIC_POSITIONS":7,
         }
-        return order[a[0]] if a[0] in order else 5
+        return order[a[0]] if a[0] in order else 1000
     
     # Compose everything
     result = ""

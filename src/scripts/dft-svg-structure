@@ -6,6 +6,7 @@ parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose ou
 parser.add_argument("-c", "--unitcell", action = "store_true", help = "Plot unit cell")
 parser.add_argument("-p", "--projection", help = "Projection to plot: x,y or z")
 parser.add_argument("-s", "--size", help = "Size of the image in px, example: 600x600")
+parser.add_argument("-x", "--super", help = "Supercell size, example: 2x3x4")
 parser.add_argument("file", help = "file with the atomic structure", metavar = "FILENAME")
 parser.add_argument("output", help = "SVG file name for output", metavar = "FILENAME")
 
@@ -35,7 +36,7 @@ except ParseError:
 except IOError:
     print("Problem with opening file '{}' for reading\n".format(options.file))
     raise
-    
+
 if options.verbose:
     d = structure.repeated(2,2,2).distances()
     d = d[d>0]
@@ -49,6 +50,11 @@ kwargs = dict(
 
 if not options.size is None:
     kwargs["size"] = tuple(int(i) for i in options.size.split("x"))
+    
+if options.super:
+    m = tuple(int(i) for i in options.super.split('x'))
+    structure = structure.repeated(m)
+    print("A supercell "+repr(m)+" requested")
     
 svgwrite_unit_cell(structure, options.output, **kwargs)
     

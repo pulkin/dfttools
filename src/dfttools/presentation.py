@@ -346,7 +346,10 @@ def svgwrite_unit_cell(
     # Calculate base colors
     colors_base = tuple(__fadeout_z__(e_color[i], projected[i,2], b_max[2], b_min[2], fadeout_strength, bg) for i in range(cell.size()))
     if hook_atomic_color:
-        colors_base = tuple(hook_atomic_color(i,c) for i,c in enumerate(colors_base))
+        if invisible != "auto":
+            colors_base = tuple(hook_atomic_color(i,c) for i,c in enumerate(colors_base))
+        else:
+            colors_base = colors_base[:13*N] + tuple(hook_atomic_color(i,c) for i,c in enumerate(colors_base[13*N:14*N])) + colors_base[14*N:]
     
     # Arrays for storing objects with z-index
     obj = []

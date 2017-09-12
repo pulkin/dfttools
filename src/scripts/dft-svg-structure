@@ -7,6 +7,7 @@ parser.add_argument("-c", "--unitcell", action = "store_true", help = "Plot unit
 parser.add_argument("-p", "--projection", help = "Projection to plot: x,y or z")
 parser.add_argument("-s", "--size", help = "Size of the image in px, example: 600x600")
 parser.add_argument("-x", "--super", help = "Supercell size, example: 2x3x4")
+parser.add_argument("-a", "--accent", help = "Highlight specific atoms, for example: 1-5,6,8")
 parser.add_argument("file", help = "file with the atomic structure", metavar = "FILENAME")
 parser.add_argument("output", help = "SVG file name for output", metavar = "FILENAME")
 
@@ -14,9 +15,66 @@ options = parser.parse_args()
 
 from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
-from dfttools.presentation import svgwrite_unit_cell
+from dfttools.presentation import svgwrite_unit_cell, __light__
 
 from numericalunits import angstrom
+
+def get_int_list(s):
+    
+    here = lambda j: s[:j]+" > "+s[j]+" < "+s[j+1:]
+    result = []
+    num = 0
+    mode = 0
+    numbers = "0123456789"
+    
+    for j, i in enumerate(s):
+        
+        if mode == 0:
+            if i in numbers:
+                num = int(i)
+                mode = 1
+            else:
+                raise ValueError("A number expected: "+here(j))
+            
+        elif mode == 1:
+            if i in numbers:
+                num = 10*num + int(i)
+            elif i == ",":
+                result.append(num)
+                mode = 0
+            elif i == "-":
+                start = num
+                mode = 2
+            else:
+                raise ValueError("Unexpected symbol: "+here(j))
+                
+        elif mode == 2:
+            if i in numbers:
+                num = int(i)
+                mode = 3
+            else:
+                raise ValueError("A number expected: "+here(j))
+                
+        elif mode == 3:
+            if i in numbers:
+                num = 10*num + int(i)
+            elif i == ",":
+                if num < start:
+                    raise ValueError("The upper bound of range {:d} is smaller than the lower bound {:d}".format(num, start))
+                result += list(range(start,num))
+                mode = 0
+            else:
+                raise ValueError("Unexpected symbol: "+here(j))
+    if mode == 1:
+        result.append(num)
+    elif mode == 2:
+        raise ValueError("Premature end of range expression")
+    elif mode == 3:
+        if num < start:
+            raise ValueError("The upper bound of range {:d} is smaller than the lower bound {:d}".format(num, start))
+        result += list(range(start,num))
+        
+    return result
 
 try:
     
@@ -54,7 +112,19 @@ if not options.size is None:
 if options.super:
     m = tuple(int(i) for i in options.super.split('x'))
     structure = structure.repeated(m)
-    print("A supercell "+repr(m)+" requested")
+    if options.verbose:
+        print("A supercell "+repr(m)+" requested")
+
+if options.accent:
+    a = get_int_list(options.accent)
+    def hac(i, color):
+        return color if i in a else __light__(color, delta=0.9)
+    kwargs["hook_atomic_color"] = hac
+    if options.verbose:
+        print("Highlighting atoms: "+str(a))
+    
+if options.verbose:
+    print("Arguments: "+str(kwargs))
     
 svgwrite_unit_cell(structure, options.output, **kwargs)
     

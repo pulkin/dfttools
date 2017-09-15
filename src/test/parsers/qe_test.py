@@ -409,6 +409,46 @@ class Test_output4(unittest.TestCase):
             (0.3333333,  -0.3333333,   0.0000000),
         ))
 
+class Test_output5(unittest.TestCase):
+
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),"cases/qe.output.5.testcase"),'r') as f:
+            self.parser = output(f.read())
+
+    def test_unitCells(self):
+        cells = self.parser.unitCells()
+        assert len(cells)==4
+        for i in range(4):
+            testing.assert_equal(cells[i].values,
+                ('W','Se','Se','W','Se','Se'),
+            )
+        testing.assert_allclose(cells[1].vectors,numpy.array((
+            (5.952508067, 0, 0,),
+            (0, 3.312746029, 0,),
+            (0, 0, 19.999998523,),
+        ))*numericalunits.angstrom)
+        testing.assert_allclose(cells[1].coordinates,numpy.array((
+            (0.125345331, 0.749999461, 0.494938933,),
+            (0.359065123, 0.249999820, 0.570697112,),
+            (0.510935861, 0.749999461, 0.429303122,),
+            (0.744655908, 0.249999820, 0.505060896,),
+            (0.852108020, 0.749999461, 0.594681796,),
+            (0.017889757, 0.249999820, 0.405318141,),
+        )))
+        testing.assert_allclose(cells[-1].vectors,numpy.array((
+            (5.952508067, 0, 0,),
+            (0, 3.316388490, 0,),
+            (0, 0, 19.999998523,),
+        ))*numericalunits.angstrom)
+        testing.assert_allclose(cells[-1].coordinates,numpy.array((
+            (0.127475072, 0.749999461, 0.493768971,),
+            (0.361369273, 0.249999820, 0.572048008,),
+            (0.508630727, 0.749999461, 0.427951984,),
+            (0.742525597, 0.249999820, 0.506231069,),
+            (0.858847877, 0.749999461, 0.594463213,),
+            (0.011151454, 0.249999820, 0.405536755,),
+        )))
+
 class Test_proj0(unittest.TestCase):
     """
     Projwfc run for example calculation from espresso-5.0.1/PW/examples/example01/results/si.scf.cg.in

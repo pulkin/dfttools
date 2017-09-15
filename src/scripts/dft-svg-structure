@@ -86,6 +86,9 @@ try:
         
     if isinstance(structure, list):
         structure = structure[-1]
+        
+    if options.verbose:
+        print("Volume: {:.1f} A^3".format(structure.volume()/angstrom**3))
     
 except ParseError:
     print("Could not parse file '{}'\n".format(options.file))

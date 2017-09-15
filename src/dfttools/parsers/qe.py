@@ -347,8 +347,14 @@ class Output(AbstractParser):
             if self.parser.present("CELL_PARAMETERS") and (self.parser.distance("CELL_PARAMETERS")<self.parser.distance("ATOMIC_POSITIONS")):
                 
                 self.parser.skip("CELL_PARAMETERS")
-                alat = self.parser.nextFloat()*numericalunits.aBohr
-                shape = self.parser.nextFloat((3,3))*alat
+                mode = self.parser.closest(("(alat=", "(angstrom)"))
+                if mode == 0:
+                    alat = self.parser.nextFloat()*numericalunits.aBohr
+                    shape = self.parser.nextFloat((3,3))*alat
+                elif mode == 1:
+                    shape = self.parser.nextFloat((3,3))*numericalunits.angstrom
+                else:
+                    raise RuntimeError("Unknown format")
                 basis = default_real_space_basis(shape)
             
             # Parse atomic data

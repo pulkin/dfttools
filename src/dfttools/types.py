@@ -800,10 +800,7 @@ class UnitCell(Basis):
             A copy of self.
         """
         return UnitCell(
-            Basis(
-                self.vectors,
-                meta = self.meta
-            ),
+            self,
             self.coordinates,
             self.values)
         
@@ -1045,10 +1042,7 @@ class UnitCell(Basis):
             v.append(cell.values)
         
         return UnitCell(
-            Basis(
-                self.vectors,
-                meta = self.meta,
-            ),
+            self,
             numpy.concatenate(c, axis = 0),
             numpy.concatenate(v, axis = 0))
     
@@ -1281,7 +1275,7 @@ class UnitCell(Basis):
         
         # Interpolate
         return UnitCell(
-            Basis(self.vectors, meta = self.meta),
+            self,
             points,
             driver(data_points, data_values, points_i, **kwargs),
         )
@@ -1432,10 +1426,7 @@ class Grid(Basis):
             A copy of self.
         """
         return Grid(
-            Basis(
-                self.vectors,
-                meta = self.meta
-            ),
+            self,
             self.coordinates,
             self.values)
         
@@ -1656,7 +1647,7 @@ class Grid(Basis):
                 offsets[j] += i.coordinates[j].shape[0]
         
         return Grid(
-            Basis(self.vectors, meta = self.meta),
+            self,
             new_coordinates,
             new_values,
         )
@@ -1768,7 +1759,7 @@ class Grid(Basis):
         c = c.reshape((-1,c.shape[-1]))
         v = self.values.reshape((-1,)+self.values.shape[len(self.coordinates):])
         
-        return UnitCell(Basis(self.vectors, meta = self.meta), c, v)
+        return UnitCell(self, c, v)
         
     def interpolate_to_array(self, points, driver = None, periodic = True, **kwargs):
         """

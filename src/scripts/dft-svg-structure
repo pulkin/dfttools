@@ -8,6 +8,7 @@ parser.add_argument("-p", "--projection", help = "Projection to plot: x,y or z")
 parser.add_argument("-s", "--size", help = "Size of the image in px, example: 600x600")
 parser.add_argument("-x", "--super", help = "Supercell size, example: 2x3x4")
 parser.add_argument("-a", "--accent", help = "Highlight specific atoms, for example: 1-5,6,8")
+parser.add_argument("-n", "--numbers", action = "store_true", help = "Show the order of atoms as they appear in the unit cell")
 parser.add_argument("file", help = "file with the atomic structure", metavar = "FILENAME")
 parser.add_argument("output", help = "SVG file name for output", metavar = "FILENAME")
 
@@ -125,6 +126,9 @@ if options.accent:
     kwargs["hook_atomic_color"] = hac
     if options.verbose:
         print("Highlighting atoms: "+str(a))
+
+if options.numbers:
+    kwargs["show_numbers"] = True
     
 if options.verbose:
     print("Arguments: "+str(kwargs))

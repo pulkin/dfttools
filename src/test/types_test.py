@@ -929,6 +929,21 @@ class GridTest(unittest.TestCase):
         testing.assert_equal(c.coordinates, self.grid.coordinates)
         testing.assert_equal(c.values, self.grid.values)
         
+    def test_pickle_units(self):
+        import numericalunits
+        grid = Grid(
+            Basis(numpy.eye(3)*numericalunits.angstrom),
+            self.grid.coordinates,
+            self.grid.values,
+            units='angstrom',
+        )
+        data = pickle.dumps(grid)
+        numericalunits.reset_units()
+        c = pickle.loads(data)
+        testing.assert_equal(c.vectors, numpy.eye(3)*numericalunits.angstrom)
+        testing.assert_equal(c.coordinates, grid.coordinates)
+        testing.assert_equal(c.values, grid.values)
+        
     def test_eq(self):
         g = self.grid.copy()
         assert self.grid == g

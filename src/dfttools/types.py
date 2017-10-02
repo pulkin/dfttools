@@ -1294,7 +1294,7 @@ class Grid(Basis):
         values (array): a multidimensional array with data on the grid.
     """
 
-    def __init__(self, basis, coordinates, values):
+    def __init__(self, basis, coordinates, values, units=None):
         
         Basis.__init__(self, basis.vectors, meta = basis.meta)
         dims = self.vectors.shape[0]
@@ -1315,24 +1315,19 @@ class Grid(Basis):
         for i in range(dims):
             if not self.values.shape[i] == self.coordinates[i].shape[0]:
                 raise ArgumentError("The {:d} dimension of 'values' array is equal to {:d} which is different from the size of a corresponding 'coordinates' array {:d}".format(i,self.values.shape[i],self.coordinates[i].shape[0]))
+            
+        if not units is None:
+            self.meta["units"] = units
         
     def __getstate__(self):
-        return {
-            "vectors":self.vectors,
-            "coordinates":self.coordinates,
-            "values":self.values,
-            "meta":self.meta,
-        }
+        result = super(Grid,self).__getstate__()
+        result["coordinates"] = tuple(i.tolist() for i in self.coordinates)
+        result["values"] = self.values.tolist()
+        return result
         
     def __setstate__(self,data):
-        self.__init__(
-            Basis(
-                data["vectors"],
-                meta = data["meta"],
-            ),
-            data["coordinates"],
-            data["values"],
-        )
+        super(Grid,self).__setstate__(data)
+        self.__init__(self, data["coordinates"], data["values"])
         
     def __eq__(self, another):
         result = Basis.__eq__(self,another)

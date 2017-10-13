@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to DFT Tools's documentation!
+Welcome to DFT Tools' documentation!
 =====================================
 
 DFT Tools is a python library for parsing, post-processing

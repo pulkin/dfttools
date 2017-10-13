@@ -286,9 +286,9 @@ def svgwrite_unit_cell(
     
     try:
         camera = {
-            "x": (1,0,0),
-            "y": (0,1,0),
-            "z": (0,0,1),
+            "x": (-1,0,0),
+            "y": (0,-1,0),
+            "z": (0,0,-1),
         }[camera]
     except KeyError:
         pass     
@@ -1162,8 +1162,11 @@ def matplotlib_scalar(
     axes.set_ylim([mn_a[1]/units,mx_a[1]/units])
     
     if not units_name is None:
-        axes.set_xlabel(units_name)
-        axes.set_ylabel(units_name)
+        axes.set_xlabel("x ({})".format(units_name))
+        axes.set_ylabel("y ({})".format(units_name))
+    else:
+        axes.set_xlabel("x")
+        axes.set_ylabel("y")
         
     if not scale_bar is None:
         

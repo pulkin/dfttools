@@ -466,7 +466,7 @@ def svgwrite_unit_cell(
                         obj.append(svg.line(
                             start = start,
                             end = end,
-                            stroke = __svg_color__(__dark__((colors_base[i] + colors_base[j])/2)),
+                            stroke = __svg_color__((__dark__(colors_base[i]) + __dark__(colors_base[j]))/2),
                             stroke_width = scale*(e_size[i]+e_size[j])*circle_size/5,
                         ))
                         

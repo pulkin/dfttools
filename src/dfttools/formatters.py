@@ -136,6 +136,9 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
             "nat"       : cell.size(),
         })
         
+        if "&IONS" not in parameters and parameters.get("&CONTROL", {}).get("calculation", None) in ('relax', 'md', 'vc-relax', 'vc-md'):
+            parameters["&IONS"] = {}
+        
         # Unit cell
         parameters["CELL_PARAMETERS"] = "\n".join((indent + "{:.14e} {:.14e} {:.14e}",)*3).format(*numpy.reshape(cell.vectors/angstrom,-1))
         inline_parameters["CELL_PARAMETERS"] = "angstrom"
@@ -174,8 +177,12 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
             "&IONS":3,
             "&CELL":4,
             "ATOMIC_SPECIES":5,
-            "CELL_PARAMETERS":6,
-            "ATOMIC_POSITIONS":7,
+            "ATOMIC_POSITIONS":6,
+            "K_POINTS":7,
+            "CELL_PARAMETERS":8,
+            "OCCUPATIONS":9,
+            "CONSTRAINTS":10,
+            "ATOMIC_FORCES":11,
         }
         return order[a[0]] if a[0] in order else 1000
     
@@ -187,6 +194,7 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
             
         if section in inline_parameters:
             result += " "+inline_parameters[section]
+            del inline_parameters[section]
             
         result += "\n"
             
@@ -215,7 +223,9 @@ def qe_input(cell = None, relax_triggers = 0, parameters = {}, inline_parameters
             result += "/\n"
         else:
             result += "\n"
-            
+    
+    if len(inline_parameters) > 0:
+        raise ValueError("Keys {} are present in inline_parameters but not in parameters".format(", ".join(inline_parameters.keys())))
     return result
 
 def siesta_input(cell, indent = 4):

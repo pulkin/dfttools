@@ -86,7 +86,12 @@ class AbstractJSONParser(AbstractParser):
     """
     
     def __init__(self, data):
-        self.json = json.loads(data)
+        if isinstance(data, (str, unicode)):
+            self.json = json.loads(data)
+        elif isinstance(data, dict):
+            self.json = data
+        else:
+            raise TypeError("Unknown input: {}".format(data))
 
     def __set_units__(self, field, units):
         self.json[field] = numpy.array(self.json[field])*units

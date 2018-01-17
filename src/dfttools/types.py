@@ -586,7 +586,12 @@ class UnitCell(Basis):
     Kwargs:
     
         c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
-        if coordinates are passed in the cartesian basis.
+        if coordinates are passed in the cartesian basis;
+        
+        units (str,float): optional units for the Basis. The units are
+        stored in `self.meta['units']` and are used only during save/load
+        process. The string value has to correspond to one of the values
+        in `numericalunits` package.
     """
 
     def __init__(self, basis, coordinates, values, c_basis = None, units = None):
@@ -1195,7 +1200,7 @@ class UnitCell(Basis):
         
         Kwargs:
         
-            fill: default value to fill with
+            fill: default value to fill with;
         
         Returns:
         
@@ -1292,6 +1297,13 @@ class Grid(Basis):
         grid.
         
         values (array): a multidimensional array with data on the grid.
+        
+    Kwargs:
+        
+        units (str,float): optional units for the Basis. The units are
+        stored in `self.meta['units']` and are used only during save/load
+        process. The string value has to correspond to one of the values
+        in `numericalunits` package.
     """
 
     def __init__(self, basis, coordinates, values, units=None):

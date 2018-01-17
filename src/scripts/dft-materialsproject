@@ -1,0 +1,70 @@
+#!/usr/bin/env python
+import argparse
+
+parser = argparse.ArgumentParser(description = "Retrieves data from Materials Project")
+parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose output")
+parser.add_argument("-k", "--key", help = "Materials Project API key")
+parser.add_argument("action", help = "action to perform", choices = ["download-structure"], metavar = "ACTION")
+parser.add_argument("target", help = "target: strucutre ID, etc.", metavar = "TARGET")
+parser.add_argument("output", help = "file name to output", metavar = "FILENAME")
+
+options = parser.parse_args()
+
+if options.key is None:
+    print("No key specified")
+    raise ValueError("No key specified")
+    
+from dfttools.parsers import materialsproject
+from dfttools import formatters
+
+try:
+    if options.verbose:
+        print("Verfying the key ...")
+    materialsproject.check_key(options.key)
+except RuntimeError:
+    print("Could not verify the key")
+    raise
+
+if options.action == "download-structure":
+    try:
+        if options.verbose:
+            print("Requesting structures ...")
+        parser = materialsproject.download_structures(options.key, options.target)
+    except:
+        print("Failed to make a request")
+        raise
+    
+    try:
+        if options.verbose:
+            print("Parsing JSON data ...")
+        cells = parser.unitCells()
+    except:
+        print("Failed to parse the data")
+        
+    if len(cells) == 0:
+        print("No structures recognized")
+        raise RuntimeError("No structures recognized")
+        
+    if len(cells) > 1:
+        if options.verbose:
+            print("{:d} structures found, the last one is taken")
+    
+    cell = cells[-1]
+    
+    if options.output.endswith(".json"):
+        if options.verbose:
+            print("Using JSON output format")
+        f = formatters.json_structure
+    elif options.output.endswith(".xsf"):
+        if options.verbose:
+            print("Using XSF output format")
+        f = formatters.xsf_structure
+    else:
+        if options.verbose:
+            print("Using JSON output format by default")
+        f = formatters.json_structure
+        
+    if options.verbose:
+        print("Writing file ...")
+    with open(options.output, 'w') as fl:
+        fl.write(f(cell))

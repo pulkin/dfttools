@@ -61,6 +61,7 @@ setup(
     scripts=[
         'scripts/dft-plot-bands',
         'scripts/dft-svg-structure',
+        'scripts/dft-materialsproject',
     ],
 )
 

@@ -429,7 +429,7 @@ def svgwrite_unit_cell(
                 
                 if show_numbers:
                     
-                    g.add(svg.text(str(i),
+                    g.add(svg.text(str(i-13*N if invisible == "auto" else i),
                         insert = (0,radius/4),
                         fill = __svg_color__(__dark__(colors_base[i])),
                         text_anchor = "middle",

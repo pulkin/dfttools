@@ -3,6 +3,7 @@ This submodule contains routines presenting data (unit cell) in various
 text formats.
 """
 import struct
+import json
 
 import numpy
 from numericalunits import angstrom
@@ -424,3 +425,15 @@ def pyscf_cell(cell, **kwargs):
         setattr(c,k,v)
     c.build()
     return c
+
+def json_structure(cell):
+    """
+    Outputs the unit cell into JSON string.
+    Args:
+        cell (UnitCell): a unit cell to serialize;
+        
+    Returns:
+        A string with serialized unit cell.
+    """
+    return json.dumps(cell.to_json(), indent=2)
+    

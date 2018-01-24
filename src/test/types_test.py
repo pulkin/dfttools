@@ -1314,6 +1314,28 @@ class GridTest(unittest.TestCase):
             ],
         ]])
 
+    def test_save_load_json(self):
+        import json
+        a = self.a*numericalunits.angstrom
+        h = self.h*numericalunits.angstrom
+        grid = Grid(Basis((a,a,h,0,0,.5), kind='triclinic'), self.grid.coordinates, self.grid.values, units = 'angstrom')
+        assert grid.units_aware()
+        
+        data = json.dumps(grid.to_json())
+        numericalunits.reset_units()
+        x = Gird.from_json(json.loads(data))
+        
+        # Assert object changed
+        assert x != grid
+        
+        # Assert object is the same wrt numericalunits
+        a = self.a*numericalunits.angstrom
+        h = self.h*numericalunits.angstrom
+        grid2 = Grid(Basis((a,a,h,0,0,.5), kind='triclinic'), self.grid.coordinates, self.grid.values, units = 'angstrom')
+        testing.assert_allclose(x.vectors,grid2.vectors,atol = 1e-8*numericalunits.angstrom)
+        testing.assert_equal(x.coordinates,grid2.coordinates)
+        testing.assert_equal(x.values,grid2.values)        
+
 class TetrahedronDensityTest(unittest.TestCase):
     
     def setUp(self):

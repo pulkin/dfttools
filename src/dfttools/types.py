@@ -1341,6 +1341,25 @@ class Grid(Basis):
         super(Grid,self).__setstate__(data)
         self.__init__(self, data["coordinates"], data["values"])
         
+    @staticmethod
+    def from_json(j):
+        """
+        Restores a Grid from JSON data.
+        
+        Args:
+        
+            j (dict): JSON data.
+            
+        Returns:
+        
+            A Grid object.
+        """
+        if not "type" in j or not j["type"] == "dfttools.Grid":
+            raise ValueError("This is not a valid Grid JSON representation.")
+        result = Grid(Basis(j["vectors"], meta = j["meta"]), j["coordinates"], j["values"])
+        result.__setstate__(j)
+        return result
+
     def __eq__(self, another):
         result = Basis.__eq__(self,another)
         result = result and numpy.all(self.values == another.values)

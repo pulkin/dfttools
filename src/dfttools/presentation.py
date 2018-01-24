@@ -588,6 +588,7 @@ def matplotlib_bands(
     cell,
     axes,
     show_fermi = True,
+    fermi_origin = False,
     energy_range = None,
     energy_units = "eV",
     energy_units_name = None,
@@ -615,6 +616,8 @@ def matplotlib_bands(
     Kwargs:
         
         show_fermi (bool): shows the Fermi level if specified;
+        
+        fermi_origin (bool): shift the energy origin to the Fermi level;
         
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
@@ -683,6 +686,12 @@ def matplotlib_bands(
     if isinstance(coordinate_units, str):
         coordinate_units_name = coordinate_units
         coordinate_units = getattr(numericalunits, coordinate_units)
+        
+    # Move the origin to the Fermi level
+    if fermi_origin and "Fermi" in cell.meta:
+        cell = cell.copy()
+        cell.values -= cell.meta["Fermi"]
+        cell.meta["Fermi"] = 0
         
     # Set energy range
     if energy_range is None:

@@ -1227,7 +1227,7 @@ class UnitCell(Basis):
             data[indexes] = v
             
         return Grid(
-            Basis(self.vectors, meta = self.meta),
+            self,
             coordinates,
             data,
         )

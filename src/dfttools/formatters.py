@@ -416,10 +416,12 @@ def pyscf_cell(cell, **kwargs):
     elif kwargs["unit"] == "Bohr":
         geometry = zip(cell.values, cell.cartesian() / aBohr)
         vectors = cell.vectors / aBohr
+        
+    if not "dimension" in kwargs:
+        kwargs['dimension'] = 3
 
     kwargs['atom'] = geometry
     kwargs['a'] = vectors
-    kwargs['dimension'] = 3
     c = Cell()
     for k,v in kwargs.items():
         setattr(c,k,v)

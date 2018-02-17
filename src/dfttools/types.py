@@ -998,30 +998,39 @@ class UnitCell(Basis):
         self.apply(~numpy.array(selection))
 
     @input_as_list
-    def cut(self, piece):
+    def cut(self, piece, select='auto'):
         """
         Selects a piece of this unit cell and returns it as a smaller
         unit cell.
         
-        Kwargs:
+        Args:
         
             piece (array): fraction of the cell to be selected. The order
             of coordinates in ``piece`` is ``x_from, y_from, ..., z_from, x_to, y_to, ..., z_to``.
+            
+        Kwargs:
+        
+            select (array): manual selection of points insisde the
+            unit cell. By default, selects only those pieces which drop
+            into the box defined by `piece`.
             
         Returns:
         
             A smaller unit cell selected.
         """
+        if isinstance(select, (str, unicode)) and select == 'auto':
+            select = self.select(piece)
         result = self.copy()
-        result.apply(result.select(piece))
+        result.apply(select)
         
         piece = numpy.reshape(piece,(2,-1))
         p1 = numpy.amin(piece,axis = 0)
         p2 = numpy.amax(piece,axis = 0)
-        
-        result.coordinates -= p1[numpy.newaxis,:]
-        result.coordinates /= (p2-p1)[numpy.newaxis,:]
-        result.vectors *= (p2-p1)[numpy.newaxis,:]
+
+        cartesian_shift = p1.dot(result.vectors)
+        cartesian_coords = result.cartesian() - cartesian_shift[numpy.newaxis, :]
+        result.vectors *= (p2-p1)[:, numpy.newaxis]
+        result.coordinates = result.transform_from_cartesian(cartesian_coords)
         return result
 
     @input_as_list
@@ -1097,7 +1106,7 @@ class UnitCell(Basis):
         coordinates = numpy.concatenate(coordinates, axis = 0)
             
         return UnitCell(basis, coordinates, values, c_basis = "cartesian")
-
+        
     @input_as_list
     def supercell(self, vec):
         """

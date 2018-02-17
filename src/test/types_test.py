@@ -403,8 +403,8 @@ class CellTest(unittest.TestCase):
         
     def test_cut_0(self):
         cp = self.cell.cut(0.,0.,0.,1.,1.,1.)
-        testing.assert_equal(cp.vectors,self.cell.vectors)
-        testing.assert_equal(cp.coordinates,self.cell.coordinates)
+        testing.assert_allclose(cp.vectors,self.cell.vectors)
+        testing.assert_allclose(cp.coordinates,self.cell.coordinates)
         testing.assert_equal(cp.values,self.cell.values)
         
     def test_cut_1(self):
@@ -1316,23 +1316,21 @@ class GridTest(unittest.TestCase):
 
     def test_save_load_json(self):
         import json
-        a = self.a*numericalunits.angstrom
-        h = self.h*numericalunits.angstrom
-        grid = Grid(Basis((a,a,h,0,0,.5), kind='triclinic'), self.grid.coordinates, self.grid.values, units = 'angstrom')
+        a = numericalunits.angstrom
+        grid = Grid(Basis((a,2*a,3*a), kind='orthorombic'), self.grid.coordinates, self.grid.values, units = 'angstrom')
         assert grid.units_aware()
         
         data = json.dumps(grid.to_json())
         numericalunits.reset_units()
-        x = Gird.from_json(json.loads(data))
+        x = Grid.from_json(json.loads(data))
         
         # Assert object changed
         assert x != grid
         
         # Assert object is the same wrt numericalunits
-        a = self.a*numericalunits.angstrom
-        h = self.h*numericalunits.angstrom
-        grid2 = Grid(Basis((a,a,h,0,0,.5), kind='triclinic'), self.grid.coordinates, self.grid.values, units = 'angstrom')
-        testing.assert_allclose(x.vectors,grid2.vectors,atol = 1e-8*numericalunits.angstrom)
+        a = numericalunits.angstrom
+        grid2 = Grid(Basis((a,2*a,3*a), kind='orthorombic'), self.grid.coordinates, self.grid.values, units = 'angstrom')
+        testing.assert_allclose(x.vectors,grid2.vectors,atol = 2e-8*numericalunits.angstrom)
         testing.assert_equal(x.coordinates,grid2.coordinates)
         testing.assert_equal(x.values,grid2.values)        
 

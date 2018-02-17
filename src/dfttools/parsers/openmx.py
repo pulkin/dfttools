@@ -702,9 +702,7 @@ class Transmission(AbstractParser):
         
         if l == -1:
             return False
-        print name[l+6:]
         return not (re.match(r"[\d+]_[\d+]\Z",name[l+5:]) is None)
-        
     
     @staticmethod
     def valid_header(header):

@@ -667,6 +667,7 @@ def matplotlib_bands(
     """
     
     from matplotlib.collections import LineCollection
+    from matplotlib.transforms import blended_transform_factory
 
     if not weights is None and not (cell.values.shape == weights.shape):
         raise TypeError("The shape of 'weights' {} is different from the shape of band structure data {}".format(weights.shape, cell.values.shape))
@@ -697,124 +698,140 @@ def matplotlib_bands(
     # Set energy range
     if energy_range is None:
         energy_range = __guess_energy_range__(cell)/energy_units
-        
-    # Fold K points to 0- > 1 line or project
-    if not project is None:
-        __ = {"kx":0, "ky":1, "kz":2}
-        if project in __.keys():
-            x_label = project
-            v = [0] * cell.vectors.shape[0]
-            v[__[project]] = 1
-            project = v
-            
-        else:
-            x_label = ("("+(",".join(("{:.2f}",)*len(project)))+") direction").format(*project)
-        
-        project = numpy.array(project, dtype = numpy.float)
-        project /= (project**2).sum()**.5
-        
-        if coordinate_units is None:
-            kpoints = numpy.dot(cell.coordinates,project)
-            
-        else:
-            kpoints = numpy.dot(cell.cartesian(),project) / coordinate_units
-        
-    else:
-        x_label = None
-        
-        kpoints = cell.distances((0,)+tuple(range(cell.size())))
-        for i in range(1,kpoints.shape[0]):
-            kpoints[i] += kpoints[i-1]
-        
-        if coordinate_units is None:
-            kpoints /= kpoints[-1]
-            
-        else:
-            kpoints /= coordinate_units
-            
-    if not coordinate_units_name is None:
-        if x_label is None:
-            x_label = "("+coordinate_units_name+")"
-            
-        else:
-            
-            x_label += " ("+coordinate_units_name+")"
     
-    # Find location of edges on the K axis
-    makes_turn = numpy.abs(1.+cell.angles(range(cell.size())))>threshold
-    makes_turn = numpy.concatenate([[True], makes_turn, [True]])
-    edges = kpoints[makes_turn]
-
-    # Plot edges
-    if project is None:
-        for e in edges[1:-1]:
-            axes.axvline(x=e,color='black',linewidth = 0.5)
-        
-    # Get continious parts
-    continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])
-    
-    # Get the segments to draw
-    visible_segment = continious[:,numpy.newaxis]*numpy.ones((1,cell.values.shape[1]), dtype = numpy.bool)
-    
-    # Optimize visible segments
-    if optimize_visible:
-        visible_point = numpy.logical_and(cell.values/energy_units > energy_range[0], cell.values/energy_units < energy_range[1])
-        visible_segment = numpy.logical_and(
-            numpy.logical_or(visible_point[:-1,:],visible_point[1:,:]),
-            visible_segment
-        )
-    
-    # Prepare LineCollection
-    segment_sets = []
-    for i in range(cell.values.shape[1]):
-        points = numpy.array([kpoints, cell.values[:,i]/energy_units]).T.reshape(-1, 1, 2)
-        segments = numpy.concatenate([points[:-1][visible_segment[:,i]], points[1:][visible_segment[:,i]]], axis=1)
-        
-        segment_sets.append(segments)
-        
-    segments = numpy.concatenate(segment_sets,axis = 0)
-    
+    # Cycle color
     if not "colors" in kwargs:
         kwargs.update(next(axes._get_lines.prop_cycler))
         
-    lc = LineCollection(segments, **kwargs)
-    
-    # Weights
-    for array, target in ((weights_color, lc.set_array), (weights_size, lc.set_linewidth)):
-        if not array is None:
-            array = numpy.swapaxes(0.5*(array[1:,:]+array[:-1,:]),0,1)
-            array = array[numpy.swapaxes(visible_segment,0,1)]
-            target(array)
+    if cell.size() > 1:
+            
+        # Fold K points to 0- > 1 line or project
+        if not project is None:
+            __ = {"kx":0, "ky":1, "kz":2}
+            if project in __.keys():
+                x_label = project
+                v = [0] * cell.vectors.shape[0]
+                v[__[project]] = 1
+                project = v
+                
+            else:
+                x_label = ("("+(",".join(("{:.2f}",)*len(project)))+") direction").format(*project)
+            
+            project = numpy.array(project, dtype = numpy.float)
+            project /= (project**2).sum()**.5
+            
+            if coordinate_units is None:
+                kpoints = numpy.dot(cell.coordinates,project)
+                
+            else:
+                kpoints = numpy.dot(cell.cartesian(),project) / coordinate_units
+            
+        else:
+            x_label = None
+            
+            kpoints = cell.distances((0,)+tuple(range(cell.size())))
+            for i in range(1,kpoints.shape[0]):
+                kpoints[i] += kpoints[i-1]
+            
+            if coordinate_units is None:
+                kpoints /= kpoints[-1]
+                
+            else:
+                kpoints /= coordinate_units
+                
+        if not coordinate_units_name is None:
+            if x_label is None:
+                x_label = "("+coordinate_units_name+")"
+                
+            else:
+                
+                x_label += " ("+coordinate_units_name+")"
+        
+        # Find location of edges on the K axis
+        if cell.size() > 2:
+            makes_turn = numpy.abs(1.+cell.angles(range(cell.size())))>threshold
+            makes_turn = numpy.concatenate([[True], makes_turn, [True]])
+        else:
+            makes_turn = numpy.array([True, True])
+        edges = kpoints[makes_turn]
+
+        # Plot edges
+        if project is None:
+            for e in edges[1:-1]:
+                axes.axvline(x=e,color='black',linewidth = 0.5)
+            
+        # Get continious parts
+        if cell.size() > 2:
+            continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])
+        else:
+            continious = numpy.array([True])
+        
+        # Get the segments to draw
+        visible_segment = continious[:,numpy.newaxis]*numpy.ones((1,cell.values.shape[1]), dtype = numpy.bool)
+        
+        # Optimize visible segments
+        if optimize_visible:
+            visible_point = numpy.logical_and(cell.values/energy_units > energy_range[0], cell.values/energy_units < energy_range[1])
+            visible_segment = numpy.logical_and(
+                numpy.logical_or(visible_point[:-1,:],visible_point[1:,:]),
+                visible_segment
+            )
+        
+        # Prepare LineCollection
+        segment_sets = []
+        for i in range(cell.values.shape[1]):
+            points = numpy.array([kpoints, cell.values[:,i]/energy_units]).T.reshape(-1, 1, 2)
+            segments = numpy.concatenate([points[:-1][visible_segment[:,i]], points[1:][visible_segment[:,i]]], axis=1)
+            
+            segment_sets.append(segments)
+            
+        segments = numpy.concatenate(segment_sets,axis = 0)
+            
+        lc = LineCollection(segments, **kwargs)
+        
+        # Weights
+        for array, target in ((weights_color, lc.set_array), (weights_size, lc.set_linewidth)):
+            if not array is None:
+                array = numpy.swapaxes(0.5*(array[1:,:]+array[:-1,:]),0,1)
+                array = array[numpy.swapaxes(visible_segment,0,1)]
+                target(array)
+        
+        # Mark points
+        if not mark_points is None:
+            mark_points = numpy.array(mark_points)
+            axes.scatter(
+                list(kpoints[i] for i,j in mark_points),
+                list(cell.values[i,j]/energy_units for i,j in mark_points),
+                marker = "+",
+                s = 50,
+            )
+        
+        if project is None:
+            axes.set_xticks(edges)
+            axes.set_xticklabels(list(
+                edge_names[i] if i<len(edge_names) else " ".join(("{:.2f}",)*cell.coordinates.shape[1]).format(*cell.coordinates[makes_turn,:][i])
+                for i in range(makes_turn.sum())
+            ))
+        
+        axes.set_xlim((kpoints.min(),kpoints.max()))
+        if not x_label is None:
+            axes.set_xlabel(x_label)
+            
+    else:
+        
+        kwargs.update(transform=blended_transform_factory(axes.transAxes, axes.transData))
+        lc = LineCollection(list([[0, v], [1, v]] for v in cell.values.reshape(-1) / energy_units), **kwargs)
+        
+        axes.set_xticks([])
         
     # Plot bands
     axes.add_collection(lc)
-    
-    # Mark points
-    if not mark_points is None:
-        mark_points = numpy.array(mark_points)
-        axes.scatter(
-            list(kpoints[i] for i,j in mark_points),
-            list(cell.values[i,j]/energy_units for i,j in mark_points),
-            marker = "+",
-            s = 50,
-        )
     
     # Plot Fermi energy
     if show_fermi and "Fermi" in cell.meta:
         axes.axhline(y = cell.meta["Fermi"]/energy_units, color='black', ls = "--", lw = 0.5)
                 
     axes.set_ylim(energy_range)
-    
-    axes.set_xlim((kpoints.min(),kpoints.max()))
-    if not x_label is None:
-        axes.set_xlabel(x_label)
-    
-    if project is None:
-        axes.set_xticks(edges)
-        axes.set_xticklabels(list(
-            edge_names[i] if i<len(edge_names) else " ".join(("{:.2f}",)*cell.coordinates.shape[1]).format(*cell.coordinates[makes_turn,:][i])
-            for i in range(makes_turn.sum())
-        ))
         
     if not energy_units_name is None:
         axes.set_ylabel('Energy ({})'.format(energy_units_name))

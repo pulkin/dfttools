@@ -574,15 +574,16 @@ def __guess_energy_range__(cell, bands = 10, window = 0.05):
         
         global_min = minimas[top[:bands]].min()
         global_max = maximas[top[:bands]].max()
-        
-        return numpy.array((
-            ((1+window)*global_min - window*global_max),
-            ((1+window)*global_max - window*global_min),
-        ))
-        
+    
     else:
         
-        return numpy.array((cell.values.min(), cell.values.max()))
+        global_min = cell.values.min()
+        global_max = cell.values.max()
+    
+    return numpy.array((
+        ((1+window)*global_min - window*global_max),
+        ((1+window)*global_max - window*global_min),
+    ))
     
 def matplotlib_bands(
     cell,

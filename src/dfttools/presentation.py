@@ -6,7 +6,10 @@ from .types import Basis, UnitCell, Grid, __angle__, __xyz2i__
 import math
 import colorsys
 import base64
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 
 import numpy
 import numericalunits

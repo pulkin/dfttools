@@ -764,10 +764,12 @@ def matplotlib_bands(
                 axes.axvline(x=e,color='black',linewidth = 0.5)
             
         # Get continious parts
-        if cell.size() > 2:
-            continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])
-        else:
-            continious = numpy.array([True])
+        continious = numpy.logical_not(makes_turn[1:]*makes_turn[:-1])
+
+        # Take care of isolated points
+        discontinious = numpy.logical_not(numpy.concatenate(([False], continious, [False])))
+        isolated_points = discontinious[1:] * discontinious[:-1]
+        continious = numpy.logical_or(continious, numpy.logical_or(isolated_points[1:], isolated_points[:-1]))
         
         # Get the segments to draw
         visible_segment = continious[:,numpy.newaxis]*numpy.ones((1,cell.values.shape[1]), dtype = numpy.bool)

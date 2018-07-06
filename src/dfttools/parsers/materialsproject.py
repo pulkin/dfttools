@@ -76,9 +76,17 @@ class JSONResponse(AbstractJSONParser):
     """
     A class parsing JSON responses of Materials Project API.
     """
+    def test_error(self):
+        """
+        Tests whether any error returned. Raises an exception if so.
+        """
+        if "valid_response" in self.json and not self.json["valid_response"]:
+            text = self.json.get("error", "(None)")
+            raise ValueError("The response is invalid, message: {}".format(text))
     
     @unit_cell
     def unitCells(self, root = None):
+        self.test_error()
         if root is None:
             root = self.json
         

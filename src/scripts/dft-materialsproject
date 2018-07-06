@@ -17,6 +17,8 @@ if options.key is None:
 from dfttools.parsers import materialsproject
 from dfttools import formatters
 
+import json
+
 try:
     if options.verbose:
         print("Verfying the key ...")
@@ -40,10 +42,13 @@ if options.action == "download-structure":
         cells = parser.unitCells()
     except:
         print("Failed to parse the data")
+        raise
         
     if len(cells) == 0:
         print("No structures recognized")
-        raise RuntimeError("No structures recognized")
+        with open("mp-error-response.json", 'w') as f:
+            json.dump(parser.json, f, indent=4)
+        raise RuntimeError("No structures recognized, the response is written in mp-error-response.json")
         
     if len(cells) > 1:
         if options.verbose:

@@ -817,18 +817,23 @@ class UnitCell(Basis):
         
         Kwargs:
         
-            sort: coordinates to sort with: either 'x', 'y', 'z' or 0,1,2.
+            sort: coordinates to sort with: either 'x', 'y', 'z' or 0,1,2
+            or a vector in crystal coordiantes to project onto before sorting.
         
         Returns:
         
             A new grid with normalized data.
         """
         sort = __xyz2i__(sort)
+        if isinstance(sort, int):
+            i = sort
+            sort = [0] * self.coordinates.shape[1]
+            sort[i] = 1
         
         result = self.copy()
         result.coordinates = result.coordinates % 1
         if not sort is None:
-            result.apply(numpy.argsort(result.coordinates[:,sort]))
+            result.apply(numpy.argsort(result.coordinates.dot(sort)))
             
         return result
         
@@ -1087,6 +1092,8 @@ class UnitCell(Basis):
         """
         cells = [self]+cells
         d = __xyz2i__(vector)
+        not_d = list(range(self.vectors.shape[0]))
+        del not_d[d]
         dims = self.vectors.shape[0]
         
         for c in cells:
@@ -1101,7 +1108,11 @@ class UnitCell(Basis):
         shift = numpy.zeros(dims)
         for c in cells:
             if isinstance(c, UnitCell):
+                # Fix for not-excatly-the-same vectors
+                original = c.vectors[not_d].copy()
+                c.vectors[not_d] = self.vectors[not_d]
                 coordinates.append(c.cartesian() + shift[numpy.newaxis,:])
+                c.vectors[not_d] = original
             shift += c.vectors[d,:]
         coordinates = numpy.concatenate(coordinates, axis = 0)
             
@@ -1160,7 +1171,7 @@ class UnitCell(Basis):
         
         result.apply(numpy.all(numpy.logical_and(result.coordinates >= 0, result.coordinates < 1), axis = 1))
         result.coordinates -= result.transform_from(u, random_displacement)
-        return result
+        return result.normalized()
     
     def species(self):
         """

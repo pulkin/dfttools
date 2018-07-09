@@ -1020,13 +1020,15 @@ class Input(AbstractParser):
             self.parser.nextLine()
             
         if units == "alat":
-            result = UnitCell(basis, coordinates*alat, values, c_basis = "cartesian")
+            result = UnitCell(basis, coordinates*units_dict["alat"], values, c_basis = "cartesian")
         elif units == "bohr":
             result = UnitCell(basis, coordinates*numericalunits.aBohr, values, c_basis = "cartesian")
         elif units == "angstrom":
             result = UnitCell(basis, coordinates*numericalunits.angstrom, values, c_basis = "cartesian")
         elif units == "crystal":
             result = UnitCell(basis, coordinates, values)
+        else:
+            raise RuntimeError("Unknown units: {}".format(units))
             
         result.meta["force-factors"] = statics
         

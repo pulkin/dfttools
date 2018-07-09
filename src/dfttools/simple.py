@@ -157,5 +157,5 @@ def parse(f, tag, *args):
     
     else:
         raise ParseError("Parsing failed, attempted following candidates:\n" + "\n".join(tuple(
-            " - "+i for i in cadidates
+            " - "+str(i) for i in candidates
         )))

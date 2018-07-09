@@ -995,15 +995,25 @@ class Input(AbstractParser):
             self.parser.skip("cell_parameters")
             units = self.parser.nextMatch(cre_word)
             vectors = self.parser.nextFloat(n = (3,3))*units_dict[units]
-                
             basis = default_real_space_basis(vectors)
+            
+        elif ibrav == 2:
+            
+            a = nl["system"]["celldm(1)"]
+            basis = default_real_space_basis(a/2 * numericalunits.aBohr * numpy.array((
+                (-1, 0, 1), (0, 1, 1), (-1, 1, 0),
+            )))
             
         else:
             raise NotImplementedError("Cell recovery not implemented for ibrav = {:d}".format(int(ibrav)))
         
         self.parser.reset()
         self.parser.skip("atomic_positions")
-        units = self.parser.nextMatch(cre_word)
+        units = self.parser.nextMatch(cre_word, n="\n")
+        if len(units) == 0:
+            units = "alat"
+        else:
+            units = units[0]
         coordinates = numpy.zeros((int(nl["system"]["nat"]),3))
         statics = numpy.ones(coordinates.shape, dtype = numpy.float)
         values = numpy.zeros(coordinates.shape[0],"S2")

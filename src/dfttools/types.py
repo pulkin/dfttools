@@ -129,7 +129,7 @@ class Basis(object):
         
     def __getstate__(self):
         result = {
-            "meta":self.meta.copy(),
+            "meta":{k: v.tolist() if isinstance(v, numpy.ndarray) else v for k, v in self.meta.items()},
         }
         # Release units
         if self.units_aware():

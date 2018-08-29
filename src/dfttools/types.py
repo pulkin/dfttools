@@ -1596,7 +1596,7 @@ class Grid(Basis):
             # Set a valid slice
             slices[i] = selection[i]
             # Apply slice
-            self.values = self.values[slices]
+            self.values = self.values[tuple(slices)]
             # Revert slice
             slices[i] = slice(None,None,None)
         

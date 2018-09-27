@@ -296,25 +296,30 @@ def svgwrite_unit_cell(
     except KeyError:
         pass     
     camera = numpy.array(camera, dtype = numpy.float64)
-    camera = camera / (camera**2).sum()**.5
+    camera_z = camera / numpy.linalg.norm(camera)
     
     # Camera top vector
     if camera_top is None:
         # Determine lattice vector with the longest projection
         proj = ((cell.vectors - numpy.dot(cell.vectors, camera)[:,numpy.newaxis] * camera[numpy.newaxis,:])**2).sum(axis = -1)
         camera_top = numpy.cross(camera,cell.vectors[numpy.argmax(proj)])
-        
     else:
         camera_top = numpy.array(camera_top, dtype = numpy.float64)
-        if numpy.linalg.norm(numpy.cross(camera_top,camera)) == 0:
-            raise ValueError("The 'camera' and 'camera_top' vectors cannot be collinear")
+        
+    camera_x = numpy.cross(camera, camera_top)
+    camera_y = camera_top - numpy.dot(camera_top, camera_z) * camera_z
     
+    if numpy.linalg.norm(camera_x) == 0 or numpy.linalg.norm(camera_y) == 0:
+        raise ValueError("The 'camera' and 'camera_top' vectors cannot be collinear")
+        
+    camera_x /= numpy.linalg.norm(camera_x)
+    camera_y /= numpy.linalg.norm(camera_y)
+        
     # Calculate projection matrix
-    camera_top /= (camera_top**2).sum()**.5
     projection = Basis((
-        numpy.cross(camera, camera_top),
-        camera_top,
-        camera,
+        camera_x,
+        camera_y,
+        camera_z,
     ))
     
     # Project atomic coordinates onto the plane    

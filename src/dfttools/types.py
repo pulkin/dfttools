@@ -681,12 +681,19 @@ class UnitCell(Basis):
     def __getstate__(self):
         result = super(UnitCell, self).__getstate__()
         result["coordinates"] = self.coordinates.tolist()
-        result["values"] = self.values.tolist()
+        # Release units
+        if self.value_units_aware:
+            result["values"] = (self.values / __eval_numericalunits__(self.meta["units-values"])).tolist()
+        else:
+            result["values"] = self.values.tolist()
         return result
 
     def __setstate__(self, data):
         super(UnitCell, self).__setstate__(data)
         self.__init__(self, data["coordinates"], data["values"])
+        # Set units
+        if self.value_units_aware:
+            self.values *= __eval_numericalunits__(self.meta["units-values"])
 
     @staticmethod
     def from_json(j):
@@ -706,6 +713,17 @@ class UnitCell(Basis):
         result = UnitCell(Basis(j["vectors"], meta=j["meta"]), j["coordinates"], j["values"])
         result.__setstate__(j)
         return result
+
+    @property
+    def value_units_aware(self):
+        """
+        Checks if units for this Basis' values are defined.
+
+        Returns:
+
+            True if units were defined.
+        """
+        return "units-values" in self.meta
 
     def __eq__(self, another):
         return Basis.__eq__(self, another) and numpy.all(self.coordinates == another.coordinates) and numpy.all(

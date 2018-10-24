@@ -360,15 +360,13 @@ class CellTest(unittest.TestCase):
         )
 
     @staticmethod
-    def __bs__(a, h):
-        c = UnitCell(
+    def __bs__(a, h, **kwargs):
+        return UnitCell(
             Basis((a, a, h, 0., 0., 0.5), kind='triclinic'),
             ((0., 0., 0.), (1. / 3., 1. / 3., 0.5)),
             [3 * numericalunits.eV],
+            **kwargs
         )
-        c.meta["units"] = "1/angstrom"
-        c.meta["units-values"] = "eV"
-        return c
 
     def setUp(self):
         self.a = 2.510e-10
@@ -724,7 +722,7 @@ class CellTest(unittest.TestCase):
         import pickle
         a = self.a * numericalunits.angstrom
         h = self.h * numericalunits.angstrom
-        cell = CellTest.__bs__(a, h)
+        cell = CellTest.__bs__(a, h, units="1/angstrom", units_values="eV")
         assert cell.units_aware
         assert cell.value_units_aware
 
@@ -738,7 +736,7 @@ class CellTest(unittest.TestCase):
         # Assert object is the same wrt numericalunits
         a = self.a * numericalunits.angstrom
         h = self.h * numericalunits.angstrom
-        cell2 = CellTest.__bs__(a, h)
+        cell2 = CellTest.__bs__(a, h, units="1/angstrom", units_values="eV")
         testing.assert_allclose(x.vectors, cell2.vectors, atol=1e-8 * numericalunits.angstrom)
         testing.assert_equal(x.coordinates, cell2.coordinates)
         testing.assert_equal(x.values, cell2.values)

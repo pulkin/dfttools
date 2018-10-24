@@ -618,13 +618,19 @@ class UnitCell(Basis):
         c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
         if coordinates are passed in the cartesian basis;
         
-        units (str): optional units for the UnitCell basis. The units are stored
-        in `self.meta['units']` and are used only during save/load
+        units (str): optional units for the UnitCell basis. The units are
+        stored in `self.meta['units']` and are used only during save/load
         process. The string expression of the units may contain only
         attributes of the `numericalunits` package. Example: '1/angstrom'.
+
+        units_values (str): optional units for the UnitCell values. The
+        units are stored in `self.meta['units-values']` and are used only
+        during save/load process. The string expression of the units may
+        contain only attributes of the `numericalunits` package.
+        Example: 'eV/angstrom'.
     """
 
-    def __init__(self, basis, coordinates, values, c_basis=None, units=None):
+    def __init__(self, basis, coordinates, values, c_basis=None, units=None, units_values=None):
 
         Basis.__init__(self, basis.vectors, meta=basis.meta)
 
@@ -677,6 +683,9 @@ class UnitCell(Basis):
 
         if not units is None:
             self.meta["units"] = units
+
+        if units_values is not None:
+            self.meta["units-values"] = units_values
 
     def __getstate__(self):
         result = super(UnitCell, self).__getstate__()

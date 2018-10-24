@@ -209,7 +209,6 @@ class BasisTest(unittest.TestCase):
         for k in keys:
             a = numpy.array(k, dtype = float).tolist()
             b = pth.tolist()
-            print a,b
             assert a in b
         
     def test_save_load(self):

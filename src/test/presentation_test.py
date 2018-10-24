@@ -376,7 +376,6 @@ class ScalarGridPlotTest(unittest.TestCase):
     def test_plot_3(self):
         im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1,0.1,0.1), 'z', show_cell = True)
         l = list(i for i in pyplot.gca().get_children() if isinstance(i, Line2D))
-        print len(l)
         assert len(l) == 12
             
     @cleanup

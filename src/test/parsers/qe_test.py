@@ -835,11 +835,7 @@ K_POINTS automatic
     def test_unitCell(self):
         cell = self.parser.unitCell()
         assert cell.units_aware()
-        #print cell.vectors - numpy.array(
-            #((5.669178374*numericalunits.aBohr, 0, 0),
-             #(0, 5.669178374*numericalunits.aBohr, 0),
-             #(0, 0, 5.669178374*numericalunits.aBohr*0.9466666667)))
-             
+
         testing.assert_allclose(cell.vectors,
             ((5.669178374*numericalunits.aBohr, 0, 0),
              (0, 5.669178374*numericalunits.aBohr, 0),

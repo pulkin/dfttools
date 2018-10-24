@@ -8,5 +8,12 @@ def __import_all_parsers__():
 
 
 def default_real_space_basis(vectors, kind='default', meta=None):
-    "A default basis in the real space with units assigned."
+    """"A default basis in the real space with units assigned."""
     return Basis(vectors, kind=kind, meta=meta, units="angstrom")
+
+
+def default_band_structure_basis(vectors, kind='default', meta=None):
+    """A default basis in the real space with units assigned."""
+    b = Basis(vectors, kind=kind, meta=meta, units="1/angstrom")
+    b.meta["units-values"] = "eV"
+    return b

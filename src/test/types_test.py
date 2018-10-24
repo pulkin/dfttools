@@ -739,14 +739,15 @@ class CellTest(unittest.TestCase):
         cell2 = CellTest.__bs__(a, h, units="1/angstrom", units_values="eV")
         testing.assert_allclose(x.vectors, cell2.vectors, atol=1e-8 / numericalunits.angstrom)
         testing.assert_equal(x.coordinates, cell2.coordinates)
-        testing.assert_equal(x.values, cell2.values)
+        testing.assert_allclose(x.values, cell2.values)
 
     def test_save_load_json(self):
         import json
         a = self.a * numericalunits.angstrom
         h = self.h * numericalunits.angstrom
-        cell = CellTest.__co__(a, h, units='angstrom')
+        cell = CellTest.__bs__(a, h, units='1/angstrom', units_values="eV")
         assert cell.units_aware
+        assert cell.values_units_aware
 
         data = json.dumps(cell.to_json())
         numericalunits.reset_units()
@@ -758,10 +759,10 @@ class CellTest(unittest.TestCase):
         # Assert object is the same wrt numericalunits
         a = self.a * numericalunits.angstrom
         h = self.h * numericalunits.angstrom
-        cell2 = CellTest.__co__(a, h, units='angstrom')
+        cell2 = CellTest.__bs__(a, h, units='1/angstrom', units_values="eV")
         testing.assert_allclose(x.vectors, cell2.vectors, atol=1e-8 * numericalunits.angstrom)
         testing.assert_equal(x.coordinates, cell2.coordinates)
-        testing.assert_equal(x.values, cell2.values)
+        testing.assert_allclose(x.values, cell2.values)
 
 
 class FCCCellTest(unittest.TestCase):
@@ -1349,7 +1350,30 @@ class GridTest(unittest.TestCase):
                      self.grid.values * numericalunits.eV, units='1/angstrom', units_values="eV")
         testing.assert_allclose(x.vectors, grid2.vectors, atol=2e-8 / numericalunits.angstrom)
         testing.assert_equal(x.coordinates, grid2.coordinates)
-        testing.assert_equal(x.values, grid2.values)
+        testing.assert_allclose(x.values, grid2.values)
+
+    def test_save_load_json_with_conversion(self):
+        import json
+        a = numericalunits.angstrom
+        grid = Grid(Basis((a, 2 * a, 3 * a), kind='orthorombic'), self.grid.coordinates,
+                    self.grid.values * numericalunits.eV, units='1/angstrom', units_values="eV")
+        assert grid.units_aware
+        assert grid.values_units_aware
+
+        data = json.dumps(grid.as_unitCell().to_json())
+        numericalunits.reset_units()
+        x = UnitCell.from_json(json.loads(data)).as_grid()
+
+        # Assert object changed
+        assert x != grid
+
+        # Assert object is the same wrt numericalunits
+        a = numericalunits.angstrom
+        grid2 = Grid(Basis((a, 2 * a, 3 * a), kind='orthorombic'), self.grid.coordinates,
+                     self.grid.values * numericalunits.eV, units='1/angstrom', units_values="eV")
+        testing.assert_allclose(x.vectors, grid2.vectors, atol=2e-8 / numericalunits.angstrom)
+        testing.assert_equal(x.coordinates, grid2.coordinates)
+        testing.assert_allclose(x.values, grid2.values)
 
 
 class TetrahedronDensityTest(unittest.TestCase):

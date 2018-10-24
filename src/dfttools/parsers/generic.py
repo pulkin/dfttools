@@ -1,10 +1,9 @@
 """
 Contains helper routines to parse text.
 """
-import re
-import sys
 import json
-    
+import re
+
 import numpy
 
 re_float = r"([-+]?[0-9]+\.?[0-9]*(?:[eEdD][-+]?[0-9]*)?)|(nan)"
@@ -17,15 +16,17 @@ re_quotedText = r"(\'.*?\')|(\".*?\")"
 
 cre_float = re.compile(re_float)
 cre_int = re.compile(re_int)
-cre_line = re.compile(re_line,re.MULTILINE)
+cre_line = re.compile(re_line, re.MULTILINE)
 cre_word = re.compile(re_word)
 cre_varName = re.compile(re_varName)
 cre_nonspace = re.compile(re_nonspace)
-cre_quotedText = re.compile(re_quotedText,re.DOTALL)
+cre_quotedText = re.compile(re_quotedText, re.DOTALL)
+
 
 class ParseError(Exception):
     pass
-    
+
+
 class AbstractParser(object):
     """
     A root class for text parsers.
@@ -34,16 +35,16 @@ class AbstractParser(object):
     
         data (str): text to parse or a file to read.
     """
-    
+
     def __init__(self, file):
-        if hasattr(file,"read"):
+        if hasattr(file, "read"):
             self.file = file
             self.data = file.read()
         else:
             self.file = None
             self.data = file
         self.parser = parse(self.data)
-    
+
     @staticmethod
     def valid_header(header):
         """
@@ -59,7 +60,7 @@ class AbstractParser(object):
             True if the header is as expected.
         """
         raise NotImplementedError
-        
+
     @staticmethod
     def valid_filename(name):
         """
@@ -75,7 +76,8 @@ class AbstractParser(object):
             True if the name is as expected.
         """
         raise NotImplementedError
-        
+
+
 class AbstractJSONParser(AbstractParser):
     """
     A root class for JSON parsers.
@@ -84,7 +86,7 @@ class AbstractJSONParser(AbstractParser):
     
         data (str): text representation of JSON to parse.
     """
-    
+
     def __init__(self, data):
         if isinstance(data, (str, unicode)):
             self.json = json.loads(data)
@@ -94,8 +96,9 @@ class AbstractJSONParser(AbstractParser):
             raise TypeError("Unknown input: {}".format(data))
 
     def __set_units__(self, field, units):
-        self.json[field] = numpy.array(self.json[field])*units
-        
+        self.json[field] = numpy.array(self.json[field]) * units
+
+
 class StringParser(object):
     """
     Simple parser for a string with position memory.
@@ -115,13 +118,13 @@ class StringParser(object):
         field. The contents of the string is not copied.
     
     """
-    
+
     def __init__(self, string):
         self.string = string
         self.__position__ = 0
         self.__history__ = []
-        
-    def goto(self, expression, n = 1):
+
+    def goto(self, expression, n=1):
         """
         Goes to the beginning of nth occurrence of expression in the
         string.
@@ -140,12 +143,12 @@ class StringParser(object):
             StopIteration: No occurrences left in the string.
         """
         if isinstance(expression, str):
-            expression = re.compile(re.escape(expression),re.I)
+            expression = re.compile(re.escape(expression), re.I)
         ex_it = expression.finditer(self.string[self.__position__:])
         for i in range(n):
             start = next(ex_it).start()
         self.__position__ += start
-        
+
     def pop(self):
         """
         Returns to the previously saved position of the parser.
@@ -155,7 +158,7 @@ class StringParser(object):
             IndexError: No saved positions left.
         """
         self.__position__ = self.__history__.pop()
-        
+
     def save(self):
         """
         Saves the current position of the parser.
@@ -177,8 +180,8 @@ class StringParser(object):
             sp.nextInt()
         """
         self.__history__.append(self.__position__)
-        
-    def skip(self, expression, n = 1):
+
+    def skip(self, expression, n=1):
         """
         Skips n occurrences of expression in the string.
 
@@ -196,12 +199,12 @@ class StringParser(object):
             StopIteration: No occurrences left in the string.
         """
         if isinstance(expression, str):
-            expression = re.compile(re.escape(expression),re.I)
+            expression = re.compile(re.escape(expression), re.I)
         ex_it = expression.finditer(self.string[self.__position__:])
         for i in range(n):
             end = next(ex_it).end()
         self.__position__ += end
-            
+
     def skipAll(self, expression):
         """
         Goes to the end of the last occurrence of a given expression in
@@ -217,7 +220,7 @@ class StringParser(object):
             StopIteration: No occurrences left in the string.
         """
         if isinstance(expression, str):
-            expression = re.compile(re.escape(expression),re.I)
+            expression = re.compile(re.escape(expression), re.I)
         ex_it = expression.finditer(self.string[self.__position__:])
         end = next(ex_it).end()
         while True:
@@ -226,7 +229,7 @@ class StringParser(object):
             except StopIteration:
                 self.__position__ += end
                 return
-        
+
     def present(self, expression):
         """
         Test the string for the presence of expression.
@@ -246,8 +249,8 @@ class StringParser(object):
             return True
         except StopIteration:
             return False
-                
-    def distance(self, expression, n = 1, default = None):
+
+    def distance(self, expression, n=1, default=None):
         """
         Calculates distance to nth occurrence of expression in characters.
         
@@ -275,7 +278,7 @@ class StringParser(object):
             StopIteration: No occurrences left in the string.
         """
         if isinstance(expression, str):
-            expression = re.compile(re.escape(expression),re.I)
+            expression = re.compile(re.escape(expression), re.I)
         ex_it = expression.finditer(self.string[self.__position__:])
         try:
             for i in range(n):
@@ -286,14 +289,14 @@ class StringParser(object):
             else:
                 return default
         return start
-        
+
     def reset(self):
         """
         Resets the caret to the beginning of the string.
         """
         self.__position__ = 0
-        
-    def nextMatch(self, match, n = None):
+
+    def nextMatch(self, match, n=None):
         """
         Basic function for matching data.
         
@@ -324,9 +327,9 @@ class StringParser(object):
             result = match.group()
             self.__position__ += match.end()
             return result
-        elif isinstance(n,(int, list, tuple, numpy.ndarray)):
-            n_elements = n if isinstance(n,int) else numpy.prod(n)
-            result = numpy.zeros(n_elements, dtype = object)
+        elif isinstance(n, (int, list, tuple, numpy.ndarray)):
+            n_elements = n if isinstance(n, int) else numpy.prod(n)
+            result = numpy.zeros(n_elements, dtype=object)
             if result.size > 0:
                 for x in range(n_elements):
                     match = next(ex_it)
@@ -341,7 +344,7 @@ class StringParser(object):
                 try:
                     match = next(ex_it)
                     e = match.end()
-                    if e<=lim:
+                    if e <= lim:
                         result.append(match.group())
                         end = e
                     else:
@@ -349,9 +352,9 @@ class StringParser(object):
                 except StopIteration:
                     break
             self.__position__ += end
-            return numpy.array(result, dtype = object)
+            return numpy.array(result, dtype=object)
 
-    def matchAfter(self,after,match,n = None):
+    def matchAfter(self, after, match, n=None):
         """
         Matches pattern after another pattern and returns caret to initial
         position. Particularly useful for getting value for parameter
@@ -390,11 +393,11 @@ class StringParser(object):
         """
         self.save()
         self.skip(after)
-        result = self.nextMatch(match, n = n)
+        result = self.nextMatch(match, n=n)
         self.pop()
         return result
-        
-    def nextInt(self, n = None):
+
+    def nextInt(self, n=None):
         """
         Reads integers from string.
         
@@ -424,13 +427,13 @@ class StringParser(object):
             array([ 7.,  8.,  9.])
                 
         """
-        result = self.nextMatch(cre_int, n = n)
+        result = self.nextMatch(cre_int, n=n)
         if n is None:
             return int(result)
         else:
             return result.astype(numpy.int)
-            
-    def intAfter(self, after, n = None):
+
+    def intAfter(self, after, n=None):
         """
         Reads integers from string after the next regular expression.
         Returns the caret to initial position. Particularly useful for
@@ -467,11 +470,11 @@ class StringParser(object):
         """
         self.save()
         self.skip(after)
-        result = self.nextInt(n = n)
+        result = self.nextInt(n=n)
         self.pop()
         return result
-        
-    def nextFloat(self, n = None):
+
+    def nextFloat(self, n=None):
         """
         Reads floats from string.
         
@@ -500,13 +503,13 @@ class StringParser(object):
             array([ 3.7  ,  0.562])
                 
         """
-        result = self.nextMatch(cre_float, n = n)
+        result = self.nextMatch(cre_float, n=n)
         if n is None:
-            return float(result.replace('d','e').replace('D','E'))
+            return float(result.replace('d', 'e').replace('D', 'E'))
         else:
             return result.astype(numpy.float)
-            
-    def floatAfter(self, after, n = None):
+
+    def floatAfter(self, after, n=None):
         """
         Reads floats from string after the next regular expression.
         Returns the caret to initial position. Particularly useful for
@@ -543,11 +546,11 @@ class StringParser(object):
         """
         self.save()
         self.skip(after)
-        result = self.nextFloat(n = n)
+        result = self.nextFloat(n=n)
         self.pop()
         return result
 
-    def nextLine(self, n = None):
+    def nextLine(self, n=None):
         """
         Reads lines from string.
         
@@ -570,11 +573,11 @@ class StringParser(object):
         """
         if self.__position__ == len(self.string):
             raise StopIteration
-        result = self.nextMatch(cre_line, n = n)
+        result = self.nextMatch(cre_line, n=n)
         if self.__position__ < len(self.string):
             self.__position__ += 1
         return result
-        
+
     def startOfLine(self):
         """
         Goes to the beginning of the current line.
@@ -583,14 +586,14 @@ class StringParser(object):
             self.__position__ -= 1
         else:
             return
-            
+
         while not self.string[self.__position__] == "\n":
             if self.__position__ == 0:
                 return
             self.__position__ -= 1
-            
+
         self.__position__ += 1
-        
+
     def closest(self, exprs):
         """
         Returns the closest match of a set of expressions.
@@ -612,14 +615,15 @@ class StringParser(object):
             2
             
         """
-        patterns = tuple(re.escape(i) if isinstance(i,str) else i.pattern for i in exprs)
-        match = re.search("("+(")|(".join(patterns))+")",self.string[self.__position__:],re.I)
+        patterns = tuple(re.escape(i) if isinstance(i, str) else i.pattern for i in exprs)
+        match = re.search("(" + (")|(".join(patterns)) + ")", self.string[self.__position__:], re.I)
         if match is None:
             return None
         else:
             matchedString = match.group()
             for i in range(len(patterns)):
-                if not re.search(patterns[i],matchedString,re.I) is None:
+                if not re.search(patterns[i], matchedString, re.I) is None:
                     return i
+
 
 parse = StringParser

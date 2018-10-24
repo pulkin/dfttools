@@ -1,20 +1,24 @@
+import os
+import subprocess
+import sys
 import unittest
-import os, sys, subprocess
+
 
 def get_fname(self, id):
-    return "__"+self.__class__.__name__+"TEMP"+str(id)        
+    return "__" + self.__class__.__name__ + "TEMP" + str(id)
+
 
 class Test_dft_plot_bands(unittest.TestCase):
 
     def setUp(self):
-        fname = get_fname(self,"0.pdf")
+        fname = get_fname(self, "0.pdf")
         if os.path.exists(fname):
             os.remove(fname)
-            
+
     tearDown = setUp
-        
+
     def test_output(self):
-        fname = get_fname(self,"0.pdf")
+        fname = get_fname(self, "0.pdf")
         assert subprocess.call((
             sys.executable,
             "scripts/dft-plot-bands",
@@ -24,17 +28,18 @@ class Test_dft_plot_bands(unittest.TestCase):
         )) == 0
         assert os.path.exists(fname)
 
+
 class Test_dft_svg_struct(unittest.TestCase):
-        
+
     def setUp(self):
-        fname = get_fname(self,"0.svg")
+        fname = get_fname(self, "0.svg")
         if os.path.exists(fname):
             os.remove(fname)
-            
+
     tearDown = setUp
-        
+
     def test_output(self):
-        fname = get_fname(self,"0.svg")
+        fname = get_fname(self, "0.svg")
         assert subprocess.call((
             sys.executable,
             "scripts/dft-svg-structure",

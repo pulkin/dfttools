@@ -25,6 +25,7 @@ class Test_bands0(unittest.TestCase):
             ) * 2 * math.pi / 5.999694 / numericalunits.aBohr
         )
         c = self.parser.bands(c)
+        assert c.value_units_aware
         assert c.values.shape == (400, 34)
         assert c.coordinates.shape == (400, 3)
         testing.assert_allclose(c.coordinates[0, :], (0.500000, -0.288675, 0.000000))
@@ -146,7 +147,9 @@ class Test_output0(unittest.TestCase):
         b = self.parser.bands(index=None, skipVCRelaxException=True)
         assert len(b) == 19
         for i in range(len(b)):
-            testing.assert_allclose(b[0].vectors, numpy.array(
+            assert b[i].units_aware
+            assert b[i].value_units_aware
+            testing.assert_allclose(b[i].vectors, numpy.array(
                 ((1.149169, 0.000000, 0.409237),
                  (-0.574584, 0.995209, 0.409237),
                  (-0.574584, -0.995209, 0.409237))
@@ -362,6 +365,8 @@ class Test_output3(unittest.TestCase):
         b = self.parser.bands(index=None)
         assert len(b) == 1
         b = b[0]
+        assert b.units_aware
+        assert b.value_units_aware
         testing.assert_allclose(b.vectors, numpy.array(
             ((-1., -1., 1.),
              (1., 1., 1.),
@@ -406,6 +411,8 @@ class Test_output4(unittest.TestCase):
 
     def test_bands(self):
         b = self.parser.bands(index=None)
+        assert b[0].units_aware
+        assert b[0].value_units_aware
 
         testing.assert_equal(b[0].coordinates, (
             (0.0000000, 0.0000000, 0.0000000),

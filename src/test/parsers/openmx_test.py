@@ -26,6 +26,8 @@ class Test_bands0(unittest.TestCase):
 
     def test_bands(self):
         b = self.parser.bands()
+        assert b.units_aware
+        assert b.value_units_aware
         testing.assert_equal(b.vectors, numpy.array((
             (1.011228, -0.583833, 0.000000),
             (0.000000, 1.167666, 0.000000),

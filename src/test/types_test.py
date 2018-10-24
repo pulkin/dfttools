@@ -1,9 +1,10 @@
 import math
 import pickle
+import numpy
 import unittest
 import numericalunits
 
-from dfttools.types import *
+from dfttools.types import Basis, UnitCell, Grid, __eval_numericalunits__, ArgumentError, diamond_basis
 from numpy import testing
 
 
@@ -1372,3 +1373,21 @@ class TetrahedronDensityTest(unittest.TestCase):
         g.values = g.values[:, :, 0, ...]
         with self.assertRaises(ArgumentError):
             g.tetrahedron_density((-.1, 0, .1, .2))
+
+
+class EvalNUTest(unittest.TestCase):
+
+    def test_nu(self):
+        with self.assertRaises(ValueError):
+            __eval_numericalunits__("")
+        with self.assertRaises(ValueError):
+            __eval_numericalunits__("nonexistent_unit")
+        testing.assert_equal(__eval_numericalunits__("angstrom"), numericalunits.angstrom)
+        eva = numericalunits.eV / numericalunits.angstrom
+        for i in ("eV/angstrom", "eV /angstrom", "eV/ angstrom", "eV / angstrom", "eV/angstrom ", " eV/angstrom",
+                  " eV  /   angstrom  "):
+            testing.assert_equal(__eval_numericalunits__(i), eva)
+
+        with self.assertRaises(ValueError):
+            __eval_numericalunits__("eV/nonexistent_unit")
+        testing.assert_equal(__eval_numericalunits__("1/angstrom"), 1./numericalunits.angstrom)

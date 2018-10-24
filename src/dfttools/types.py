@@ -3,6 +3,7 @@ This submodule contains key types for handling coordinate-dependent data:
 ``UnitCell``, ``Grid`` and ``Basis``.
 """
 import itertools
+import re
 from functools import wraps
 
 import numpy
@@ -55,6 +56,39 @@ def __xyz2i__(i):
         return {'x': 0, 'y': 1, 'z': 2}[i]
     except KeyError:
         return i
+
+
+def __eval_numericalunits__(s):
+    """
+    Evaluates numericalunits expression.
+    Args:
+        s (str): en expression to evaluate;
+
+    Returns:
+        The result of evaluation.
+    """
+    match = re.match(r'\s*\w*((\s*[*/]\s*\w*)*)\s*$', s)
+    if match is None:
+        raise ValueError("Not a valid numericalunits expression: {}".format(s))
+
+    import numericalunits
+    result = 1.
+
+    for i in re.finditer(r"([*/])\s*(\w*)", "*" + s):
+        op, name = i.groups()
+        if name == "1":
+            val = 1.
+        elif name in dir(numericalunits):
+            val = getattr(numericalunits, name)
+        else:
+            raise ValueError("'{}' not found in numericalunits".format(name))
+
+        if op == "*":
+            result *= val
+        else:
+            result /= val
+
+    return result
 
 
 class ArgumentError(Exception):

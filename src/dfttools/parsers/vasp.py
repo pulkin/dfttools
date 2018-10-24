@@ -3,6 +3,7 @@ Parsing `VASP <https://www.vasp.at/>`_ files.
 """
 import numericalunits
 
+from . import default_band_structure_basis
 from .generic import AbstractParser
 from ..simple import band_structure
 from ..types import Basis, UnitCell
@@ -43,7 +44,7 @@ class Output(AbstractParser):
     def __reciprocal__(self):
         self.parser.skip("reciprocal lattice vectors")
         self.parser.nextLine()
-        return Basis(
+        return default_band_structure_basis(
             self.parser.nextFloat((3, 6))[:, 3:],
         )
 

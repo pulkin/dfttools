@@ -116,10 +116,10 @@ class Basis(object):
         * 'triclinic': expects ``vectors`` to be a 1D array with 3
           lengths of edges and 3 cosines of face angles.
         
-        units (str,float): optional units for the Basis. The units are
-        stored in `self.meta['units']` and are used only during save/load
-        process. The string value has to correspond to one of the values
-        in `numericalunits` package.
+        units (str): optional units for the Basis. The units are stored
+        in `self.meta['units']` and are used only during save/load
+        process. The string expression of the units may contain only
+        attributes of the `numericalunits` package. Example: '1/angstrom'.
         
         meta (dict): a metadata for this Basis.
     """
@@ -618,10 +618,10 @@ class UnitCell(Basis):
         c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
         if coordinates are passed in the cartesian basis;
         
-        units (str,float): optional units for the Basis. The units are
-        stored in `self.meta['units']` and are used only during save/load
-        process. The string value has to correspond to one of the values
-        in `numericalunits` package.
+        units (str): optional units for the UnitCell basis. The units are stored
+        in `self.meta['units']` and are used only during save/load
+        process. The string expression of the units may contain only
+        attributes of the `numericalunits` package. Example: '1/angstrom'.
     """
 
     def __init__(self, basis, coordinates, values, c_basis=None, units=None):
@@ -1375,10 +1375,10 @@ class Grid(Basis):
         
     Kwargs:
         
-        units (str,float): optional units for the Basis. The units are
-        stored in `self.meta['units']` and are used only during save/load
-        process. The string value has to correspond to one of the values
-        in `numericalunits` package.
+        units (str): optional units for the Grid basis. The units are stored
+        in `self.meta['units']` and are used only during save/load
+        process. The string expression of the units may contain only
+        attributes of the `numericalunits` package. Example: '1/angstrom'.
     """
 
     def __init__(self, basis, coordinates, values, units=None):

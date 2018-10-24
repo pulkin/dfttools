@@ -9,12 +9,12 @@ import numericalunits
 import numpy
 import os.path
 
-from . import default_real_space_basis
+from . import default_real_space_basis, default_band_structure_basis
 from .generic import cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, \
     AbstractJSONParser, ParseError
 from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, tag_method
-from ..types import UnitCell, Basis
+from ..types import UnitCell
 
 
 def populations(s):
@@ -684,7 +684,7 @@ class Bands(AbstractParser):
         data = openmx_bands_bands(self.data)
 
         return UnitCell(
-            Basis(shape, meta={"Fermi": self.fermi(), "special-points": self.captions()}),
+            default_band_structure_basis(shape, meta={"Fermi": self.fermi(), "special-points": self.captions()}),
             data[:, :3],
             data[:, 3:] * numericalunits.Hartree,
         )

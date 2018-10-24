@@ -691,7 +691,7 @@ class UnitCell(Basis):
         result = super(UnitCell, self).__getstate__()
         result["coordinates"] = self.coordinates.tolist()
         # Release units
-        if self.value_units_aware:
+        if self.values_units_aware:
             result["values"] = (self.values / __eval_numericalunits__(self.meta["units-values"])).tolist()
         else:
             result["values"] = self.values.tolist()
@@ -701,7 +701,7 @@ class UnitCell(Basis):
         super(UnitCell, self).__setstate__(data)
         self.__init__(self, data["coordinates"], data["values"])
         # Set units
-        if self.value_units_aware:
+        if self.values_units_aware:
             self.values *= __eval_numericalunits__(self.meta["units-values"])
 
     @staticmethod
@@ -724,9 +724,9 @@ class UnitCell(Basis):
         return result
 
     @property
-    def value_units_aware(self):
+    def values_units_aware(self):
         """
-        Checks if units for this Basis' values are defined.
+        Checks if units for values of this UnitCell are defined.
 
         Returns:
 

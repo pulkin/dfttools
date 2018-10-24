@@ -724,7 +724,7 @@ class CellTest(unittest.TestCase):
         h = self.h * numericalunits.angstrom
         cell = CellTest.__bs__(a, h, units="1/angstrom", units_values="eV")
         assert cell.units_aware
-        assert cell.value_units_aware
+        assert cell.values_units_aware
 
         data = pickle.dumps(cell)
         numericalunits.reset_units()

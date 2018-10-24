@@ -1388,9 +1388,15 @@ class Grid(Basis):
         in `self.meta['units']` and are used only during save/load
         process. The string expression of the units may contain only
         attributes of the `numericalunits` package. Example: '1/angstrom'.
+
+        units_values (str): optional units for the Grid values. The
+        units are stored in `self.meta['units-values']` and are used only
+        during save/load process. The string expression of the units may
+        contain only attributes of the `numericalunits` package.
+        Example: 'eV/angstrom'.
     """
 
-    def __init__(self, basis, coordinates, values, units=None):
+    def __init__(self, basis, coordinates, values, units=None, units_values=None):
 
         Basis.__init__(self, basis.vectors, meta=basis.meta)
         dims = self.vectors.shape[0]
@@ -1421,15 +1427,25 @@ class Grid(Basis):
         if not units is None:
             self.meta["units"] = units
 
+        if units_values is not None:
+            self.meta["units-values"] = units_values
+
     def __getstate__(self):
         result = super(Grid, self).__getstate__()
         result["coordinates"] = tuple(i.tolist() for i in self.coordinates)
-        result["values"] = self.values.tolist()
+        # Release units
+        if self.values_units_aware:
+            result["values"] = (self.values / __eval_numericalunits__(self.meta["units-values"])).tolist()
+        else:
+            result["values"] = self.values.tolist()
         return result
 
     def __setstate__(self, data):
         super(Grid, self).__setstate__(data)
         self.__init__(self, data["coordinates"], data["values"])
+        # Set units
+        if self.values_units_aware:
+            self.values *= __eval_numericalunits__(self.meta["units-values"])
 
     @staticmethod
     def from_json(j):
@@ -1449,6 +1465,17 @@ class Grid(Basis):
         result = Grid(Basis(j["vectors"], meta=j["meta"]), j["coordinates"], j["values"])
         result.__setstate__(j)
         return result
+
+    @property
+    def values_units_aware(self):
+        """
+        Checks if units for values of this UnitCell are defined.
+
+        Returns:
+
+            True if units were defined.
+        """
+        return "units-values" in self.meta
 
     def __eq__(self, another):
         result = Basis.__eq__(self, another)

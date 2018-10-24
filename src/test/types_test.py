@@ -737,7 +737,7 @@ class CellTest(unittest.TestCase):
         a = self.a * numericalunits.angstrom
         h = self.h * numericalunits.angstrom
         cell2 = CellTest.__bs__(a, h, units="1/angstrom", units_values="eV")
-        testing.assert_allclose(x.vectors, cell2.vectors, atol=1e-8 * numericalunits.angstrom)
+        testing.assert_allclose(x.vectors, cell2.vectors, atol=1e-8 / numericalunits.angstrom)
         testing.assert_equal(x.coordinates, cell2.coordinates)
         testing.assert_equal(x.values, cell2.values)
 
@@ -1331,9 +1331,10 @@ class GridTest(unittest.TestCase):
     def test_save_load_json(self):
         import json
         a = numericalunits.angstrom
-        grid = Grid(Basis((a, 2 * a, 3 * a), kind='orthorombic'), self.grid.coordinates, self.grid.values,
-                    units='angstrom')
+        grid = Grid(Basis((a, 2 * a, 3 * a), kind='orthorombic'), self.grid.coordinates,
+                    self.grid.values * numericalunits.eV, units='1/angstrom', units_values="eV")
         assert grid.units_aware
+        assert grid.values_units_aware
 
         data = json.dumps(grid.to_json())
         numericalunits.reset_units()
@@ -1344,9 +1345,9 @@ class GridTest(unittest.TestCase):
 
         # Assert object is the same wrt numericalunits
         a = numericalunits.angstrom
-        grid2 = Grid(Basis((a, 2 * a, 3 * a), kind='orthorombic'), self.grid.coordinates, self.grid.values,
-                     units='angstrom')
-        testing.assert_allclose(x.vectors, grid2.vectors, atol=2e-8 * numericalunits.angstrom)
+        grid2 = Grid(Basis((a, 2 * a, 3 * a), kind='orthorombic'), self.grid.coordinates,
+                     self.grid.values * numericalunits.eV, units='1/angstrom', units_values="eV")
+        testing.assert_allclose(x.vectors, grid2.vectors, atol=2e-8 / numericalunits.angstrom)
         testing.assert_equal(x.coordinates, grid2.coordinates)
         testing.assert_equal(x.values, grid2.values)
 

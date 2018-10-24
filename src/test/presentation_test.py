@@ -70,7 +70,7 @@ class BandPlotTest(unittest.TestCase):
         segments = lc.get_segments()
         assert len(segments) == (30*3-3)*3
         
-        testing.assert_equal(axes.get_ylim(), numpy.array((0,3))*eV/getattr(numericalunits, units))
+        testing.assert_allclose(axes.get_ylim(), numpy.array((-0.15,3.15))*eV/getattr(numericalunits, units))
         assert axes.get_yaxis().get_label().get_text().endswith("("+units+")")
 
     @cleanup
@@ -178,7 +178,7 @@ class BandDensityPlotTest(unittest.TestCase):
         assert len(axes) == 1
         axes = axes[0]
 
-        testing.assert_allclose(axes.get_xlim(), (-3,3))
+        testing.assert_allclose(axes.get_xlim(), (-3.3,3.3))
         
         l = list(i for i in axes.get_children() if isinstance(i, Line2D))
         assert len(l) == 1
@@ -187,7 +187,7 @@ class BandDensityPlotTest(unittest.TestCase):
         
         x,y = l.get_data()
         
-        testing.assert_allclose(x, numpy.linspace(-3,3,100))
+        testing.assert_allclose(x, numpy.linspace(-3.3,3.3,100))
         assert numpy.all(y<10) and numpy.all(y>0)
         assert numpy.any(y>0.1)
         
@@ -202,8 +202,8 @@ class BandDensityPlotTest(unittest.TestCase):
         x1,y1 = rl1.get_data()
         x2,y2 = rl2.get_data()
         
-        testing.assert_allclose(x1, numpy.linspace(-3,3,100))
-        testing.assert_allclose(x2, numpy.linspace(-3,3,100))
+        testing.assert_allclose(x1, numpy.linspace(-3.3,3.3,100))
+        testing.assert_allclose(x2, numpy.linspace(-3.3,3.3,100))
         testing.assert_allclose(y1, 0.3*y2)
 
     @cleanup
@@ -221,9 +221,9 @@ class BandDensityPlotTest(unittest.TestCase):
         
         for p in rpc.get_paths():
             (xmin, ymin), (xmax, ymax) = p.get_extents().get_points()
-            assert xmin>=-3.01
+            assert xmin>=-3.31
             assert ymin>=0
-            assert xmax<=3.01
+            assert xmax<=3.31
             assert ymax< 10
         
     @cleanup
@@ -237,9 +237,9 @@ class BandDensityPlotTest(unittest.TestCase):
         for rpc in (rpc1,rpc2):
             for p in rpc.get_paths():
                 (xmin, ymin), (xmax, ymax) = p.get_extents().get_points()
-                assert xmin>=-3.01
+                assert xmin>=-3.31
                 assert ymin>=0
-                assert xmax<=3.01
+                assert xmax<=3.31
                 assert ymax< 10
         
     @cleanup
@@ -248,9 +248,9 @@ class BandDensityPlotTest(unittest.TestCase):
         
         for p in rpc.get_paths():
             (xmin, ymin), (xmax, ymax) = p.get_extents().get_points()
-            assert ymin>=-3.01
+            assert ymin>=-3.31
             assert xmin>=0
-            assert ymax<=3.01
+            assert ymax<=3.31
             assert xmax< 10
             
     @cleanup

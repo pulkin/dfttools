@@ -614,7 +614,7 @@ class CellTest(unittest.TestCase):
 
     def test_isolated_fail(self):
         with self.assertRaises(ArgumentError):
-            self.cell.isolated(1, 2, 3, units='unkown')
+            self.cell.isolated(1, 2, 3, units='unknown')
 
     def test_add(self):
         c = self.cell.copy()

@@ -7,12 +7,12 @@ import re
 import numericalunits
 import numpy
 
-from . import default_real_space_basis
+from . import default_real_space_basis, default_band_structure_basis
 from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, cre_int, ParseError, \
     AbstractParser
 from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
-from ..types import UnitCell, Basis
+from ..types import UnitCell
 
 
 class Bands(AbstractParser):
@@ -98,6 +98,7 @@ class Bands(AbstractParser):
         """
         result = self.reciprocal_data(basis)
         result.values *= numericalunits.eV
+        result.meta["units-values"] = "eV"
         return result
 
 
@@ -445,7 +446,7 @@ class Output(AbstractParser):
 
         self.parser.reset()
         self.parser.skip("reciprocal axes: (cart. coord. in units 2 pi/alat)")
-        basis = Basis(self.parser.nextFloat((3, 4))[:, 1:] * 2 * math.pi / alat)
+        basis = default_band_structure_basis(self.parser.nextFloat((3, 4))[:, 1:] * 2 * math.pi / alat)
 
         self.parser.skip("number of k points=")
         n_kp = self.parser.nextInt()

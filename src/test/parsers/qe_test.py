@@ -105,7 +105,7 @@ class Test_output0(unittest.TestCase):
             testing.assert_equal(cells[i].values,
                                  ('As', 'As')
                                  )
-        assert cells[0].units_aware()
+        assert cells[0].units_aware
         testing.assert_allclose(cells[0].vectors, numpy.array(
             ((0.580130, 0.000000, 0.814524),
              (-0.290065, 0.502407, 0.814524),
@@ -120,7 +120,7 @@ class Test_output0(unittest.TestCase):
             ((0.0000001, 0.0000000, 0.7086605),
              (-0.0000001, 0.0000000, -0.7086605))
         ) * 7.0103 * numericalunits.aBohr, atol=1)
-        assert cells[1].units_aware()
+        assert cells[1].units_aware
         testing.assert_allclose(cells[1].vectors, numpy.array(
             ((0.589711141, -0.000000000, 0.822239221),
              (-0.294855381, 0.510704782, 0.822239223),
@@ -130,7 +130,7 @@ class Test_output0(unittest.TestCase):
                                 ((0.288386168, 0.288386167, 0.288386167),
                                  (-0.288386168, -0.288386167, -0.288386167))
                                 )
-        assert cells[-1].units_aware()
+        assert cells[-1].units_aware
         testing.assert_allclose(cells[-1].vectors, numpy.array(
             ((0.593659483, -0.000000000, 0.870567646),
              (-0.296829546, 0.514124144, 0.870567651),
@@ -235,7 +235,7 @@ class Test_output1(unittest.TestCase):
         cells = self.parser.unitCells()
         assert len(cells) == 6
         for i in range(6):
-            assert cells[i].units_aware()
+            assert cells[i].units_aware
             testing.assert_equal(cells[i].values,
                                  ('C', 'O')
                                  )
@@ -268,7 +268,7 @@ class Test_output2(unittest.TestCase):
         cells = self.parser.unitCells()
         assert len(cells) == 14
         for i in range(14):
-            assert cells[i].units_aware()
+            assert cells[i].units_aware
             testing.assert_equal(cells[i].values,
                                  ('Al',) * 7
                                  )
@@ -884,7 +884,7 @@ K_POINTS automatic
 
     def test_unitCell(self):
         cell = self.parser.unitCell()
-        assert cell.units_aware()
+        assert cell.units_aware
 
         testing.assert_allclose(cell.vectors,
                                 ((5.669178374 * numericalunits.aBohr, 0, 0),

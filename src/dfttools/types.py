@@ -166,14 +166,8 @@ class Basis(object):
             "meta": {k: v.tolist() if isinstance(v, numpy.ndarray) else v for k, v in self.meta.items()},
         }
         # Release units
-        if self.units_aware():
-            u = self.meta["units"]
-            if isinstance(u, (str, unicode)):
-                import numericalunits
-                value = getattr(numericalunits, u)
-            else:
-                value = u
-            result['vectors'] = (self.vectors / value).tolist()
+        if self.units_aware:
+            result['vectors'] = (self.vectors / __eval_numericalunits__(self.meta["units"])).tolist()
         else:
             result['vectors'] = self.vectors.tolist()
         return result
@@ -185,14 +179,8 @@ class Basis(object):
             meta=data["meta"],
         )
         # Set units
-        if self.units_aware():
-            u = self.meta["units"]
-            if isinstance(u, (str, unicode)):
-                import numericalunits
-                value = getattr(numericalunits, u)
-            else:
-                value = u
-            self.vectors *= value
+        if self.units_aware:
+            self.vectors *= __eval_numericalunits__(self.meta["units"])
 
     def __eq__(self, another):
         return type(another) == type(self) and numpy.all(self.vectors == another.vectors)
@@ -228,6 +216,7 @@ class Basis(object):
         result.__setstate__(j)
         return result
 
+    @property
     def units_aware(self):
         """
         Checks if units for this Basis are defined.

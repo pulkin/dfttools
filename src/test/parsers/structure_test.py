@@ -23,7 +23,7 @@ class Test_xsf0(unittest.TestCase):
         assert len(c) == 1
         c = c[0]
 
-        assert c.units_aware()
+        assert c.units_aware
         testing.assert_allclose(c.vectors, numpy.array((
             (2.71, 2.71, 0.),
             (2.71, 0., 2.71),
@@ -55,7 +55,7 @@ class Test_xsf1(unittest.TestCase):
         assert len(c) == 2
 
         for cc in c:
-            assert cc.units_aware()
+            assert cc.units_aware
             testing.assert_allclose(cc.vectors, numpy.array((
                 (0., 2.71, 2.71),
                 (2.71, 0., 2.71),
@@ -92,7 +92,7 @@ class Test_xsf2(unittest.TestCase):
         assert len(c) == 2
 
         for cc in c:
-            assert cc.units_aware()
+            assert cc.units_aware
             assert cc.values[0] == "16"
             assert cc.values[1] == "30"
 
@@ -131,7 +131,7 @@ class Test_xsf3(unittest.TestCase):
 
         assert len(c) == 3
 
-        assert c[0].units_aware()
+        assert c[0].units_aware
         testing.assert_equal(c[0].vectors, numpy.array((
             (1.0, 0.0, 0.0),
             (0.0, 1.0, 0.0),
@@ -196,7 +196,7 @@ class Test_xsf4(unittest.TestCase):
         c = self.parser.grids()
         assert len(c) == 1
 
-        assert c[0].units_aware()
+        assert c[0].units_aware
         testing.assert_equal(c[0].vectors, numpy.array((
             (1.0, 0.0, 0.0),
             (0.0, 1.0, 0.0),
@@ -229,7 +229,7 @@ class Test_cube0(unittest.TestCase):
     def test_grid(self):
         c = self.parser.grid()
 
-        assert c.units_aware()
+        assert c.units_aware
         testing.assert_allclose(c.vectors, numpy.diag((4., 5., 6.)) * 0.283459 * numericalunits.aBohr, rtol=1e-12)
 
         test = numpy.array((((1., 2., 3., 4., 5., 6.),) * 5,) * 4)
@@ -246,7 +246,7 @@ class Test_cube0(unittest.TestCase):
     def test_unitCell(self):
         c = self.parser.unitCell()
 
-        assert c.units_aware()
+        assert c.units_aware
         testing.assert_allclose(c.cartesian(), numpy.array((
             (5.570575, 5.669178, 5.593517),
             (5.562867, 5.669178, 7.428055),
@@ -267,14 +267,14 @@ class Test_cube1(unittest.TestCase):
 
     def test_grid(self):
         c = self.parser.grid()
-        assert c.units_aware()
+        assert c.units_aware
 
         testing.assert_allclose(c.vectors, numpy.diag((4., 5., 6.)) * 0.283459 * numericalunits.angstrom, rtol=1e-12)
 
     def test_unitCell(self):
         c = self.parser.unitCell()
 
-        assert c.units_aware()
+        assert c.units_aware
         testing.assert_allclose(c.cartesian(), numpy.array((
             (5.570575, 5.669178, 5.593517),
             (5.562867, 5.669178, 7.428055),

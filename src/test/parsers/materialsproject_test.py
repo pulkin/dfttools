@@ -20,7 +20,7 @@ class Test_structure0(unittest.TestCase):
         assert len(cells) == 34
 
         c = cells[0]
-        assert c.units_aware()
+        assert c.units_aware
         testing.assert_equal(c.vectors, numpy.array([
             [1.4119197, 2.0624061, 7.43608817],
             [-1.0453002, 1.48076613, 2.58860205],
@@ -33,7 +33,7 @@ class Test_structure0(unittest.TestCase):
         testing.assert_equal(c.values, ["C"] * 2)
 
         c = cells[-1]
-        assert c.units_aware()
+        assert c.units_aware
         testing.assert_equal(c.vectors, numpy.array([
             [2.46801892, 6.328e-05, 0.0],
             [-1.23410443, 2.13733939, 0.0],

@@ -58,39 +58,6 @@ def __xyz2i__(i):
         return i
 
 
-def __eval_numericalunits__(s):
-    """
-    Evaluates numericalunits expression.
-    Args:
-        s (str): en expression to evaluate;
-
-    Returns:
-        The result of evaluation.
-    """
-    match = re.match(r'\s*\w*((\s*[*/]\s*\w*)*)\s*$', s)
-    if match is None:
-        raise ValueError("Not a valid numericalunits expression: {}".format(s))
-
-    import numericalunits
-    result = 1.
-
-    for i in re.finditer(r"([*/])\s*(\w*)", "*" + s):
-        op, name = i.groups()
-        if name == "1":
-            val = 1.
-        elif name in dir(numericalunits):
-            val = getattr(numericalunits, name)
-        else:
-            raise ValueError("'{}' not found in numericalunits".format(name))
-
-        if op == "*":
-            result *= val
-        else:
-            result /= val
-
-    return result
-
-
 class ArgumentError(Exception):
     pass
 
@@ -115,16 +82,11 @@ class Basis(object):
           dimensions of an orthorombic basis set;
         * 'triclinic': expects ``vectors`` to be a 1D array with 3
           lengths of edges and 3 cosines of face angles.
-        
-        units (str): optional units for the Basis. The units are stored
-        in `self.meta['units']` and are used only during save/load
-        process. The string expression of the units may contain only
-        attributes of the `numericalunits` package. Example: '1/angstrom'.
-        
+
         meta (dict): a metadata for this Basis.
     """
 
-    def __init__(self, vectors, kind='default', meta=None, units=None):
+    def __init__(self, vectors, kind='default', meta=None):
 
         vectors = numpy.array(vectors, dtype=numpy.float64)
 
@@ -158,19 +120,11 @@ class Basis(object):
         else:
             self.meta = {}
 
-        if not units is None:
-            self.meta["units"] = units
-
     def __getstate__(self):
-        result = {
-            "meta": {k: v.tolist() if isinstance(v, numpy.ndarray) else v for k, v in self.meta.items()},
-        }
-        # Release units
-        if self.units_aware:
-            result['vectors'] = (self.vectors / __eval_numericalunits__(self.meta["units"])).tolist()
-        else:
-            result['vectors'] = self.vectors.tolist()
-        return result
+        return dict(
+            vectors=self.vectors.tolist(),
+            meta={k: v.tolist() if isinstance(v, numpy.ndarray) else v for k, v in self.meta.items()},
+        )
 
     def __setstate__(self, data):
         Basis.__init__(
@@ -178,9 +132,6 @@ class Basis(object):
             data["vectors"],
             meta=data["meta"],
         )
-        # Set units
-        if self.units_aware:
-            self.vectors *= __eval_numericalunits__(self.meta["units"])
 
     def __eq__(self, another):
         return type(another) == type(self) and numpy.all(self.vectors == another.vectors)
@@ -216,17 +167,6 @@ class Basis(object):
         result = cls(**j)
         result.__setstate__(j)
         return result
-
-    @property
-    def units_aware(self):
-        """
-        Checks if units for this Basis are defined.
-        
-        Returns:
-        
-            True if units were defined.
-        """
-        return "units" in self.meta
 
     def transform_to(self, basis, coordinates):
         """
@@ -619,21 +559,10 @@ class UnitCell(Basis):
         meta (dict): a metadata for this UnitCell;
 
         c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
-        if coordinates are passed in the cartesian basis;
-        
-        units (str): optional units for the UnitCell basis. The units are
-        stored in `self.meta['units']` and are used only during save/load
-        process. The string expression of the units may contain only
-        attributes of the `numericalunits` package. Example: '1/angstrom'.
-
-        units_values (str): optional units for the UnitCell values. The
-        units are stored in `self.meta['units-values']` and are used only
-        during save/load process. The string expression of the units may
-        contain only attributes of the `numericalunits` package.
-        Example: 'eV/angstrom'.
+        if coordinates are passed in the cartesian basis.
     """
 
-    def __init__(self, vectors, coordinates, values, meta=None, c_basis=None, units=None, units_values=None):
+    def __init__(self, vectors, coordinates, values, meta=None, c_basis=None):
 
         if isinstance(vectors, Basis):
             Basis.__init__(self, vectors.vectors, meta=vectors.meta)
@@ -689,39 +618,17 @@ class UnitCell(Basis):
         else:
             self.coordinates = self.transform_from(c_basis, self.coordinates)
 
-        if not units is None:
-            self.meta["units"] = units
-
-        if units_values is not None:
-            self.meta["units-values"] = units_values
-
     def __getstate__(self):
         result = super(UnitCell, self).__getstate__()
-        result["coordinates"] = self.coordinates.tolist()
-        # Release units
-        if self.values_units_aware:
-            result["values"] = (self.values / __eval_numericalunits__(self.meta["units-values"])).tolist()
-        else:
-            result["values"] = self.values.tolist()
+        result.update(dict(
+            coordinates=self.coordinates.tolist(),
+            values=self.values.tolist(),
+        ))
         return result
 
     def __setstate__(self, data):
         super(UnitCell, self).__setstate__(data)
         self.__init__(self, data["coordinates"], data["values"])
-        # Set units
-        if self.values_units_aware:
-            self.values *= __eval_numericalunits__(self.meta["units-values"])
-
-    @property
-    def values_units_aware(self):
-        """
-        Checks if units for values of this UnitCell are defined.
-
-        Returns:
-
-            True if units were defined.
-        """
-        return "units-values" in self.meta
 
     def __eq__(self, another):
         return Basis.__eq__(self, another) and numpy.all(self.coordinates == another.coordinates) and numpy.all(
@@ -1361,20 +1268,9 @@ class Grid(Basis):
     Kwargs:
 
         meta (dict): a metadata for this Grid;
-
-        units (str): optional units for the Grid basis. The units are stored
-        in `self.meta['units']` and are used only during save/load
-        process. The string expression of the units may contain only
-        attributes of the `numericalunits` package. Example: '1/angstrom'.
-
-        units_values (str): optional units for the Grid values. The
-        units are stored in `self.meta['units-values']` and are used only
-        during save/load process. The string expression of the units may
-        contain only attributes of the `numericalunits` package.
-        Example: 'eV/angstrom'.
     """
 
-    def __init__(self, vectors, coordinates, values, meta=None, units=None, units_values=None):
+    def __init__(self, vectors, coordinates, values, meta=None):
 
         if isinstance(vectors, Basis):
             Basis.__init__(self, vectors.vectors, meta=vectors.meta)
@@ -1390,9 +1286,10 @@ class Grid(Basis):
         # Proceed to checks
         if not len(self.coordinates) == dims:
             raise ArgumentError(
-                "The size of the basis is {:d} but the number of coordinates specified is different: {:d}".format(dims,
-                                                                                                                  len(
-                                                                                                                      self.coordinates)))
+                "The size of the basis is {:d} but the number of coordinates specified is different: {:d}".format(
+                    dims, len(self.coordinates)
+                )
+            )
 
         for i, c in enumerate(self.coordinates):
             if not len(c.shape) == 1:
@@ -1408,39 +1305,17 @@ class Grid(Basis):
                     "The {:d} dimension of 'values' array is equal to {:d} which is different from the size of a corresponding 'coordinates' array {:d}".format(
                         i, self.values.shape[i], self.coordinates[i].shape[0]))
 
-        if not units is None:
-            self.meta["units"] = units
-
-        if units_values is not None:
-            self.meta["units-values"] = units_values
-
     def __getstate__(self):
         result = super(Grid, self).__getstate__()
-        result["coordinates"] = tuple(i.tolist() for i in self.coordinates)
-        # Release units
-        if self.values_units_aware:
-            result["values"] = (self.values / __eval_numericalunits__(self.meta["units-values"])).tolist()
-        else:
-            result["values"] = self.values.tolist()
+        result.update(dict(
+            coordinates=tuple(i.tolist() for i in self.coordinates),
+            values=self.values.tolist(),
+        ))
         return result
 
     def __setstate__(self, data):
         super(Grid, self).__setstate__(data)
         self.__init__(self, data["coordinates"], data["values"])
-        # Set units
-        if self.values_units_aware:
-            self.values *= __eval_numericalunits__(self.meta["units-values"])
-
-    @property
-    def values_units_aware(self):
-        """
-        Checks if units for values of this UnitCell are defined.
-
-        Returns:
-
-            True if units were defined.
-        """
-        return "units-values" in self.meta
 
     def __eq__(self, another):
         result = Basis.__eq__(self, another)

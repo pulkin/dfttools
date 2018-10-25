@@ -423,7 +423,7 @@ class Basis(object):
         
             A deep copy of self.
         """
-        return Basis(self.vectors, meta=self.meta)
+        return self.from_json(self.to_json())
 
     @input_as_list
     def stack(self, basises, vector='x', tolerance=1e-10, restrict_collinear=False):
@@ -847,19 +847,6 @@ class UnitCell(Basis):
             A numpy array with cartesian coordinates
         """
         return self.transform_to_cartesian(self.coordinates)
-
-    def copy(self):
-        """
-        Calculates a copy.
-        
-        Returns:
-        
-            A copy of self.
-        """
-        return UnitCell(
-            self,
-            self.coordinates,
-            self.values)
 
     def normalized(self, sort=None):
         """
@@ -1537,19 +1524,6 @@ class Grid(Basis):
             each grid point.
         """
         return self.transform_to_cartesian(self.explicit_coordinates())
-
-    def copy(self):
-        """
-        Calculates a copy.
-        
-        Returns:
-        
-            A copy of self.
-        """
-        return Grid(
-            self,
-            self.coordinates,
-            self.values)
 
     def normalized(self):
         """

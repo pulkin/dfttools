@@ -197,8 +197,8 @@ class Basis(object):
         result["type"] = "dfttools." + self.__class__.__name__
         return result
 
-    @staticmethod
-    def from_json(j):
+    @classmethod
+    def from_json(cls, j):
         """
         Restores a Basis from JSON data.
         
@@ -210,9 +210,10 @@ class Basis(object):
         
             A Basis object.
         """
-        if not "type" in j or not j["type"] == "dfttools.Basis":
-            raise ValueError("This is not a valid Basis JSON representation.")
-        result = Basis(j["vectors"], meta=j["meta"])
+        if "type" not in j or j["type"] != "dfttools." + cls.__name__:
+            raise ValueError("Invalid JSON")
+        del j["type"]
+        result = cls(**j)
         result.__setstate__(j)
         return result
 
@@ -604,7 +605,7 @@ class UnitCell(Basis):
     
     Args:
     
-        basis (Basis): a crystal basis.
+        vectors (Basis,array): a crystal basis.
         
         coordinates (array): a 2D array of coordinates of atoms (or any
         other instances)
@@ -614,7 +615,9 @@ class UnitCell(Basis):
         ``coordinates`` array.
 
     Kwargs:
-    
+
+        meta (dict): a metadata for this UnitCell;
+
         c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
         if coordinates are passed in the cartesian basis;
         
@@ -630,9 +633,14 @@ class UnitCell(Basis):
         Example: 'eV/angstrom'.
     """
 
-    def __init__(self, basis, coordinates, values, c_basis=None, units=None, units_values=None):
+    def __init__(self, vectors, coordinates, values, meta=None, c_basis=None, units=None, units_values=None):
 
-        Basis.__init__(self, basis.vectors, meta=basis.meta)
+        if isinstance(vectors, Basis):
+            Basis.__init__(self, vectors.vectors, meta=vectors.meta)
+        else:
+            Basis.__init__(self, vectors)
+        if meta is not None:
+            self.meta.update(meta)
 
         dims = self.vectors.shape[0]
 
@@ -703,25 +711,6 @@ class UnitCell(Basis):
         # Set units
         if self.values_units_aware:
             self.values *= __eval_numericalunits__(self.meta["units-values"])
-
-    @staticmethod
-    def from_json(j):
-        """
-        Restores a UnitCell from JSON data.
-        
-        Args:
-        
-            j (dict): JSON data.
-            
-        Returns:
-        
-            A UnitCell object.
-        """
-        if not "type" in j or not j["type"] == "dfttools.UnitCell":
-            raise ValueError("This is not a valid UnitCell JSON representation.")
-        result = UnitCell(Basis(j["vectors"], meta=j["meta"]), j["coordinates"], j["values"])
-        result.__setstate__(j)
-        return result
 
     @property
     def values_units_aware(self):
@@ -1375,7 +1364,7 @@ class Grid(Basis):
     
     Args:
     
-        basis (Basis): a crystal basis.
+        vectors (Basis,array): a crystal basis.
         
         coordinates (array): a list of arrays of coordinates specifying
         grid.
@@ -1383,7 +1372,9 @@ class Grid(Basis):
         values (array): a multidimensional array with data on the grid.
         
     Kwargs:
-        
+
+        meta (dict): a metadata for this Grid;
+
         units (str): optional units for the Grid basis. The units are stored
         in `self.meta['units']` and are used only during save/load
         process. The string expression of the units may contain only
@@ -1396,9 +1387,15 @@ class Grid(Basis):
         Example: 'eV/angstrom'.
     """
 
-    def __init__(self, basis, coordinates, values, units=None, units_values=None):
+    def __init__(self, vectors, coordinates, values, meta=None, units=None, units_values=None):
 
-        Basis.__init__(self, basis.vectors, meta=basis.meta)
+        if isinstance(vectors, Basis):
+            Basis.__init__(self, vectors.vectors, meta=vectors.meta)
+        else:
+            Basis.__init__(self, vectors)
+        if meta is not None:
+            self.meta.update(meta)
+
         dims = self.vectors.shape[0]
         self.coordinates = list(numpy.array(c, dtype=numpy.float64) for c in coordinates)
         self.values = numpy.array(values)
@@ -1446,25 +1443,6 @@ class Grid(Basis):
         # Set units
         if self.values_units_aware:
             self.values *= __eval_numericalunits__(self.meta["units-values"])
-
-    @staticmethod
-    def from_json(j):
-        """
-        Restores a Grid from JSON data.
-        
-        Args:
-        
-            j (dict): JSON data.
-            
-        Returns:
-        
-            A Grid object.
-        """
-        if not "type" in j or not j["type"] == "dfttools.Grid":
-            raise ValueError("This is not a valid Grid JSON representation.")
-        result = Grid(Basis(j["vectors"], meta=j["meta"]), j["coordinates"], j["values"])
-        result.__setstate__(j)
-        return result
 
     @property
     def values_units_aware(self):

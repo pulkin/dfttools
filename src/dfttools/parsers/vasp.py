@@ -77,7 +77,7 @@ class Output(AbstractParser):
             k,
             e,
         )
-        result.meta["Fermi"] = fermi
+        result.fermi = fermi
         return result
 
 

@@ -21,14 +21,14 @@ import numpy
     
 def report(bands):
     
-    fermi_present = "Fermi" in bands.meta.keys()
+    fermi_present = bands.fermi is not None
     print("Fermi present: {}".format("yes" if fermi_present else "no"))
     
     if fermi_present:
         
-        print("Fermi value: {:.6f}".format(bands.meta["Fermi"]/eV))
+        print("Fermi value: {:.6f}".format(bands.fermi/eV))
         
-        vb = (bands.values < bands.meta["Fermi"]).sum(axis = -1)
+        vb = (bands.values < bands.fermi).sum(axis = -1)
         ref = vb.ravel()[0]
         
         if numpy.all(vb == ref):
@@ -73,7 +73,7 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if "
                     raise
                 
                 if not options.fermi is None:
-                    bands.meta["Fermi"] = options.fermi
+                    bands.fermi = options.fermi
                 
                 data[destination] = bands
                 

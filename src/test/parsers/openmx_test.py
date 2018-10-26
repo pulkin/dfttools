@@ -93,7 +93,7 @@ class Test_bands0(unittest.TestCase):
                                                               2.675051340334891))) * numericalunits.Hartree
                                 )
         testing.assert_allclose(b.values[0, :], b.values[-1, :])
-        assert b.meta["Fermi"] == -0.161133 * numericalunits.Hartree
+        assert b.fermi == -0.161133 * numericalunits.Hartree
         assert b.meta["special-points"] == {
             0: "M",
             99: "G",

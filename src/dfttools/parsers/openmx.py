@@ -686,7 +686,8 @@ class Bands(AbstractParser):
             shape,
             data[:, :3],
             data[:, 3:] * numericalunits.Hartree,
-            meta={"Fermi": self.fermi(), "special-points": self.captions()},
+            fermi=fermi,
+            meta={"special-points": self.captions()},
         )
 
 

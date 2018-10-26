@@ -397,12 +397,9 @@ class Output(AbstractParser):
             energies.append(sub_energies)
 
         if parseMode_kp == 0:
-            c = BandsPath(vectors, kpoints, energies)
+            c = BandsPath(vectors, kpoints, energies, fermi=fermi)
         else:
-            c = BandsPath(vectors, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian")
-
-        if not fermi is None:
-            c.meta["Fermi"] = fermi
+            c = BandsPath(vectors, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian", fermi=fermi)
 
         return c
 

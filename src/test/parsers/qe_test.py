@@ -203,20 +203,20 @@ class Test_output0(unittest.TestCase):
              (-5.9208, -1.5477, 5.7981, 5.7981, 7.0153, 8.5039, 8.5039, 9.6260, 15.7219),
              (-4.9074, -2.0659, 2.1277, 4.6402, 5.9533, 10.0685, 10.3976, 13.2007, 15.2380))
         ) * numericalunits.eV)
-        assert b[0].meta["Fermi"] == 10.0033 * numericalunits.eV
-        assert b[-1].meta["Fermi"] == 8.2525 * numericalunits.eV
+        assert b[0].fermi == 10.0033 * numericalunits.eV
+        assert b[-1].fermi == 8.2525 * numericalunits.eV
 
         for i in range(19):
             bb = self.parser.bands(index=i, skipVCRelaxException=True)
             assert len(self.parser.parser.__history__) == 0
             assert bb == b[i]
-            assert bb.meta["Fermi"] == b[i].meta["Fermi"]
+            assert bb.fermi == b[i].fermi
 
         for i in range(19):
             bb = self.parser.bands(index=-i - 1, skipVCRelaxException=True)
             assert len(self.parser.parser.__history__) == 0
             assert bb == b[-i - 1]
-            assert bb.meta["Fermi"] == b[-i - 1].meta["Fermi"]
+            assert bb.fermi == b[-i - 1].fermi
 
         with self.assertRaises(ParseError):
             self.parser.bands(index=-21, skipVCRelaxException=True)

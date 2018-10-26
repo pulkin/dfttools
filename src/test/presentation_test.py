@@ -14,7 +14,7 @@ from matplotlib.lines import Line2D
 from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.image import AxesImage
 
-from dfttools.types import Basis, UnitCell, Grid
+from dfttools.utypes import Basis, BandsPath, BandsGrid, Grid
 from dfttools.presentation import matplotlib_bands, matplotlib_scalar, matplotlib_bands_density
 
 
@@ -37,18 +37,19 @@ class BandPlotTest(unittest.TestCase):
 
         d = (basis.transform_to_cartesian(kp_path) ** 2).sum(axis=1)
 
-        self.bands = UnitCell(
+        self.bands = BandsPath(
             basis,
             kp_path,
             ([[0, 0, 3]] + d[..., numpy.newaxis] * [[1, 2, -3]]) * eV,
+            fermi=1*eV,
         )
-        self.bands.meta["Fermi"] = 1 * eV
         self.weights = self.bands.values / self.bands.values.max()
-        self.huge_bands = UnitCell(
+        self.huge_bands = BandsPath(
             self.bands,
             kp_path,
             ([BandPlotTest.__pseudo_random__(0, 1000, 50) * 10 - 5] + d[..., numpy.newaxis] * [
                 BandPlotTest.__pseudo_random__(1000, 2000, 50) * 20 - 10]) * eV,
+            fermi=1*eV,
         )
 
     @staticmethod
@@ -134,7 +135,7 @@ class BandPlotTest(unittest.TestCase):
 class BandDensityPlotTest(unittest.TestCase):
 
     def setUp(self):
-        basis = Basis((1, 1, 1, 0, 0, -0.5), kind='triclinic', meta={"Fermi": 0})
+        basis = Basis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
 
         kp_gamma = numpy.array((0, 0, 0))[numpy.newaxis, :]
         kp_m = numpy.array((0.5, 0.0, 0))[numpy.newaxis, :]
@@ -151,18 +152,20 @@ class BandDensityPlotTest(unittest.TestCase):
         k = basis.transform_to_cartesian(kp_path) * math.pi / 3. ** .5 * 2
         e = (1 + 4 * numpy.cos(k[..., 1]) ** 2 + 4 * numpy.cos(k[..., 1]) * numpy.cos(k[..., 0] * 3. ** .5)) ** .5
 
-        self.cell = UnitCell(
+        self.cell = BandsPath(
             basis,
             kp_path,
             e[:, numpy.newaxis] * eV * [[-1., 1.]],
+            fermi=0,
         )
         self.cell_weights = self.cell.values / self.cell.values.max()
 
-        self.grid = Grid(
+        self.grid = BandsGrid(
             basis,
             (numpy.linspace(0, 1, 30, endpoint=False) + 1. / 60, numpy.linspace(0, 1, 30, endpoint=False) + 1. / 60,
              (0,)),
             numpy.zeros((30, 30, 1, 2), dtype=numpy.float64),
+            fermi=0,
         )
         k = self.grid.cartesian() * math.pi / 3. ** .5 * 2
         e = (1 + 4 * numpy.cos(k[..., 1]) ** 2 + 4 * numpy.cos(k[..., 1]) * numpy.cos(k[..., 0] * 3. ** .5)) ** .5 * eV
@@ -338,7 +341,7 @@ class ScalarGridPlotTest(unittest.TestCase):
 
     def setUp(self):
         self.grid = Grid(
-            Basis((1 * angstrom, 1 * angstrom, 1 * angstrom, 0, 0, -0.5), kind='triclinic'),
+            Basis((1 * angstrom, 1 * angstrom, 1 * angstrom, 0, 0, -0.5), kind='triclinic', units=dict(vectors="angstrom")),
             (
                 numpy.linspace(0, 1, 30, endpoint=False),
                 numpy.linspace(0, 1, 30, endpoint=False),

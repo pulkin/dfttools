@@ -581,14 +581,14 @@ def __guess_energy_range__(cell, bands=10, window=0.05):
     
         A tuple with the energy range.
     """
-    if "Fermi" in cell.meta and cell.values.shape[1] > bands:
+    if cell.fermi is not None and cell.values.shape[1] > bands:
 
         minimas = cell.values.min(axis=0)
         maximas = cell.values.max(axis=0)
 
         top = numpy.argsort(numpy.maximum(
-            numpy.abs(minimas - cell.meta["Fermi"]),
-            numpy.abs(maximas - cell.meta["Fermi"]),
+            numpy.abs(minimas - cell.fermi),
+            numpy.abs(maximas - cell.fermi),
         ))
 
         global_min = minimas[top[:bands]].min()
@@ -714,10 +714,10 @@ def matplotlib_bands(
         coordinate_units = getattr(numericalunits, coordinate_units)
 
     # Move the origin to the Fermi level
-    if fermi_origin and "Fermi" in cell.meta:
+    if fermi_origin and cell.fermi is not None:
         cell = cell.copy()
-        cell.values -= cell.meta["Fermi"]
-        cell.meta["Fermi"] = 0
+        cell.values -= cell.fermi
+        cell.fermi = 0
 
     # Set energy range
     if energy_range is None:
@@ -857,8 +857,8 @@ def matplotlib_bands(
     axes.add_collection(lc)
 
     # Plot Fermi energy
-    if show_fermi and "Fermi" in cell.meta:
-        axes.axhline(y=cell.meta["Fermi"] / energy_units, color='black', ls="--", lw=0.5)
+    if show_fermi and cell.fermi is not None:
+        axes.axhline(y=cell.fermi / energy_units, color='black', ls="--", lw=0.5)
 
     axes.set_ylim(energy_range)
 
@@ -1008,8 +1008,8 @@ def matplotlib_bands_density(
         else:
             plot = axes.plot(data, energies, **kwargs)
 
-        if "Fermi" in cell.meta and show_fermi:
-            axes.axhline(y=cell.meta["Fermi"] / units, color='black', ls="--", lw=0.5)
+        if cell.fermi is not None and show_fermi:
+            axes.axhline(y=cell.fermi / units, color='black', ls="--", lw=0.5)
 
         axes.set_ylim(energy_range)
 
@@ -1028,8 +1028,8 @@ def matplotlib_bands_density(
         else:
             plot = axes.plot(energies, data, **kwargs)
 
-        if "Fermi" in cell.meta and show_fermi:
-            axes.axvline(x=cell.meta["Fermi"] / units, color='black', ls="--", lw=0.5)
+        if cell.fermi is not None and show_fermi:
+            axes.axvline(x=cell.fermi / units, color='black', ls="--", lw=0.5)
 
         axes.set_xlim(energy_range)
 

@@ -45,31 +45,46 @@ class EvalNUTest(unittest.TestCase):
 
 class BasisTest(unittest.TestCase):
 
-    def test_save_load(self):
-        x = old = Basis(
-            (numericalunits.angstrom,) * 3,
+    def setUp(self):
+        self.basis = Basis(
+            numpy.array((1, 2, 3)) * numericalunits.angstrom,
             kind='orthorombic',
-            units=dict(vectors='angstrom'),
+            meta={"key": "value"},
+            units=dict(vectors="angstrom")
         )
-        data = pickle.dumps(x)
+
+    def test_save_load(self):
+        basis = self.basis
+
+        data = pickle.dumps(basis)
         numericalunits.reset_units()
         x = pickle.loads(data)
-        # Assert object changed
-        assert x != old
-        testing.assert_allclose(x.vectors, numpy.eye(3) * numericalunits.angstrom)
+
+        # Assert object is the same wrt numericalunits
+        self.setUp()
+        basis2 = self.basis
+        testing.assert_allclose(x.vectors, basis2.vectors)
 
     def test_save_load_json(self):
-        x = old = Basis(
-            (numericalunits.angstrom,) * 3,
-            kind='orthorombic',
-            units=dict(vectors='angstrom'),
-        )
-        data = json.dumps(x.to_json())
+        basis = self.basis
+
+        data = json.dumps(basis.to_json())
         numericalunits.reset_units()
         x = Basis.from_json(json.loads(data))
-        # Assert object changed
-        assert x != old
-        testing.assert_allclose(x.vectors, numpy.eye(3) * numericalunits.angstrom)
+
+        # Assert object is the same wrt numericalunits
+        self.setUp()
+        basis2 = self.basis
+        testing.assert_allclose(x.vectors, basis2.vectors)
+
+    def test_serialization(self):
+        serialized = self.basis.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=(self.basis.vectors / numericalunits.angstrom).tolist(),
+            meta=dict(key="value"),
+            type="dfttools.utypes.Basis",
+            units=dict(vectors="angstrom"),
+        ))
 
 
 class CellTest(unittest.TestCase):
@@ -120,6 +135,29 @@ class CellTest(unittest.TestCase):
         testing.assert_equal(x.coordinates, cell2.coordinates)
         testing.assert_allclose(x.values, cell2.values)
         testing.assert_allclose(x.fermi, cell2.fermi)
+
+    def test_serialization_cry(self):
+        serialized = self.co_cell.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=(self.co_cell.vectors / numericalunits.angstrom).tolist(),
+            meta={},
+            type="dfttools.utypes.CrystalCell",
+            units=dict(vectors="angstrom"),
+            coordinates=self.co_cell.coordinates.tolist(),
+            values=self.co_cell.values.tolist(),
+        ))
+
+    def test_serialization_bs(self):
+        serialized = self.bs_cell.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=(self.bs_cell.vectors / (1. / numericalunits.angstrom)).tolist(),
+            meta={},
+            type="dfttools.utypes.BandsPath",
+            units=dict(vectors="1/angstrom", values="eV", fermi="eV"),
+            coordinates=self.bs_cell.coordinates.tolist(),
+            values=(self.bs_cell.values / numericalunits.eV).tolist(),
+            fermi=self.bs_cell.fermi / numericalunits.eV,
+        ))
 
 
 class GridTest(unittest.TestCase):
@@ -181,3 +219,15 @@ class GridTest(unittest.TestCase):
         testing.assert_equal(x.coordinates, grid2.coordinates)
         testing.assert_allclose(x.values, grid2.values)
         testing.assert_allclose(x.fermi, grid2.fermi)
+
+    def test_serialization(self):
+        serialized = self.bs_grid.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=(self.bs_grid.vectors / (1. / numericalunits.angstrom)).tolist(),
+            meta={},
+            type="dfttools.utypes.BandsGrid",
+            units=dict(vectors="1/angstrom", values="eV", fermi="eV"),
+            coordinates=tuple(i.tolist() for i in self.bs_grid.coordinates),
+            values=(self.bs_grid.values / numericalunits.eV).tolist(),
+            fermi=self.bs_grid.fermi / numericalunits.eV,
+        ))

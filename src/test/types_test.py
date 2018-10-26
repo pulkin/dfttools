@@ -228,6 +228,15 @@ class BasisTest(unittest.TestCase):
             (0, 0, 1),
         ))
 
+    def test_serialization(self):
+        serialized = self.b.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=self.b.vectors.tolist(),
+            meta=dict(key="value"),
+            type="dfttools.types.Basis"
+        ))
+        assert self.b == Basis.from_json(serialized)
+
 
 class BasisMacroTests(unittest.TestCase):
 
@@ -685,6 +694,17 @@ class CellTest(unittest.TestCase):
             testing.assert_equal(c.meta, c2.meta)
             testing.assert_equal(c2.coordinates, ((0, 0), (.5, .5)))
             testing.assert_allclose(c2.values, ((2, 6), (1, 5)))
+
+    def test_serialization(self):
+        serialized = self.cell.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=self.cell.vectors.tolist(),
+            meta={},
+            type="dfttools.types.UnitCell",
+            coordinates=self.cell.coordinates.tolist(),
+            values=self.cell.values.tolist(),
+        ))
+        assert self.cell == UnitCell.from_json(serialized)
 
 
 class FCCCellTest(unittest.TestCase):
@@ -1226,6 +1246,17 @@ class GridTest(unittest.TestCase):
                 (0, .5, 2. / 3),
             ],
         ]])
+
+    def test_serialization(self):
+        serialized = self.grid.to_json()
+        testing.assert_equal(serialized, dict(
+            vectors=self.grid.vectors.tolist(),
+            meta={},
+            type="dfttools.types.Grid",
+            coordinates=tuple(i.tolist() for i in self.grid.coordinates),
+            values=self.grid.values.tolist(),
+        ))
+        assert self.grid == Grid.from_json(serialized)
 
 
 class TetrahedronDensityTest(unittest.TestCase):

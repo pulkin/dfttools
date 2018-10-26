@@ -136,6 +136,15 @@ class Basis(object):
     def __eq__(self, another):
         return type(another) == type(self) and numpy.all(self.vectors == another.vectors)
 
+    @classmethod
+    def class_id(cls):
+        """
+        Retrieves a unique ID of the class.
+        Returns:
+            A string ID of the class based on class and module names.
+        """
+        return cls.__module__ + "." + getattr(cls, "__qualname__", cls.__name__)
+
     def to_json(self):
         """
         Prepares a JSON-compatible object representing this Basis.
@@ -145,7 +154,7 @@ class Basis(object):
             A JSON-compatible dict.
         """
         result = self.__getstate__()
-        result["type"] = "dfttools." + self.__class__.__name__
+        result["type"] = self.class_id()
         return result
 
     @classmethod
@@ -161,8 +170,8 @@ class Basis(object):
         
             A Basis object.
         """
-        if "type" not in j or j["type"] != "dfttools." + cls.__name__:
-            raise ValueError("Invalid JSON")
+        if "type" not in j or j["type"] != cls.class_id():
+            raise ValueError("Invalid JSON, expected type {}".format(cls.class_id()))
         del j["type"]
         result = cls(**j)
         result.__setstate__(j)

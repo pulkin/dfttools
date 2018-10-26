@@ -170,6 +170,7 @@ class Basis(object):
         
             A Basis object.
         """
+        j = dict(j)
         if "type" not in j or j["type"] != cls.class_id():
             raise ValueError("Invalid JSON, expected type {}".format(cls.class_id()))
         del j["type"]

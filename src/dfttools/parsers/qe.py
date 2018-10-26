@@ -7,12 +7,11 @@ import re
 import numericalunits
 import numpy
 
-from . import default_real_space_basis, default_band_structure_basis
 from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, cre_int, ParseError, \
     AbstractParser
 from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
-from ..types import UnitCell
+from ..utypes import CrystalCell, BandsPath, Basis
 
 
 class Bands(AbstractParser):
@@ -81,7 +80,7 @@ class Bands(AbstractParser):
             coordinates[i, :] = self.parser.nextFloat(3)
             values[i, :] = self.parser.nextFloat(ne)
 
-        return UnitCell(basis, coordinates, values)
+        return BandsPath(basis, coordinates, values)
 
     def bands(self, basis):
         """
@@ -326,7 +325,6 @@ class Output(AbstractParser):
 
         self.parser.skip("crystal axes: (cart. coord. in units of alat)")
         shape = self.parser.nextFloat((3, 4))[:, 1:] * alat
-        basis = default_real_space_basis(shape)
 
         self.parser.skip("Cartesian axes")
         coordinates = numpy.zeros((n, 3))
@@ -340,7 +338,7 @@ class Output(AbstractParser):
             coordinates[i, :] = self.parser.nextFloat(3)
 
         coordinates *= alat
-        result.append(UnitCell(basis, coordinates, captions, c_basis="cartesian"))
+        result.append(CrystalCell(shape, coordinates, captions, c_basis="cartesian"))
 
         # Parse MD steps
         while self.parser.present("ATOMIC_POSITIONS"):
@@ -361,7 +359,6 @@ class Output(AbstractParser):
                     shape = self.parser.nextFloat((3, 3)) * numericalunits.angstrom
                 else:
                     raise RuntimeError("Unknown format")
-                basis = default_real_space_basis(shape)
 
             # Parse atomic data
             self.parser.skip("ATOMIC_POSITIONS")
@@ -373,17 +370,17 @@ class Output(AbstractParser):
                 self.parser.nextLine()
 
             if units == "crystal":
-                result.append(UnitCell(basis, coordinates, captions))
+                result.append(CrystalCell(shape, coordinates, captions))
             elif units == "alat":
-                result.append(UnitCell(basis, coordinates * alat, captions, c_basis="cartesian"))
+                result.append(CrystalCell(shape, coordinates * alat, captions, c_basis="cartesian"))
             elif units == "bohr":
-                result.append(UnitCell(basis, coordinates * numericalunits.aBohr, captions, c_basis="cartesian"))
+                result.append(CrystalCell(shape, coordinates * numericalunits.aBohr, captions, c_basis="cartesian"))
             else:
                 raise ParseError("Unknown units: %s" % units)
 
         return result
 
-    def __bands_energies__(self, parseMode_kp, basis, kpoints, fermi, alat):
+    def __bands_energies__(self, parseMode_kp, vectors, kpoints, fermi, alat):
 
         n_kp = len(kpoints)
         energies = []
@@ -400,9 +397,9 @@ class Output(AbstractParser):
             energies.append(sub_energies)
 
         if parseMode_kp == 0:
-            c = UnitCell(basis, kpoints, energies)
+            c = BandsPath(vectors, kpoints, energies)
         else:
-            c = UnitCell(basis, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian")
+            c = BandsPath(vectors, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian")
 
         if not fermi is None:
             c.meta["Fermi"] = fermi
@@ -446,7 +443,7 @@ class Output(AbstractParser):
 
         self.parser.reset()
         self.parser.skip("reciprocal axes: (cart. coord. in units 2 pi/alat)")
-        basis = default_band_structure_basis(self.parser.nextFloat((3, 4))[:, 1:] * 2 * math.pi / alat)
+        basis = self.parser.nextFloat((3, 4))[:, 1:] * 2 * math.pi / alat
 
         self.parser.skip("number of k points=")
         n_kp = self.parser.nextInt()
@@ -986,7 +983,7 @@ class Input(AbstractParser):
             shape[0] *= numericalunits.aBohr
             shape[1] *= shape[0]
             shape[2] *= shape[0]
-            basis = default_real_space_basis(shape, kind='triclinic')
+            basis = Basis(shape, kind='triclinic')
 
         elif ibrav == 0:
 
@@ -994,12 +991,12 @@ class Input(AbstractParser):
             self.parser.skip("cell_parameters")
             units = self.parser.nextMatch(cre_word)
             vectors = self.parser.nextFloat(n=(3, 3)) * units_dict[units]
-            basis = default_real_space_basis(vectors)
+            basis = Basis(vectors)
 
         elif ibrav == 2:
 
             a = nl["system"]["celldm(1)"]
-            basis = default_real_space_basis(a / 2 * numericalunits.aBohr * numpy.array((
+            basis = Basis(a / 2 * numericalunits.aBohr * numpy.array((
                 (-1, 0, 1), (0, 1, 1), (-1, 1, 0),
             )))
 
@@ -1028,13 +1025,13 @@ class Input(AbstractParser):
             self.parser.nextLine()
 
         if units == "alat":
-            result = UnitCell(basis, coordinates * units_dict["alat"], values, c_basis="cartesian")
+            result = CrystalCell(basis, coordinates * units_dict["alat"], values, c_basis="cartesian")
         elif units == "bohr":
-            result = UnitCell(basis, coordinates * numericalunits.aBohr, values, c_basis="cartesian")
+            result = CrystalCell(basis, coordinates * numericalunits.aBohr, values, c_basis="cartesian")
         elif units == "angstrom":
-            result = UnitCell(basis, coordinates * numericalunits.angstrom, values, c_basis="cartesian")
+            result = CrystalCell(basis, coordinates * numericalunits.angstrom, values, c_basis="cartesian")
         elif units == "crystal":
-            result = UnitCell(basis, coordinates, values)
+            result = CrystalCell(basis, coordinates, values)
         else:
             raise RuntimeError("Unknown units: {}".format(units))
 

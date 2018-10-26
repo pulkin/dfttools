@@ -7,6 +7,7 @@ import numpy
 from dfttools.parsers.generic import ParseError
 from dfttools.parsers.qe import bands, output, cond, input, proj
 from dfttools.types import Basis
+from ..utypes_test import assert_standard_crystal_cell, assert_standard_bands_path
 from numpy import testing
 
 
@@ -25,7 +26,7 @@ class Test_bands0(unittest.TestCase):
             ) * 2 * math.pi / 5.999694 / numericalunits.aBohr
         )
         c = self.parser.bands(c)
-        assert c.values_units_aware
+        assert_standard_bands_path(c)
         assert c.values.shape == (400, 34)
         assert c.coordinates.shape == (400, 3)
         testing.assert_allclose(c.coordinates[0, :], (0.500000, -0.288675, 0.000000))
@@ -106,7 +107,7 @@ class Test_output0(unittest.TestCase):
             testing.assert_equal(cells[i].values,
                                  ('As', 'As')
                                  )
-        assert cells[0].units_aware
+        assert_standard_crystal_cell(cells[0])
         testing.assert_allclose(cells[0].vectors, numpy.array(
             ((0.580130, 0.000000, 0.814524),
              (-0.290065, 0.502407, 0.814524),
@@ -121,7 +122,7 @@ class Test_output0(unittest.TestCase):
             ((0.0000001, 0.0000000, 0.7086605),
              (-0.0000001, 0.0000000, -0.7086605))
         ) * 7.0103 * numericalunits.aBohr, atol=1)
-        assert cells[1].units_aware
+        assert_standard_crystal_cell(cells[1])
         testing.assert_allclose(cells[1].vectors, numpy.array(
             ((0.589711141, -0.000000000, 0.822239221),
              (-0.294855381, 0.510704782, 0.822239223),
@@ -131,7 +132,7 @@ class Test_output0(unittest.TestCase):
                                 ((0.288386168, 0.288386167, 0.288386167),
                                  (-0.288386168, -0.288386167, -0.288386167))
                                 )
-        assert cells[-1].units_aware
+        assert_standard_crystal_cell(cells[-1])
         testing.assert_allclose(cells[-1].vectors, numpy.array(
             ((0.593659483, -0.000000000, 0.870567646),
              (-0.296829546, 0.514124144, 0.870567651),
@@ -147,8 +148,7 @@ class Test_output0(unittest.TestCase):
         b = self.parser.bands(index=None, skipVCRelaxException=True)
         assert len(b) == 19
         for i in range(len(b)):
-            assert b[i].units_aware
-            assert b[i].values_units_aware
+            assert_standard_bands_path(b[i])
             testing.assert_allclose(b[i].vectors, numpy.array(
                 ((1.149169, 0.000000, 0.409237),
                  (-0.574584, 0.995209, 0.409237),
@@ -238,7 +238,7 @@ class Test_output1(unittest.TestCase):
         cells = self.parser.unitCells()
         assert len(cells) == 6
         for i in range(6):
-            assert cells[i].units_aware
+            assert_standard_crystal_cell(cells[i])
             testing.assert_equal(cells[i].values,
                                  ('C', 'O')
                                  )
@@ -271,7 +271,7 @@ class Test_output2(unittest.TestCase):
         cells = self.parser.unitCells()
         assert len(cells) == 14
         for i in range(14):
-            assert cells[i].units_aware
+            assert_standard_crystal_cell(cells[i])
             testing.assert_equal(cells[i].values,
                                  ('Al',) * 7
                                  )
@@ -365,8 +365,7 @@ class Test_output3(unittest.TestCase):
         b = self.parser.bands(index=None)
         assert len(b) == 1
         b = b[0]
-        assert b.units_aware
-        assert b.values_units_aware
+        assert_standard_bands_path(b)
         testing.assert_allclose(b.vectors, numpy.array(
             ((-1., -1., 1.),
              (1., 1., 1.),
@@ -411,8 +410,7 @@ class Test_output4(unittest.TestCase):
 
     def test_bands(self):
         b = self.parser.bands(index=None)
-        assert b[0].units_aware
-        assert b[0].values_units_aware
+        assert_standard_bands_path(b[0])
 
         testing.assert_equal(b[0].coordinates, (
             (0.0000000, 0.0000000, 0.0000000),
@@ -891,7 +889,7 @@ K_POINTS automatic
 
     def test_unitCell(self):
         cell = self.parser.unitCell()
-        assert cell.units_aware
+        assert_standard_crystal_cell(cell)
 
         testing.assert_allclose(cell.vectors,
                                 ((5.669178374 * numericalunits.aBohr, 0, 0),

@@ -4,11 +4,10 @@ Parsing various atomic structure files.
 import numericalunits
 import numpy
 
-from . import default_real_space_basis
 from .generic import cre_word, cre_nonspace, AbstractParser
 from ..presentation import __elements_table__
 from ..simple import unit_cell
-from ..types import UnitCell, Grid
+from ..utypes import CrystalCell, Grid, Basis
 
 
 class XSF(AbstractParser):
@@ -62,8 +61,8 @@ class XSF(AbstractParser):
                     self.parser.nextLine()
                     values[i] = self.parser.nextMatch(cre_word)
                     coordinates[i, :] = self.parser.nextFloat(3) * numericalunits.angstrom
-                result.append(UnitCell(
-                    default_real_space_basis(shape),
+                result.append(CrystalCell(
+                    shape,
                     coordinates,
                     values,
                     c_basis='cartesian'
@@ -138,9 +137,11 @@ class XSF(AbstractParser):
                     "xsf-grid-name": grid_name,
                 }
                 c = Grid(
-                    default_real_space_basis(vectors, meta=meta),
+                    vectors,
                     tuple(numpy.linspace(0, 1, s, endpoint=False) for s in data.shape),
                     data,
+                    meta=meta,
+                    units=dict(vectors="angstrom")
                 )
                 result.append(c)
 
@@ -200,9 +201,10 @@ class GaussianCube(AbstractParser):
         data = self.parser.nextFloat(size)
 
         return Grid(
-            default_real_space_basis(vectors),
+            vectors,
             tuple(numpy.linspace(0, 1, s, endpoint=False) for s in data.shape),
             data,
+            units=dict(vectors="angstrom"),
         )
 
     @unit_cell
@@ -254,7 +256,7 @@ class GaussianCube(AbstractParser):
             else:
                 c.append(ac * numericalunits.aBohr)
 
-        return UnitCell(default_real_space_basis(shape), c, v, c_basis="cartesian")
+        return CrystalCell(shape, c, v, c_basis="cartesian")
 
 
 class XYZ(AbstractParser):
@@ -301,7 +303,7 @@ class XYZ(AbstractParser):
         mn = c.min(axis=0)
         shape = mx - mn + XYZ.vacuum_size
 
-        return UnitCell(default_real_space_basis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
+        return CrystalCell(Basis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
 
 
 # Lower case versions

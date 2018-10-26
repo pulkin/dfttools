@@ -9,12 +9,11 @@ import numericalunits
 import numpy
 import os.path
 
-from . import default_real_space_basis, default_band_structure_basis
 from .generic import cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, \
     AbstractJSONParser, ParseError
 from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, tag_method
-from ..types import UnitCell
+from ..utypes import CrystalCell, BandsPath
 
 
 def populations(s):
@@ -381,8 +380,8 @@ class Input(AbstractParser):
             elif units_cell == "au":
                 shape *= numericalunits.aBohr
 
-        return UnitCell(
-            default_real_space_basis(shape),
+        return CrystalCell(
+            shape,
             coordinates,
             values,
             c_basis=None if units.lower() == "frac" else "cartesian"
@@ -487,8 +486,8 @@ class Output(AbstractParser):
                     self.parser.skip("XYZ(ang)")
                     coordinates.append(self.parser.nextFloat(3) * numericalunits.angstrom)
 
-                cells.append(UnitCell(
-                    default_real_space_basis(shape),
+                cells.append(CrystalCell(
+                    shape,
                     coordinates,
                     startingCell.values,
                     c_basis="cartesian",
@@ -683,10 +682,11 @@ class Bands(AbstractParser):
 
         data = openmx_bands_bands(self.data)
 
-        return UnitCell(
-            default_band_structure_basis(shape, meta={"Fermi": self.fermi(), "special-points": self.captions()}),
+        return BandsPath(
+            shape,
             data[:, :3],
             data[:, 3:] * numericalunits.Hartree,
+            meta={"Fermi": self.fermi(), "special-points": self.captions()},
         )
 
 

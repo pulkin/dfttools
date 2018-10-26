@@ -3,10 +3,9 @@ Parsing `VASP <https://www.vasp.at/>`_ files.
 """
 import numericalunits
 
-from . import default_band_structure_basis
 from .generic import AbstractParser
 from ..simple import band_structure
-from ..types import Basis, UnitCell
+from ..utypes import CrystalCell, BandsPath
 
 
 class Output(AbstractParser):
@@ -44,9 +43,7 @@ class Output(AbstractParser):
     def __reciprocal__(self):
         self.parser.skip("reciprocal lattice vectors")
         self.parser.nextLine()
-        return default_band_structure_basis(
-            self.parser.nextFloat((3, 6))[:, 3:],
-        )
+        return self.parser.nextFloat((3, 6))[:, 3:] / numericalunits.angstrom
 
     def __kpoints__(self):
         self.parser.skip("k-points in reciprocal lattice and weights: K-points")
@@ -75,7 +72,7 @@ class Output(AbstractParser):
             self.parser.nextLine(2)
             e.append(self.parser.nextFloat("\n\n").reshape(-1, 3)[:, 1] * numericalunits.eV)
 
-        result = UnitCell(
+        result = BandsPath(
             basis,
             k,
             e,
@@ -99,12 +96,11 @@ class Structure(AbstractParser):
         scale = self.parser.nextFloat()
         self.parser.nextLine()
         vectors = self.parser.nextFloat((3, 3))
-        basis = Basis(vectors, units="angstrom")
         if scale > 0:
             scale *= numericalunits.angstrom
         else:
             raise NotImplemented
-        basis.vectors *= scale
+        vectors *= scale
         self.parser.nextLine(2)
         nat = self.parser.nextInt("\n")
         self.parser.nextLine()
@@ -117,8 +113,8 @@ class Structure(AbstractParser):
         atoms = []
         for name, number in zip(names, nat):
             atoms += [name] * number
-        return UnitCell(
-            basis,
+        return CrystalCell(
+            vectors,
             coords if c_basis is None else coords * scale,
             atoms,
             c_basis=c_basis,

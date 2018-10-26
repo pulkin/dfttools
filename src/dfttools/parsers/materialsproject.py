@@ -6,10 +6,9 @@ import requests
 import numericalunits
 import numpy
 
-from . import default_real_space_basis
 from .generic import AbstractJSONParser
 from ..simple import unit_cell
-from ..types import UnitCell
+from ..utypes import CrystalCell
 
 GATEWAY = "https://www.materialsproject.org/rest/v1/"
 
@@ -102,13 +101,13 @@ class JSONResponse(AbstractJSONParser):
 
         elif isinstance(root, dict):
             if "@class" in root and root["@class"] == "Structure":
-                b = default_real_space_basis(numpy.array(root["lattice"]["matrix"]) * numericalunits.angstrom)
+                vecs = numpy.array(root["lattice"]["matrix"]) * numericalunits.angstrom
                 coords = []
                 vals = []
                 for s in root["sites"]:
                     coords.append(s["abc"])
                     vals.append(s["label"])
-                return [UnitCell(b, coords, vals)]
+                return [CrystalCell(vecs, coords, vals)]
 
             else:
                 for k, v in root.items():

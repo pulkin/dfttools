@@ -7,10 +7,9 @@ import re
 import numericalunits
 import numpy
 
-from . import default_real_space_basis
 from .generic import cre_nonspace, cre_float, cre_word, AbstractParser
 from ..simple import band_structure, unit_cell
-from ..types import UnitCell, Basis
+from ..utypes import CrystalCell, Basis, BandsPath
 
 
 class UnitCellsParser(AbstractParser):
@@ -79,8 +78,8 @@ class UnitCellsParser(AbstractParser):
             coordinates.append(self.parser.nextFloat(n=(n_at, 6))[:, :3])
             values = values + [name] * n_at
 
-        return UnitCell(
-            default_real_space_basis(vectors),
+        return CrystalCell(
+            vectors,
             numpy.concatenate(coordinates, axis=0),
             values,
         )
@@ -236,8 +235,8 @@ class Output(AbstractParser):
             values += [name] * coords.shape[0]
 
         coordinates = numpy.concatenate(coordinates, axis=0)
-        return UnitCell(
-            default_real_space_basis(vecs),
+        return CrystalCell(
+            vecs,
             coordinates,
             values,
         )
@@ -255,7 +254,7 @@ class Output(AbstractParser):
         self.parser.skip('Reciprocal lattice vectors :')
 
         vecs = self.parser.nextFloat(n=(3, 3)) * 2 * math.pi / numericalunits.aBohr
-        return Basis(vecs)
+        return Basis(vecs, units=dict(vectors="1/angstrom"))
 
 
 class Bands(AbstractParser):
@@ -289,8 +288,8 @@ class Bands(AbstractParser):
             values.append(a[1::2] * numericalunits.Hartree)
             coordinates = a[::2]
 
-        return UnitCell(
-            Basis((1,)),
+        return BandsPath(
+            (1,),
             coordinates[:, numpy.newaxis],
             numpy.array(values).swapaxes(0, 1),
         )

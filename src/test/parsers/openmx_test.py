@@ -1,7 +1,8 @@
 import unittest
 
 from dfttools.parsers.openmx import *
-from dfttools.types import UnitCell, Basis
+from dfttools.utypes import CrystalCell
+from ..utypes_test import assert_standard_crystal_cell, assert_standard_bands_path
 from numpy import testing
 
 
@@ -26,8 +27,7 @@ class Test_bands0(unittest.TestCase):
 
     def test_bands(self):
         b = self.parser.bands()
-        assert b.units_aware
-        assert b.values_units_aware
+        assert_standard_bands_path(b)
         testing.assert_equal(b.vectors, numpy.array((
             (1.011228, -0.583833, 0.000000),
             (0.000000, 1.167666, 0.000000),
@@ -132,7 +132,7 @@ class Test_input0(unittest.TestCase):
 
     def test_unitCell(self):
         c = self.parser.unitCell()
-        assert c.units_aware
+        assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((
             (3.288, 0.0, 0.0),
@@ -154,8 +154,7 @@ class Test_input0(unittest.TestCase):
 
     def test_unitCell_au(self):
         c = self.parser_au.unitCell()
-        assert c.units_aware
-
+        assert_standard_crystal_cell(c)
         testing.assert_equal(c.vectors, numpy.array((
             (3.288, 0.0, 0.0),
             (1.644, 2.847491528, 0.0),
@@ -177,7 +176,7 @@ class Test_input1(unittest.TestCase):
 
     def test_unitCell(self):
         c = self.parser.unitCell()
-        assert c.units_aware
+        assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((
             (55.66990773701619, 0.0, 0.0),
@@ -221,8 +220,8 @@ class Test_input2(unittest.TestCase):
 
         l = self.l.unitCell()
         s = self.s.unitCell(l=l, r=l)
-        assert l.units_aware
-        assert s.units_aware
+        assert_standard_crystal_cell(l)
+        assert_standard_crystal_cell(s)
 
         testing.assert_allclose(l.vectors, s.vectors)
         testing.assert_allclose(l.coordinates, s.coordinates)
@@ -234,8 +233,8 @@ class Test_input2(unittest.TestCase):
 
         l = self.l_au.unitCell()
         s = self.s_au.unitCell(l=l, r=l)
-        assert l.units_aware
-        assert s.units_aware
+        assert_standard_crystal_cell(l)
+        assert_standard_crystal_cell(s)
 
         testing.assert_allclose(l.vectors, s.vectors)
         testing.assert_allclose(l.coordinates, s.coordinates)
@@ -291,8 +290,8 @@ class Test_output0(unittest.TestCase):
             (0.0, 0.0, 100)
         )) * numericalunits.angstrom
 
-        c = self.parser.unitCells(UnitCell(
-            Basis(vecs, units="angstrom"),
+        c = self.parser.unitCells(CrystalCell(
+            vecs,
             (
                 (0.33333333333353, 0.33333333333331, 0.50000000000001),
                 (0.66666666666614, 0.66666666666674, 0.48313110391249),
@@ -305,7 +304,7 @@ class Test_output0(unittest.TestCase):
 
         for cc in c:
             assert cc.coordinates.shape[0] == 3
-            assert cc.units_aware
+            assert_standard_crystal_cell(cc)
 
             testing.assert_allclose(cc.vectors, vecs)
 

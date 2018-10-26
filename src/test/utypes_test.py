@@ -17,6 +17,7 @@ def assert_standard_bands_path(c):
     assert isinstance(c, BandsPath)
     assert c.units["vectors"] == "1/angstrom"
     assert c.units["values"] == "eV"
+    assert c.units["fermi"] == "eV"
 
 
 def assert_standard_real_space_grid(c):
@@ -87,6 +88,7 @@ class CellTest(unittest.TestCase):
             ((self.ia, 0, 0), (.5 * self.ia, .5 * self.ia * 3. ** .5, 0), (0, 0, self.ih)),
             ((0., 0., 0.), (1. / 3., 1. / 3., 0.5)),
             [3 * numericalunits.eV],
+            fermi=1.5 * numericalunits.eV,
         )
 
     def test_save_load(self):
@@ -102,6 +104,7 @@ class CellTest(unittest.TestCase):
         testing.assert_allclose(x.vectors, cell2.vectors)
         testing.assert_equal(x.coordinates, cell2.coordinates)
         testing.assert_allclose(x.values, cell2.values)
+        testing.assert_allclose(x.fermi, cell2.fermi)
 
     def test_save_load_json(self):
         cell = self.bs_cell
@@ -116,6 +119,7 @@ class CellTest(unittest.TestCase):
         testing.assert_allclose(x.vectors, cell2.vectors)
         testing.assert_equal(x.coordinates, cell2.coordinates)
         testing.assert_allclose(x.values, cell2.values)
+        testing.assert_allclose(x.fermi, cell2.fermi)
 
 
 class GridTest(unittest.TestCase):
@@ -130,6 +134,7 @@ class GridTest(unittest.TestCase):
             Basis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorombic'),
             (x, y, z),
             data,
+            fermi=1.5 * numericalunits.eV,
         )
 
     def test_pickle_units(self):
@@ -145,6 +150,7 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(x.vectors, grid2.vectors)
         testing.assert_equal(x.coordinates, grid2.coordinates)
         testing.assert_allclose(x.values, grid2.values)
+        testing.assert_allclose(x.fermi, grid2.fermi)
 
     def test_save_load_json(self):
         grid = self.bs_grid
@@ -159,6 +165,7 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(x.vectors, grid2.vectors)
         testing.assert_equal(x.coordinates, grid2.coordinates)
         testing.assert_allclose(x.values, grid2.values)
+        testing.assert_allclose(x.fermi, grid2.fermi)
 
     def test_save_load_json_with_conversion(self):
         grid = self.bs_grid
@@ -173,3 +180,4 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(x.vectors, grid2.vectors)
         testing.assert_equal(x.coordinates, grid2.coordinates)
         testing.assert_allclose(x.values, grid2.values)
+        testing.assert_allclose(x.fermi, grid2.fermi)

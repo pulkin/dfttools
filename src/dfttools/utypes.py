@@ -5,6 +5,7 @@ This submodule enhances `types.py` with units from
 import re
 import numericalunits
 import numpy
+from numbers import Number
 
 from . import types
 
@@ -105,8 +106,11 @@ class UnitsMixin(object):
         for k in self.units:
             if k in dir(self):
                 v = getattr(self, k)
-                if isinstance(v, numpy.ndarray):
+                if isinstance(v, (numpy.ndarray, Number)):
                     yield k, v
+
+    def __getstate_u__(self, state):
+        return state
 
     def __getstate__(self):
         backup = {}
@@ -117,7 +121,7 @@ class UnitsMixin(object):
             setattr(self, k, self.units.release(k, v))
 
         # Get the state
-        state = super(UnitsMixin, self).__getstate__()
+        state = self.__getstate_u__(super(UnitsMixin, self).__getstate__())
         if "units" in state:
             raise RuntimeError("The `units` key is reserved but was set by the parent class")
         state["units"] = dict(self.units)
@@ -128,12 +132,16 @@ class UnitsMixin(object):
 
         return state
 
+    def __setstate_u__(self, state):
+        pass
+
     def __setstate__(self, data):
         # Take units
         units = UnitsCollection(data["units"])
         del data["units"]
         # Init parent
         super(UnitsMixin, self).__setstate__(data)
+        self.__setstate_u__(data)
         # Assign units
         self.units = units
         # Set all units
@@ -208,8 +216,10 @@ class BandsPath(UnitCell):
     A band structure in a crystal.
     """
     def __init__(self, *args, **kwargs):
-        kw = dict(units=dict(vectors="1/angstrom", values="eV"))
+        kw = dict(units=dict(vectors="1/angstrom", values="eV", fermi="eV"), fermi=None)
         kw.update(kwargs)
+        self.fermi = kw["fermi"]
+        del kw["fermi"]
         super(BandsPath, self).__init__(*args, **kw)
 
     def as_grid(self, fill=float("nan")):
@@ -227,7 +237,15 @@ class BandsPath(UnitCell):
             self,
             g.coordinates,
             g.values,
+            fermi=self.fermi,
         )
+
+    def __getstate_u__(self, state):
+        state["fermi"] = self.fermi
+        return state
+
+    def __setstate_u__(self, state):
+        self.fermi = state["fermi"]
 
 
 class BandsGrid(Grid):
@@ -235,8 +253,10 @@ class BandsGrid(Grid):
     A band structure in a crystal.
     """
     def __init__(self, *args, **kwargs):
-        kw = dict(units=dict(vectors="1/angstrom", values="eV"))
+        kw = dict(units=dict(vectors="1/angstrom", values="eV", fermi="eV"), fermi=None)
         kw.update(kwargs)
+        self.fermi = kw["fermi"]
+        del kw["fermi"]
         super(BandsGrid, self).__init__(*args, **kw)
 
     def as_unitCell(self):
@@ -251,4 +271,12 @@ class BandsGrid(Grid):
             self,
             c.coordinates,
             c.values,
+            fermi=self.fermi,
         )
+
+    def __getstate_u__(self, state):
+        state["fermi"] = self.fermi
+        return state
+
+    def __setstate_u__(self, state):
+        self.fermi = state["fermi"]

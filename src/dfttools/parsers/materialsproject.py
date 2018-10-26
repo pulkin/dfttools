@@ -100,14 +100,19 @@ class JSONResponse(AbstractJSONParser):
                 result += self.unitCells(root=i)
 
         elif isinstance(root, dict):
-            if "@class" in root and root["@class"] == "Structure":
-                vecs = numpy.array(root["lattice"]["matrix"]) * numericalunits.angstrom
+            if "structure" in root and "@class" in root["structure"] and root["structure"]["@class"] == "Structure":
+                structure_root = root["structure"]
+                vecs = numpy.array(structure_root["lattice"]["matrix"]) * numericalunits.angstrom
                 coords = []
                 vals = []
-                for s in root["sites"]:
+                for s in structure_root["sites"]:
                     coords.append(s["abc"])
                     vals.append(s["label"])
-                return [CrystalCell(vecs, coords, vals)]
+                if "material_id" in root:
+                    meta = {"materialsproject-id": root["material_id"]}
+                else:
+                    meta = None
+                return [CrystalCell(vecs, coords, vals, meta=meta)]
 
             else:
                 for k, v in root.items():

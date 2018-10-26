@@ -32,6 +32,7 @@ class Test_structure0(unittest.TestCase):
             [0.16718909, 0.66549936, 1e-08],
         ])
         testing.assert_equal(c.values, ["C"] * 2)
+        testing.assert_equal(c.meta["materialsproject-id"], "mp-632329")
 
         c = cells[-1]
         assert_standard_crystal_cell(c)
@@ -45,3 +46,4 @@ class Test_structure0(unittest.TestCase):
             [0.16666206, 0.33333306, 0.0],
         ])
         testing.assert_equal(c.values, ["C"] * 2)
+        testing.assert_equal(c.meta["materialsproject-id"], "mp-1040425")

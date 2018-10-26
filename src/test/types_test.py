@@ -1055,15 +1055,6 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(c.values, self.grid.values)
 
     def test_stack_error_0(self):
-        another = UnitCell(
-            Basis(self.grid.vectors),
-            (0, 0, 0),
-            'X',
-        )
-        with self.assertRaises(ArgumentError):
-            self.grid.stack(another)
-
-    def test_stack_error_1(self):
         x = numpy.linspace(0, 1, 3)[:-1]
         y = numpy.linspace(0, 1, 3)[:-1]
         z = numpy.linspace(0, 1, 5)[:-1]

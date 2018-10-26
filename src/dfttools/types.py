@@ -1043,8 +1043,8 @@ class UnitCell(Basis):
         dims = self.vectors.shape[0]
 
         for c in cells:
-            if not type(c) in (UnitCell, Basis):
-                raise ArgumentError('Cannot stack object {}'.format(c))
+            if not isinstance(c, Basis):
+                raise ArgumentError('The object {} is not an instance of a Basis'.format(c))
 
         basis = Basis.stack(*cells, vector=vector, **kwargs)
 
@@ -1656,8 +1656,8 @@ class Grid(Basis):
         basis = Basis.stack(*grids, vector=vector, **kwargs)
 
         for g in grids:
-            if not type(g) in (Grid, Basis):
-                raise ArgumentError('The object {} is not an instance of a Grid'.format(g))
+            if not isinstance(g, Basis):
+                raise ArgumentError('The object {} is not an instance of a Basis'.format(g))
 
         for i, g in enumerate(grids[1:]):
             if isinstance(g, Grid):
@@ -1721,7 +1721,7 @@ class Grid(Basis):
 
     def as_unitCell(self):
         """
-        Converts this cell to a ``UnitCell``.
+        Converts this cell into a ``UnitCell``.
         
         Returns:
         

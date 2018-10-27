@@ -6,13 +6,12 @@ import json
 
 import numpy
 from dfttools.presentation import __elements_name_lookup_table__
-from numericalunits import angstrom
-
+import numericalunits
 
 def __xsf_structure__(cell, tag=None, indent=4):
     indent = " " * indent
     cell_vectors = ((indent + " {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(cell.vectors / angstrom, -1))
-    cartesian = cell.cartesian() / angstrom
+    cartesian = cell.cartesian() / numericalunits.angstrom
     coords = ''.join(
         (indent + '{:>2} {:14.10f} {:14.10f} {:14.10f}\n'.format(cell.values[i], cartesian[i, 0], cartesian[i, 1],
                                                                  cartesian[i, 2]))
@@ -145,7 +144,7 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
 
         # Unit cell
         parameters["CELL_PARAMETERS"] = "\n".join((indent + "{:.14e} {:.14e} {:.14e}",) * 3).format(
-            *numpy.reshape(cell.vectors / angstrom, -1))
+            *numpy.reshape(cell.vectors / numericalunits.angstrom, -1))
         inline_parameters["CELL_PARAMETERS"] = "angstrom"
 
         # Atomic coordinates
@@ -270,7 +269,7 @@ def siesta_input(cell, indent=4):
     ))
 
     section_lv = "\n".join(tuple(
-        indent + "{:e} {:e} {:e}".format(*v / angstrom)
+        indent + "{:e} {:e} {:e}".format(*v / numericalunits.angstrom)
         for v in cell.vectors
     ))
 
@@ -338,7 +337,7 @@ def openmx_input(cell, populations, l=None, r=None, tolerance=1e-10, indent=4):
     else:
         raise ValueError("Only one of 'left' and 'right' unit cells specified")
 
-    c = target.cartesian() / angstrom
+    c = target.cartesian() / numericalunits.angstrom
     v = target.values
 
     result = """Atoms.Number {anum:d}
@@ -352,7 +351,7 @@ Atoms.UnitVectors.Unit Ang
 """ + (
             "\n".join(tuple(
                 "{indent}{:.15e} {:.15e} {:.15e}".format(*v, indent=indent)
-                for v in target.vectors / angstrom
+                for v in target.vectors / numericalunits.angstrom
             ))
         ) + """
 Atoms.UnitVectors>
@@ -417,12 +416,12 @@ def pyscf_cell(cell, **kwargs):
         kwargs["unit"] = "Angstrom"
 
     if kwargs["unit"] == "Angstrom":
-        geometry = zip(cell.values, cell.cartesian() / angstrom)
-        vectors = cell.vectors / angstrom
+        geometry = zip(cell.values, cell.cartesian() / numericalunits.angstrom)
+        vectors = cell.vectors / numericalunits.angstrom
 
     elif kwargs["unit"] == "Bohr":
-        geometry = zip(cell.values, cell.cartesian() / aBohr)
-        vectors = cell.vectors / aBohr
+        geometry = zip(cell.values, cell.cartesian() / numericalunits.aBohr)
+        vectors = cell.vectors / numericalunits.aBohr
 
     if not "dimension" in kwargs:
         kwargs['dimension'] = 3

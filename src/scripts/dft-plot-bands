@@ -16,7 +16,7 @@ options = parser.parse_args()
 from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
 
-from numericalunits import eV, angstrom
+from numericalunits import eV
 import numpy
     
 def report(bands):

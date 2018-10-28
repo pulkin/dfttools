@@ -109,6 +109,15 @@ class UnitsMixin(object):
                 if isinstance(v, (numpy.ndarray, Number)):
                     yield k, v
 
+    def __iter_meta_units__(self):
+        for k in self.units:
+            if k.startswith("meta_"):
+                k = k[5:]
+                if k in self.meta:
+                    v = self.meta[k]
+                    if isinstance(v, (numpy.ndarray, Number)):
+                        yield k, v
+
     def __getstate_u__(self, state):
         return state
 
@@ -120,6 +129,13 @@ class UnitsMixin(object):
             backup[k] = v
             setattr(self, k, self.units.release(k, v))
 
+        backup_meta = {}
+
+        # Release units in meta
+        for k, v in self.__iter_meta_units__():
+            backup_meta[k] = v
+            self.meta[k] = self.units.release("meta_" + k, v)
+
         # Get the state
         state = self.__getstate_u__(super(UnitsMixin, self).__getstate__())
         if "units" in state:
@@ -129,6 +145,9 @@ class UnitsMixin(object):
         # Restore all data modified
         for k, v in backup.items():
             setattr(self, k, v)
+
+        # Restore units in meta
+        self.meta.update(backup_meta)
 
         return state
 
@@ -147,6 +166,9 @@ class UnitsMixin(object):
         # Set all units
         for k, v in self.__iter_fields_units__():
             setattr(self, k, self.units.apply(k, v))
+        # Set all meta units
+        for k, v in self.__iter_meta_units__():
+            self.meta[k] = self.units.apply("meta_" + k, v)
 
 
 class Basis(UnitsMixin, types.Basis):

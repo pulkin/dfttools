@@ -49,8 +49,8 @@ class BasisTest(unittest.TestCase):
         self.basis = Basis(
             numpy.array((1, 2, 3)) * numericalunits.angstrom,
             kind='orthorombic',
-            meta={"key": "value"},
-            units=dict(vectors="angstrom")
+            meta={"key": "value", "another": 3. / numericalunits.eV},
+            units=dict(vectors="angstrom", meta_another="1/eV"),
         )
 
     def test_save_load(self):
@@ -64,6 +64,7 @@ class BasisTest(unittest.TestCase):
         self.setUp()
         basis2 = self.basis
         testing.assert_allclose(x.vectors, basis2.vectors)
+        testing.assert_allclose(x.meta["another"], basis2.meta["another"])
 
     def test_save_load_json(self):
         basis = self.basis
@@ -76,14 +77,15 @@ class BasisTest(unittest.TestCase):
         self.setUp()
         basis2 = self.basis
         testing.assert_allclose(x.vectors, basis2.vectors)
+        testing.assert_allclose(x.meta["another"], basis2.meta["another"])
 
     def test_serialization(self):
         serialized = self.basis.to_json()
         testing.assert_equal(serialized, dict(
             vectors=(self.basis.vectors / numericalunits.angstrom).tolist(),
-            meta=dict(key="value"),
+            meta=dict(key="value", another=self.basis.meta["another"] / (1. / numericalunits.eV)),
             type="dfttools.utypes.Basis",
-            units=dict(vectors="angstrom"),
+            units=dict(vectors="angstrom", meta_another="1/eV"),
         ))
 
 

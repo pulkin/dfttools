@@ -4,6 +4,7 @@ from dfttools.formatters import *
 from dfttools.parsers import structure, qe, openmx
 from dfttools.types import *
 from numpy import testing
+from numericalunits import angstrom
 
 
 class BackForthTests(unittest.TestCase):

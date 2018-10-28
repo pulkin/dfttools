@@ -10,7 +10,7 @@ import numericalunits
 
 def __xsf_structure__(cell, tag=None, indent=4):
     indent = " " * indent
-    cell_vectors = ((indent + " {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(cell.vectors / angstrom, -1))
+    cell_vectors = ((indent + " {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(cell.vectors / numericalunits.angstrom, -1))
     cartesian = cell.cartesian() / numericalunits.angstrom
     coords = ''.join(
         (indent + '{:>2} {:14.10f} {:14.10f} {:14.10f}\n'.format(cell.values[i], cartesian[i, 0], cartesian[i, 1],
@@ -74,7 +74,7 @@ def xsf_grid(grid, cell, npl=6):
 
     result += "BEGIN_BLOCK_DATAGRID_3D\ndfttools.formatter\nDATAGRID_3D_UNKNOWN\n"
     result += " ".join(("{:d}",) * 3).format(*(numpy.array(grid.values.shape) + 1)) + "\n0 0 0\n"
-    result += (("     {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(grid.vectors / angstrom, -1))
+    result += (("     {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(grid.vectors / numericalunits.angstrom, -1))
 
     l = grid.values
     l = numpy.concatenate((l, l[0:1, :, :]), axis=0)

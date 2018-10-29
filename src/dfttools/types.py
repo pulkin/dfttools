@@ -3,7 +3,6 @@ This submodule contains key types for handling coordinate-dependent data:
 ``UnitCell``, ``Grid`` and ``Basis``.
 """
 import itertools
-import re
 from functools import wraps
 
 import numpy
@@ -122,8 +121,8 @@ class Basis(object):
 
     def __getstate__(self):
         return dict(
-            vectors=self.vectors.tolist(),
-            meta={k: v.tolist() if isinstance(v, numpy.ndarray) else v for k, v in self.meta.items()},
+            vectors=self.vectors,
+            meta=self.meta.copy(),
         )
 
     def __setstate__(self, data):
@@ -631,8 +630,8 @@ class UnitCell(Basis):
     def __getstate__(self):
         result = super(UnitCell, self).__getstate__()
         result.update(dict(
-            coordinates=self.coordinates.tolist(),
-            values=self.values.tolist(),
+            coordinates=self.coordinates,
+            values=self.values,
         ))
         return result
 
@@ -1318,8 +1317,8 @@ class Grid(Basis):
     def __getstate__(self):
         result = super(Grid, self).__getstate__()
         result.update(dict(
-            coordinates=tuple(i.tolist() for i in self.coordinates),
-            values=self.values.tolist(),
+            coordinates=self.coordinates,
+            values=self.values,
         ))
         return result
 

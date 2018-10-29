@@ -2,9 +2,9 @@ import pickle
 import numpy
 import unittest
 import numericalunits
-import json
 
 from dfttools.utypes import Basis, Grid, CrystalCell, BandsPath, BandsGrid, eval_nu
+from dfttools import json
 from numpy import testing
 
 

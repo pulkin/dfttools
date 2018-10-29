@@ -4,7 +4,7 @@ import unittest
 import numericalunits
 
 from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis
-from dfttools.util import dumps, loads
+from dfttools.util import dumps, loads, ArrayWithUnits
 from numpy import testing
 
 
@@ -151,6 +151,10 @@ class GridTest(unittest.TestCase):
         # Assert object is the same wrt numericalunits
         self.setUp()
         grid2 = self.bs_grid
+
+        testing.assert_equal(x.vectors.units, grid2.vectors.units)
+        testing.assert_equal(x.values.units, grid2.values.units)
+
         testing.assert_allclose(x.vectors, grid2.vectors)
         testing.assert_equal(x.coordinates, grid2.coordinates)
         testing.assert_allclose(x.values, grid2.values)
@@ -166,3 +170,27 @@ class GridTest(unittest.TestCase):
             values=self.bs_grid.values,
             fermi=self.bs_grid.fermi,
         ))
+
+    def test_interpolate(self):
+        a = self.bs_grid.interpolate_to_array(([.1, .2, .3], [.4, .5, .6]))
+        assert isinstance(a, ArrayWithUnits)
+        testing.assert_equal(a.units, self.bs_grid.values.units)
+
+        a = self.bs_grid.interpolate_to_cell(([.1, .2, .3], [.4, .5, .6]))
+        assert isinstance(a.values, ArrayWithUnits)
+        testing.assert_equal(a.values.units, self.bs_grid.values.units)
+        assert isinstance(a.vectors, ArrayWithUnits)
+        testing.assert_equal(a.vectors, self.bs_grid.vectors)
+
+        a = self.bs_grid.interpolate_to_path(([.1, .2, .3], [.4, .5, .6]), 3)
+        assert isinstance(a.values, ArrayWithUnits)
+        testing.assert_equal(a.values.units, self.bs_grid.values.units)
+        assert isinstance(a.vectors, ArrayWithUnits)
+        testing.assert_equal(a.vectors, self.bs_grid.vectors)
+
+        a = self.bs_grid.interpolate_to_grid(([.1, .2, .3], [.4, .5, .6], [.7, .8, .9]))
+        assert isinstance(a.values, ArrayWithUnits)
+        testing.assert_equal(a.values.units, self.bs_grid.values.units)
+        assert isinstance(a.vectors, ArrayWithUnits)
+        testing.assert_equal(a.vectors, self.bs_grid.vectors)
+

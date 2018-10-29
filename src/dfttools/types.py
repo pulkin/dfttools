@@ -9,6 +9,7 @@ import numpy
 from numpy import random
 
 from .blochl import tetrahedron, tetrahedron_plain
+from .util import cast_units
 
 
 def input_as_list(func):
@@ -1795,7 +1796,7 @@ class Grid(Basis):
             data_values = normalized.values
 
         # Interpolate
-        return driver(data_points, data_values, points, **kwargs)
+        return cast_units(driver(data_points, data_values, points, **kwargs), self.values)
 
     def interpolate_to_grid(self, points, **kwargs):
         """

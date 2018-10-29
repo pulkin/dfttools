@@ -124,6 +124,19 @@ class ArrayWithUnits(numpy.ndarray):
 array = ArrayWithUnits
 
 
+def cast_units(destination, source):
+    """
+    Casts units from one array to another.
+    Args:
+        destination (ndarray): destination array;
+        source (ndarray): array to cast units from;
+
+    Returns:
+        If `a2` is `ArrayWithUnits` casts units from `a2` into `a1`, otherwise returns `a1`.
+    """
+    return destination if not isinstance(source, array) else array(destination, units=source.units)
+
+
 class JSONEncoderWithArray(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, numpy.ndarray):

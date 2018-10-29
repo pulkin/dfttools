@@ -9,7 +9,6 @@ import numpy
 from numpy import random
 
 from .blochl import tetrahedron, tetrahedron_plain
-from .util import array_to_json, asarray
 
 
 def input_as_list(func):
@@ -88,13 +87,13 @@ class Basis(object):
 
     def __init__(self, vectors, kind='default', meta=None):
 
-        vectors = asarray(vectors, dtype=numpy.float64)
+        vectors = numpy.asarray(vectors, dtype=numpy.float64)
 
         if kind == 'default':
             self.vectors = vectors
 
         elif kind == 'orthorombic':
-            self.vectors = asarray(numpy.diag(vectors))
+            self.vectors = numpy.asarray(numpy.diag(vectors))
 
         elif kind == 'triclinic':
             lengths = vectors[0:3]
@@ -106,7 +105,7 @@ class Basis(object):
             ) ** .5
             sines = (1 - cosines ** 2) ** .5
             height = volume / lengths[0] / lengths[1] / sines[2]
-            self.vectors = asarray((
+            self.vectors = numpy.asarray((
                 (lengths[0], 0, 0),
                 (lengths[1] * cosines[2], lengths[1] * sines[2], 0),
                 (lengths[2] * cosines[1], abs((lengths[2] * sines[1]) ** 2 - height ** 2) ** .5, height)

@@ -124,23 +124,11 @@ class ArrayWithUnits(numpy.ndarray):
 array = ArrayWithUnits
 
 
-def asarray(a, **kwargs):
-    """
-    Converts to array.
-    Args:
-        a: object to convert;
-
-    Returns:
-        Array object.
-    """
-    return array(a, **kwargs)
-
-
 class JSONEncoderWithArray(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, numpy.ndarray):
             o = o.view(array)
-            return o.to_json()
+            return array_to_json(o)
         else:
             return super(JSONEncoderWithArray, self).default(o)
 

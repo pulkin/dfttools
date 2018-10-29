@@ -24,6 +24,8 @@ class UnitsMixin(object):
                         setattr(self, k, util.array(target, units=v))
 
 
+# TODO: remove most of these classes
+
 class RealSpaceBasis(UnitsMixin, types.Basis):
     """
     Basis in real space.
@@ -130,3 +132,15 @@ class BandsGrid(FermiMixin, UnitsMixin, types.Grid):
             c.values,
             fermi=self.fermi,
         )
+
+    def interpolate_to_cell(self, *args, **kwargs):
+        result = super(BandsGrid, self).interpolate_to_cell(*args, **kwargs)
+        return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
+
+    def interpolate_to_path(self, *args, **kwargs):
+        result = super(BandsGrid, self).interpolate_to_path(*args, **kwargs)
+        return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
+
+    def interpolate_to_grid(self, *args, **kwargs):
+        result = super(BandsGrid, self).interpolate_to_grid(*args, **kwargs)
+        return BandsGrid(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)

@@ -9,6 +9,7 @@ import numpy
 from numpy import random
 
 from .blochl import tetrahedron, tetrahedron_plain
+from .util import array_to_json, asarray
 
 
 def input_as_list(func):
@@ -87,13 +88,13 @@ class Basis(object):
 
     def __init__(self, vectors, kind='default', meta=None):
 
-        vectors = numpy.array(vectors, dtype=numpy.float64)
+        vectors = asarray(vectors, dtype=numpy.float64)
 
         if kind == 'default':
             self.vectors = vectors
 
         elif kind == 'orthorombic':
-            self.vectors = numpy.diag(vectors)
+            self.vectors = asarray(numpy.diag(vectors))
 
         elif kind == 'triclinic':
             lengths = vectors[0:3]
@@ -105,7 +106,7 @@ class Basis(object):
             ) ** .5
             sines = (1 - cosines ** 2) ** .5
             height = volume / lengths[0] / lengths[1] / sines[2]
-            self.vectors = numpy.array((
+            self.vectors = asarray((
                 (lengths[0], 0, 0),
                 (lengths[1] * cosines[2], lengths[1] * sines[2], 0),
                 (lengths[2] * cosines[1], abs((lengths[2] * sines[1]) ** 2 - height ** 2) ** .5, height)
@@ -114,14 +115,14 @@ class Basis(object):
         else:
             raise ArgumentError("Unknown kind='{}'".format(kind))
 
-        if not meta is None:
+        if meta is not None:
             self.meta = meta.copy()
         else:
             self.meta = {}
 
     def __getstate__(self):
         return dict(
-            vectors=self.vectors,
+            vectors=self.vectors.copy(),
             meta=self.meta.copy(),
         )
 
@@ -174,7 +175,6 @@ class Basis(object):
             raise ValueError("Invalid JSON, expected type {}".format(cls.class_id()))
         del j["type"]
         result = cls(**j)
-        result.__setstate__(j)
         return result
 
     def transform_to(self, basis, coordinates):
@@ -630,8 +630,8 @@ class UnitCell(Basis):
     def __getstate__(self):
         result = super(UnitCell, self).__getstate__()
         result.update(dict(
-            coordinates=self.coordinates,
-            values=self.values,
+            coordinates=self.coordinates.copy(),
+            values=self.values.copy(),
         ))
         return result
 
@@ -1317,8 +1317,8 @@ class Grid(Basis):
     def __getstate__(self):
         result = super(Grid, self).__getstate__()
         result.update(dict(
-            coordinates=self.coordinates,
-            values=self.values,
+            coordinates=tuple(i.copy() for i in self.coordinates),
+            values=self.values.copy(),
         ))
         return result
 

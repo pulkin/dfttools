@@ -9,7 +9,9 @@ import numpy
 
 from .generic import cre_nonspace, cre_float, cre_word, AbstractParser
 from ..simple import band_structure, unit_cell
-from ..utypes import CrystalCell, Basis, BandsPath
+from ..utypes import CrystalCell, BandsPath
+from ..types import Basis
+from ..util import array
 
 
 class UnitCellsParser(AbstractParser):
@@ -254,7 +256,7 @@ class Output(AbstractParser):
         self.parser.skip('Reciprocal lattice vectors :')
 
         vecs = self.parser.nextFloat(n=(3, 3)) * 2 * math.pi / numericalunits.aBohr
-        return Basis(vecs, units=dict(vectors="1/angstrom"))
+        return Basis(array(vecs, units="1/angstrom"))
 
 
 class Bands(AbstractParser):

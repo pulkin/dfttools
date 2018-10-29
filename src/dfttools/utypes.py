@@ -1,248 +1,94 @@
 """
-This submodule enhances `types.py` with units from
-`numericalunits` package.
+This submodule enhances `types.py` with units-aware arrays.
 """
-import re
-import numericalunits
 import numpy
 from numbers import Number
 
-from . import types
-
-
-def eval_nu(s):
-    """
-    Evaluates numericalunits expression.
-    Args:
-        s (str): en expression to evaluate;
-
-    Returns:
-        The result of evaluation.
-    """
-    match = re.match(r'\s*\w*((\s*[*/]\s*\w*)*)\s*$', s)
-    if match is None:
-        raise ValueError("Not a valid numericalunits expression: {}".format(s))
-
-    result = 1.
-
-    for i in re.finditer(r"([*/])\s*(\w*)", "*" + s):
-        op, name = i.groups()
-        if name == "1":
-            val = 1.
-        elif name in dir(numericalunits):
-            val = getattr(numericalunits, name)
-        else:
-            raise ValueError("'{}' not found in numericalunits".format(name))
-
-        if op == "*":
-            result *= val
-        else:
-            result /= val
-
-    return result
-
-
-class UnitsCollection(dict):
-    """
-    A collection of units.
-
-    Example:
-
-        >>> UnitsCollection(vectors="1/angstrom")
-    """
-    def get_nu_value(self, key, default=None):
-        """
-        Retrieves a `numerialunits` value by the key.
-        Args:
-            key (str): unit key;
-            default: the default value;
-
-        Returns:
-            The numericalunits value.
-        """
-        if key in self and self[key] is not None:
-            return eval_nu(self[key])
-        else:
-            return default
-
-    def release(self, key, q):
-        """
-        Releases units from the given quantity.
-        Args:
-            key (str): unit key;
-            q: the quantity;
-
-        Returns:
-            The quantity value measured in the given units.
-        """
-        return q / self.get_nu_value(key, default=1)
-
-    def apply(self, key, q):
-        """
-        Applies units to the given quantity.
-        Args:
-            key (str): unit key;
-            q: the quantity;
-
-        Returns:
-            The quantity value in "absolute" units.
-        """
-        return q * self.get_nu_value(key, default=1)
+from . import types, util
 
 
 class UnitsMixin(object):
-    """A core mixin to work with units."""
+    """
+    A core mixin to work with units.
+    """
+
+    default_units = {}
+
     def __init__(self, *args, **kwargs):
-        if "units" in kwargs:
-            if not isinstance(kwargs["units"], dict):
-                raise ValueError("A dict expected for units kwarg, found {}".format(repr(kwargs["units"])))
-            self.units = UnitsCollection(kwargs["units"])
-            del kwargs["units"]
-        else:
-            self.units = UnitsCollection()
         super(UnitsMixin, self).__init__(*args, **kwargs)
-
-    def __iter_fields_units__(self):
-        for k in self.units:
+        for k, v in self.default_units.items():
             if k in dir(self):
-                v = getattr(self, k)
-                if isinstance(v, (numpy.ndarray, Number)):
-                    yield k, v
-
-    def __iter_meta_units__(self):
-        for k in self.units:
-            if k.startswith("meta_"):
-                k = k[5:]
-                if k in self.meta:
-                    v = self.meta[k]
-                    if isinstance(v, (numpy.ndarray, Number)):
-                        yield k, v
-
-    def __getstate_u__(self, state):
-        return state
-
-    def __getstate__(self):
-        backup = {}
-
-        # Release all units
-        for k, v in self.__iter_fields_units__():
-            backup[k] = v
-            setattr(self, k, self.units.release(k, v))
-
-        backup_meta = {}
-
-        # Release units in meta
-        for k, v in self.__iter_meta_units__():
-            backup_meta[k] = v
-            self.meta[k] = self.units.release("meta_" + k, v)
-
-        # Get the state
-        state = self.__getstate_u__(super(UnitsMixin, self).__getstate__())
-        if "units" in state:
-            raise RuntimeError("The `units` key is reserved but was set by the parent class")
-        state["units"] = dict(self.units)
-
-        # Restore all data modified
-        for k, v in backup.items():
-            setattr(self, k, v)
-
-        # Restore units in meta
-        self.meta.update(backup_meta)
-
-        return state
-
-    def __setstate_u__(self, state):
-        pass
-
-    def __setstate__(self, data):
-        # Take units
-        units = UnitsCollection(data["units"])
-        del data["units"]
-        # Init parent
-        super(UnitsMixin, self).__setstate__(data)
-        self.__setstate_u__(data)
-        # Assign units
-        self.units = units
-        # Set all units
-        for k, v in self.__iter_fields_units__():
-            setattr(self, k, self.units.apply(k, v))
-        # Set all meta units
-        for k, v in self.__iter_meta_units__():
-            self.meta[k] = self.units.apply("meta_" + k, v)
+                target = getattr(self, k)
+                if isinstance(target, (numpy.ndarray, Number)):
+                    # if not isinstance(target, util.array):
+                    setattr(self, k, util.array(target, units=v))
 
 
-class Basis(UnitsMixin, types.Basis):
+class RealSpaceBasis(UnitsMixin, types.Basis):
     """
-    A units-aware version of the Basis.
+    Basis in real space.
     """
 
+    default_units = dict(vectors="angstrom")
 
-class UnitCell(UnitsMixin, types.UnitCell):
+
+class ResiprocalSpaceBasis(UnitsMixin, types.Basis):
     """
-    A units-aware version of the UnitCell.
-    """
-
-    def as_grid(self, fill=float("nan")):
-        """
-        Converts this UnitCell into a Grid.
-
-        Kwargs:
-            fill: default value to fill with;
-
-        Returns:
-            A new ``Grid``.
-        """
-        g = super(UnitCell, self).as_grid(fill=fill)
-        return Grid(
-            self,
-            g.coordinates,
-            g.values,
-            units=self.units,
-        )
-
-
-class Grid(UnitsMixin, types.Grid):
-    """
-    A units-aware version of the Grid.
+    Basis in reciprocal space.
     """
 
-    def as_unitCell(self):
-        """
-        Converts this Grid into a UnitCell.
-
-        Returns:
-
-            A new ``UnitCell``.
-        """
-        c = super(Grid, self).as_unitCell()
-        return UnitCell(
-            self,
-            c.coordinates,
-            c.values,
-            units=self.units,
-        )
+    default_units = dict(vectors="1/angstrom")
 
 
-class CrystalCell(UnitCell):
+class CrystalCell(UnitsMixin, types.UnitCell):
     """
     A unit cell of a crystal.
     """
+
+    default_units = dict(vectors="angstrom", values=None)
+
+
+class CrystalGrid(UnitsMixin, types.Grid):
+    """
+    A grid in real space.
+    """
+
+    default_units = dict(vectors="angstrom", values=None)
+
+
+class FermiMixin(object):
+    """
+    A mixin to add the Fermi attribute.
+    """
     def __init__(self, *args, **kwargs):
-        kw = dict(units=dict(vectors="angstrom"))
-        kw.update(kwargs)
-        super(CrystalCell, self).__init__(*args, **kw)
+        self.fermi = kwargs.pop("fermi", None)
+        super(FermiMixin, self).__init__(*args, **kwargs)
+
+    def __getstate__(self):
+        state = super(FermiMixin, self).__getstate__()
+        state["fermi"] = self.fermi.copy()
+        return state
+
+    def __setstate__(self, state):
+        fermi = state.pop("fermi")
+        super(FermiMixin, self).__setstate__(state)
+        self.fermi = fermi
+
+    @property
+    def fermi(self):
+        return self.__fermi__
+
+    @fermi.setter
+    def fermi(self, v):
+        self.__fermi__ = util.array(v, units=self.default_units.get("fermi", None))
 
 
-class BandsPath(UnitCell):
+class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
     """
     A band structure in a crystal.
     """
-    def __init__(self, *args, **kwargs):
-        kw = dict(units=dict(vectors="1/angstrom", values="eV", fermi="eV"), fermi=None)
-        kw.update(kwargs)
-        self.fermi = kw["fermi"]
-        del kw["fermi"]
-        super(BandsPath, self).__init__(*args, **kw)
+
+    default_units = dict(vectors="1/angstrom", values="eV", fermi="eV")
 
     def as_grid(self, fill=float("nan")):
         """
@@ -262,24 +108,13 @@ class BandsPath(UnitCell):
             fermi=self.fermi,
         )
 
-    def __getstate_u__(self, state):
-        state["fermi"] = self.fermi
-        return state
 
-    def __setstate_u__(self, state):
-        self.fermi = state["fermi"]
-
-
-class BandsGrid(Grid):
+class BandsGrid(FermiMixin, UnitsMixin, types.Grid):
     """
     A band structure in a crystal.
     """
-    def __init__(self, *args, **kwargs):
-        kw = dict(units=dict(vectors="1/angstrom", values="eV", fermi="eV"), fermi=None)
-        kw.update(kwargs)
-        self.fermi = kw["fermi"]
-        del kw["fermi"]
-        super(BandsGrid, self).__init__(*args, **kw)
+
+    default_units = dict(vectors="1/angstrom", values="eV", fermi="eV")
 
     def as_unitCell(self):
         """
@@ -295,10 +130,3 @@ class BandsGrid(Grid):
             c.values,
             fermi=self.fermi,
         )
-
-    def __getstate_u__(self, state):
-        state["fermi"] = self.fermi
-        return state
-
-    def __setstate_u__(self, state):
-        self.fermi = state["fermi"]

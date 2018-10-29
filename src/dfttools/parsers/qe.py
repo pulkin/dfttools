@@ -11,7 +11,7 @@ from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, cr
     AbstractParser
 from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
-from ..utypes import CrystalCell, BandsPath, Basis
+from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
 
 
 class Bands(AbstractParser):
@@ -980,7 +980,7 @@ class Input(AbstractParser):
             shape[0] *= numericalunits.aBohr
             shape[1] *= shape[0]
             shape[2] *= shape[0]
-            basis = Basis(shape, kind='triclinic')
+            basis = RealSpaceBasis(shape, kind='triclinic')
 
         elif ibrav == 0:
 
@@ -988,12 +988,12 @@ class Input(AbstractParser):
             self.parser.skip("cell_parameters")
             units = self.parser.nextMatch(cre_word)
             vectors = self.parser.nextFloat(n=(3, 3)) * units_dict[units]
-            basis = Basis(vectors)
+            basis = RealSpaceBasis(vectors)
 
         elif ibrav == 2:
 
             a = nl["system"]["celldm(1)"]
-            basis = Basis(a / 2 * numericalunits.aBohr * numpy.array((
+            basis = RealSpaceBasis(a / 2 * numericalunits.aBohr * numpy.array((
                 (-1, 0, 1), (0, 1, 1), (-1, 1, 0),
             )))
 

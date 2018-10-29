@@ -14,14 +14,14 @@ from matplotlib.lines import Line2D
 from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.image import AxesImage
 
-from dfttools.utypes import Basis, BandsPath, BandsGrid, Grid
+from dfttools.utypes import BandsPath, BandsGrid, CrystalGrid, RealSpaceBasis
 from dfttools.presentation import matplotlib_bands, matplotlib_scalar, matplotlib_bands_density
 
 
 class BandPlotTest(unittest.TestCase):
 
     def setUp(self):
-        basis = Basis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
+        basis = RealSpaceBasis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
 
         kp_gamma = numpy.array((0, 0, 0))[numpy.newaxis, :]
         kp_m = numpy.array((0.5, 0.0, 0))[numpy.newaxis, :]
@@ -135,7 +135,7 @@ class BandPlotTest(unittest.TestCase):
 class BandDensityPlotTest(unittest.TestCase):
 
     def setUp(self):
-        basis = Basis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
+        basis = RealSpaceBasis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
 
         kp_gamma = numpy.array((0, 0, 0))[numpy.newaxis, :]
         kp_m = numpy.array((0.5, 0.0, 0))[numpy.newaxis, :]
@@ -340,8 +340,8 @@ class BandDensityPlotTest(unittest.TestCase):
 class ScalarGridPlotTest(unittest.TestCase):
 
     def setUp(self):
-        self.grid = Grid(
-            Basis((1 * angstrom, 1 * angstrom, 1 * angstrom, 0, 0, -0.5), kind='triclinic', units=dict(vectors="angstrom")),
+        self.grid = CrystalGrid(
+            RealSpaceBasis((1 * angstrom, 1 * angstrom, 1 * angstrom, 0, 0, -0.5), kind='triclinic'),
             (
                 numpy.linspace(0, 1, 30, endpoint=False),
                 numpy.linspace(0, 1, 30, endpoint=False),
@@ -351,8 +351,8 @@ class ScalarGridPlotTest(unittest.TestCase):
         )
         self.grid.values = numpy.prod(numpy.sin(self.grid.explicit_coordinates() * 2 * math.pi), axis=-1)
 
-        self.wrong_dims = Grid(
-            Basis(((1 * angstrom, 0), (0, 1 * angstrom))),
+        self.wrong_dims = CrystalGrid(
+            RealSpaceBasis(((1 * angstrom, 0), (0, 1 * angstrom))),
             (
                 numpy.linspace(0, 1, 30, endpoint=False),
                 numpy.linspace(0, 1, 30, endpoint=False),

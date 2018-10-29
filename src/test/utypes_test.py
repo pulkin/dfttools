@@ -3,90 +3,26 @@ import numpy
 import unittest
 import numericalunits
 
-from dfttools.utypes import Basis, Grid, CrystalCell, BandsPath, BandsGrid, eval_nu
-from dfttools import json
+from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ResiprocalSpaceBasis
+from dfttools.util import dumps, loads, array_to_json
 from numpy import testing
 
 
 def assert_standard_crystal_cell(c):
     assert isinstance(c, CrystalCell)
-    assert c.units["vectors"] == "angstrom"
+    assert c.vectors.units == "angstrom"
+
+
+def assert_standard_real_space_grid(c):
+    assert isinstance(c, CrystalGrid)
+    assert c.vectors.units == "angstrom"
 
 
 def assert_standard_bands_path(c):
     assert isinstance(c, BandsPath)
-    assert c.units["vectors"] == "1/angstrom"
-    assert c.units["values"] == "eV"
-    assert c.units["fermi"] == "eV"
-
-
-def assert_standard_real_space_grid(c):
-    assert isinstance(c, Grid)
-    assert c.units["vectors"] == "angstrom"
-
-
-class EvalNUTest(unittest.TestCase):
-
-    def test_nu(self):
-        with self.assertRaises(ValueError):
-            eval_nu("")
-        with self.assertRaises(ValueError):
-            eval_nu("nonexistent_unit")
-        testing.assert_equal(eval_nu("angstrom"), numericalunits.angstrom)
-        eva = numericalunits.eV / numericalunits.angstrom
-        for i in ("eV/angstrom", "eV /angstrom", "eV/ angstrom", "eV / angstrom", "eV/angstrom ", " eV/angstrom",
-                  " eV  /   angstrom  "):
-            testing.assert_equal(eval_nu(i), eva)
-
-        with self.assertRaises(ValueError):
-            eval_nu("eV/nonexistent_unit")
-        testing.assert_equal(eval_nu("1/angstrom"), 1./numericalunits.angstrom)
-
-
-class BasisTest(unittest.TestCase):
-
-    def setUp(self):
-        self.basis = Basis(
-            numpy.array((1, 2, 3)) * numericalunits.angstrom,
-            kind='orthorombic',
-            meta={"key": "value", "another": 3. / numericalunits.eV},
-            units=dict(vectors="angstrom", meta_another="1/eV"),
-        )
-
-    def test_save_load(self):
-        basis = self.basis
-
-        data = pickle.dumps(basis)
-        numericalunits.reset_units()
-        x = pickle.loads(data)
-
-        # Assert object is the same wrt numericalunits
-        self.setUp()
-        basis2 = self.basis
-        testing.assert_allclose(x.vectors, basis2.vectors)
-        testing.assert_allclose(x.meta["another"], basis2.meta["another"])
-
-    def test_save_load_json(self):
-        basis = self.basis
-
-        data = json.dumps(basis.to_json())
-        numericalunits.reset_units()
-        x = Basis.from_json(json.loads(data))
-
-        # Assert object is the same wrt numericalunits
-        self.setUp()
-        basis2 = self.basis
-        testing.assert_allclose(x.vectors, basis2.vectors)
-        testing.assert_allclose(x.meta["another"], basis2.meta["another"])
-
-    def test_serialization(self):
-        serialized = self.basis.to_json()
-        testing.assert_equal(serialized, dict(
-            vectors=(self.basis.vectors / numericalunits.angstrom).tolist(),
-            meta=dict(key="value", another=self.basis.meta["another"] / (1. / numericalunits.eV)),
-            type="dfttools.utypes.Basis",
-            units=dict(vectors="angstrom", meta_another="1/eV"),
-        ))
+    assert c.vectors.units == "1/angstrom"
+    assert c.values.units == "eV"
+    assert c.fermi is None or c.fermi.units == "eV"
 
 
 class CellTest(unittest.TestCase):
@@ -126,9 +62,9 @@ class CellTest(unittest.TestCase):
     def test_save_load_json(self):
         cell = self.bs_cell
 
-        data = json.dumps(cell.to_json())
+        data = dumps(cell.to_json())
         numericalunits.reset_units()
-        x = BandsPath.from_json(json.loads(data))
+        x = BandsPath.from_json(loads(data))
 
         # Assert object is the same wrt numericalunits
         self.setUp()
@@ -141,24 +77,22 @@ class CellTest(unittest.TestCase):
     def test_serialization_cry(self):
         serialized = self.co_cell.to_json()
         testing.assert_equal(serialized, dict(
-            vectors=(self.co_cell.vectors / numericalunits.angstrom).tolist(),
+            vectors=self.co_cell.vectors,
             meta={},
             type="dfttools.utypes.CrystalCell",
-            units=dict(vectors="angstrom"),
-            coordinates=self.co_cell.coordinates.tolist(),
-            values=self.co_cell.values.tolist(),
+            coordinates=self.co_cell.coordinates,
+            values=self.co_cell.values,
         ))
 
     def test_serialization_bs(self):
         serialized = self.bs_cell.to_json()
         testing.assert_equal(serialized, dict(
-            vectors=(self.bs_cell.vectors / (1. / numericalunits.angstrom)).tolist(),
+            vectors=self.bs_cell.vectors,
             meta={},
             type="dfttools.utypes.BandsPath",
-            units=dict(vectors="1/angstrom", values="eV", fermi="eV"),
-            coordinates=self.bs_cell.coordinates.tolist(),
-            values=(self.bs_cell.values / numericalunits.eV).tolist(),
-            fermi=self.bs_cell.fermi / numericalunits.eV,
+            coordinates=self.bs_cell.coordinates,
+            values=self.bs_cell.values,
+            fermi=self.bs_cell.fermi,
         ))
 
 
@@ -171,7 +105,7 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = (xx ** 2 + yy ** 2 + zz ** 2) * numericalunits.eV
         self.bs_grid = BandsGrid(
-            Basis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorombic'),
+            ResiprocalSpaceBasis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorombic'),
             (x, y, z),
             data,
             fermi=1.5 * numericalunits.eV,
@@ -195,9 +129,9 @@ class GridTest(unittest.TestCase):
     def test_save_load_json(self):
         grid = self.bs_grid
 
-        data = json.dumps(grid.to_json())
+        data = dumps(grid.to_json())
         numericalunits.reset_units()
-        x = BandsGrid.from_json(json.loads(data))
+        x = BandsGrid.from_json(loads(data))
 
         # Assert object is the same wrt numericalunits
         self.setUp()
@@ -210,9 +144,9 @@ class GridTest(unittest.TestCase):
     def test_save_load_json_with_conversion(self):
         grid = self.bs_grid
 
-        data = json.dumps(grid.as_unitCell().to_json())
+        data = dumps(grid.as_unitCell().to_json())
         numericalunits.reset_units()
-        x = BandsPath.from_json(json.loads(data)).as_grid()
+        x = BandsPath.from_json(loads(data)).as_grid()
 
         # Assert object is the same wrt numericalunits
         self.setUp()
@@ -225,11 +159,10 @@ class GridTest(unittest.TestCase):
     def test_serialization(self):
         serialized = self.bs_grid.to_json()
         testing.assert_equal(serialized, dict(
-            vectors=(self.bs_grid.vectors / (1. / numericalunits.angstrom)).tolist(),
+            vectors=self.bs_grid.vectors,
             meta={},
             type="dfttools.utypes.BandsGrid",
-            units=dict(vectors="1/angstrom", values="eV", fermi="eV"),
-            coordinates=tuple(i.tolist() for i in self.bs_grid.coordinates),
-            values=(self.bs_grid.values / numericalunits.eV).tolist(),
-            fermi=self.bs_grid.fermi / numericalunits.eV,
+            coordinates=self.bs_grid.coordinates,
+            values=self.bs_grid.values,
+            fermi=self.bs_grid.fermi,
         ))

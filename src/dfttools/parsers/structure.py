@@ -7,7 +7,7 @@ import numpy
 from .generic import cre_word, cre_nonspace, AbstractParser
 from ..presentation import __elements_table__
 from ..simple import unit_cell
-from ..utypes import CrystalCell, Grid, Basis
+from ..utypes import CrystalCell, CrystalGrid, RealSpaceBasis
 
 
 class XSF(AbstractParser):
@@ -136,12 +136,11 @@ class XSF(AbstractParser):
                     "xsf-block-name": block_name,
                     "xsf-grid-name": grid_name,
                 }
-                c = Grid(
+                c = CrystalGrid(
                     vectors,
                     tuple(numpy.linspace(0, 1, s, endpoint=False) for s in data.shape),
                     data,
                     meta=meta,
-                    units=dict(vectors="angstrom")
                 )
                 result.append(c)
 
@@ -200,11 +199,10 @@ class GaussianCube(AbstractParser):
 
         data = self.parser.nextFloat(size)
 
-        return Grid(
+        return CrystalGrid(
             vectors,
             tuple(numpy.linspace(0, 1, s, endpoint=False) for s in data.shape),
             data,
-            units=dict(vectors="angstrom"),
         )
 
     @unit_cell
@@ -303,7 +301,7 @@ class XYZ(AbstractParser):
         mn = c.min(axis=0)
         shape = mx - mn + XYZ.vacuum_size
 
-        return CrystalCell(Basis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
+        return CrystalCell(RealSpaceBasis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
 
 
 # Lower case versions

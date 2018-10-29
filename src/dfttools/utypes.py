@@ -20,8 +20,8 @@ class UnitsMixin(object):
             if k in dir(self):
                 target = getattr(self, k)
                 if isinstance(target, (numpy.ndarray, Number)):
-                    # if not isinstance(target, util.array):
-                    setattr(self, k, util.array(target, units=v))
+                    if not isinstance(target, util.array):
+                        setattr(self, k, util.array(target, units=v))
 
 
 class RealSpaceBasis(UnitsMixin, types.Basis):

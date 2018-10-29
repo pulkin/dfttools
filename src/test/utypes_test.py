@@ -3,7 +3,7 @@ import numpy
 import unittest
 import numericalunits
 
-from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis
+from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis, RealSpaceBasis
 from dfttools.util import dumps, loads, ArrayWithUnits
 from numpy import testing
 
@@ -23,6 +23,25 @@ def assert_standard_bands_path(c):
     assert c.vectors.units == "1/angstrom"
     assert c.values.units == "eV"
     assert c.fermi is None or c.fermi.units == "eV"
+
+
+class CommonTests(unittest.TestCase):
+
+    def test_units_remain_unchanged(self):
+        b = RealSpaceBasis((1, 1), kind="orthorombic")
+        testing.assert_equal(b.vectors.units, "angstrom")
+
+        b = RealSpaceBasis(ArrayWithUnits(([1, 0], [0, 1]), units="nm"))
+        testing.assert_equal(b.vectors.units, "nm")
+
+        b = RealSpaceBasis(ArrayWithUnits([1, 1], units="nm"), kind="orthorombic")
+        testing.assert_equal(b.vectors.units, "nm")
+        c = RealSpaceBasis(b)
+        testing.assert_equal(c.vectors.units, "nm")
+
+        b = RealSpaceBasis(ArrayWithUnits([1, 1, 1, 0, 0, 0], units="nm"), kind="triclinic")
+        testing.assert_equal(b.vectors.units, "nm")
+
 
 
 class CellTest(unittest.TestCase):
@@ -193,4 +212,3 @@ class GridTest(unittest.TestCase):
         testing.assert_equal(a.values.units, self.bs_grid.values.units)
         assert isinstance(a.vectors, ArrayWithUnits)
         testing.assert_equal(a.vectors, self.bs_grid.vectors)
-

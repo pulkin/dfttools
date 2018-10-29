@@ -88,32 +88,41 @@ class Basis(object):
 
     def __init__(self, vectors, kind='default', meta=None):
 
-        vectors = numpy.asanyarray(vectors, dtype=numpy.float64)
-
-        if kind == 'default':
-            self.vectors = vectors
-
-        elif kind == 'orthorombic':
-            self.vectors = numpy.diag(vectors)
-
-        elif kind == 'triclinic':
-            lengths = vectors[0:3]
-            cosines = vectors[3:]
-            volume = lengths[0] * lengths[1] * lengths[2] * (
-                    1 + \
-                    2 * cosines[0] * cosines[1] * cosines[2] - \
-                    cosines[0] ** 2 - cosines[1] ** 2 - cosines[2] ** 2
-            ) ** .5
-            sines = (1 - cosines ** 2) ** .5
-            height = volume / lengths[0] / lengths[1] / sines[2]
-            self.vectors = numpy.asanyarray((
-                (lengths[0], 0, 0),
-                (lengths[1] * cosines[2], lengths[1] * sines[2], 0),
-                (lengths[2] * cosines[1], abs((lengths[2] * sines[1]) ** 2 - height ** 2) ** .5, height)
-            ), dtype=numpy.float64)
+        if isinstance(vectors, Basis):
+            self.vectors = numpy.asanyarray(vectors.vectors)
+            if meta is None:
+                meta = vectors.meta.copy()
+            else:
+                meta = meta.copy()
+                meta.update(vectors.meta)
 
         else:
-            raise ArgumentError("Unknown kind='{}'".format(kind))
+            vectors = numpy.asanyarray(vectors, dtype=numpy.float64)
+
+            if kind == 'default':
+                self.vectors = vectors
+
+            elif kind == 'orthorombic':
+                self.vectors = cast_units(numpy.diag(vectors), vectors)
+
+            elif kind == 'triclinic':
+                lengths = vectors[0:3]
+                cosines = vectors[3:]
+                volume = lengths[0] * lengths[1] * lengths[2] * (
+                        1 + \
+                        2 * cosines[0] * cosines[1] * cosines[2] - \
+                        cosines[0] ** 2 - cosines[1] ** 2 - cosines[2] ** 2
+                ) ** .5
+                sines = (1 - cosines ** 2) ** .5
+                height = volume / lengths[0] / lengths[1] / sines[2]
+                self.vectors = cast_units(numpy.asanyarray((
+                    (lengths[0], 0, 0),
+                    (lengths[1] * cosines[2], lengths[1] * sines[2], 0),
+                    (lengths[2] * cosines[1], abs((lengths[2] * sines[1]) ** 2 - height ** 2) ** .5, height)
+                ), dtype=numpy.float64), vectors)
+
+            else:
+                raise ArgumentError("Unknown kind='{}'".format(kind))
 
         if meta is not None:
             self.meta = meta.copy()

@@ -87,13 +87,13 @@ class Basis(object):
 
     def __init__(self, vectors, kind='default', meta=None):
 
-        vectors = numpy.asarray(vectors, dtype=numpy.float64)
+        vectors = numpy.asanyarray(vectors, dtype=numpy.float64)
 
         if kind == 'default':
             self.vectors = vectors
 
         elif kind == 'orthorombic':
-            self.vectors = numpy.asarray(numpy.diag(vectors))
+            self.vectors = numpy.diag(vectors)
 
         elif kind == 'triclinic':
             lengths = vectors[0:3]
@@ -105,7 +105,7 @@ class Basis(object):
             ) ** .5
             sines = (1 - cosines ** 2) ** .5
             height = volume / lengths[0] / lengths[1] / sines[2]
-            self.vectors = numpy.asarray((
+            self.vectors = numpy.asanyarray((
                 (lengths[0], 0, 0),
                 (lengths[1] * cosines[2], lengths[1] * sines[2], 0),
                 (lengths[2] * cosines[1], abs((lengths[2] * sines[1]) ** 2 - height ** 2) ** .5, height)
@@ -191,7 +191,7 @@ class Basis(object):
         
             An array with transformed coordinates.
         """
-        coordinates = numpy.array(coordinates, dtype=numpy.float64)
+        coordinates = numpy.asanyarray(coordinates, dtype=numpy.float64)
         return numpy.tensordot(
             coordinates,
             numpy.tensordot(
@@ -281,9 +281,9 @@ class Basis(object):
         angle *= units
         c = numpy.cos(angle)
         s = numpy.sin(angle)
-        axis = numpy.array(axis, dtype=numpy.float)
+        axis = numpy.asanyarray(axis, dtype=numpy.float)
         axis /= (axis ** 2).sum() ** .5
-        axis_x = numpy.array((
+        axis_x = numpy.asanyarray((
             (0, -axis[2], axis[1]),
             (axis[2], 0, -axis[0]),
             (-axis[1], axis[0], 0),
@@ -329,8 +329,8 @@ class Basis(object):
         """
         result = []
         for v in itertools.product((0.0, 1.0), repeat=self.vectors.shape[0]):
-            result.append(self.transform_to_cartesian(numpy.array(v)))
-        return numpy.array(result)
+            result.append(self.transform_to_cartesian(numpy.asanyarray(v)))
+        return numpy.asanyarray(result)
 
     def edges(self):
         """
@@ -348,10 +348,10 @@ class Basis(object):
                 v1 = v[:e] + (0.,) + v[e:]
                 v2 = v[:e] + (1.,) + v[e:]
                 result.append((
-                    (self.vectors * numpy.array(v1)[:, numpy.newaxis]).sum(axis=0),
-                    (self.vectors * numpy.array(v2)[:, numpy.newaxis]).sum(axis=0),
+                    (self.vectors * numpy.asanyarray(v1)[:, numpy.newaxis]).sum(axis=0),
+                    (self.vectors * numpy.asanyarray(v2)[:, numpy.newaxis]).sum(axis=0),
                 ))
-        return numpy.array(result)
+        return numpy.asanyarray(result)
 
     def faces(self):
         """
@@ -503,7 +503,7 @@ class Basis(object):
         
             Path coordinates expressed in this basis.
         """
-        points = numpy.array(points)
+        points = numpy.asanyarray(points)
         points_c = self.transform_to_cartesian(points)
         lengths = ((points_c[1:] - points_c[:-1]) ** 2).sum(axis=-1) ** .5
         lengths_cs = numpy.cumsum(lengths)
@@ -528,7 +528,7 @@ class Basis(object):
             path = points[path_id, :] * path_pos[:, numpy.newaxis] + points[path_id + 1, :] * (
                         1 - path_pos[:, numpy.newaxis])
 
-        return numpy.array(path)
+        return numpy.asanyarray(path)
 
 
 def diamond_basis(a):
@@ -582,14 +582,15 @@ class UnitCell(Basis):
         dims = self.vectors.shape[0]
 
         # Process coordinates and vectors input
-        self.coordinates = numpy.array(coordinates, dtype=numpy.float64)
+        self.coordinates = numpy.asanyarray(coordinates, dtype=numpy.float64)
 
         if len(self.coordinates.shape) == 1:
             if not self.coordinates.shape == (dims,):
                 raise ArgumentError(
-                    'Coordinates array is 1D, {:d} coordinates have to be specified instead of {:d}'.format(dims,
-                                                                                                            self.coordinates.shape[
-                                                                                                                0]))
+                    'Coordinates array is 1D, {:d} coordinates have to be specified instead of {:d}'.format(
+                        dims,
+                        self.coordinates.shape[0],
+                    ))
 
             self.coordinates = self.coordinates[numpy.newaxis, ...]
 
@@ -600,15 +601,14 @@ class UnitCell(Basis):
                         self.coordinates.shape[1], dims))
 
         # Coordinates are now prepeared, proceed to values
-        self.values = numpy.array(values)
+        self.values = numpy.asanyarray(values)
         if len(self.values.shape) == 0:
             self.values = self.values[numpy.newaxis, ...]
 
         if self.values.shape[0] < self.coordinates.shape[0] and self.coordinates.shape[0] % self.values.shape[0] == 0:
             # Broadcast values repeatedly
-            self.values = numpy.array(tuple(
-                self.values[i % self.values.shape[0]] for i in range(self.coordinates.shape[0])
-            ))
+            nrep = len(self.coordinates) // len(self.values) + 1
+            self.values = numpy.tile(self.values, (nrep,) + (1,) * (self.values.ndim - 1))[:len(self.coordinates)]
 
         elif not self.values.shape[0] == self.coordinates.shape[0]:
             raise ArgumentError('Mismatch of sizes of coordinates and values arrays: {:d} vs {:d}'.format(
@@ -672,7 +672,7 @@ class UnitCell(Basis):
         """
 
         v = self.cartesian()
-        ids = numpy.array(ids, dtype=numpy.int64)
+        ids = numpy.asanyarray(ids, dtype=numpy.int64)
 
         if len(ids.shape) == 1:
             if ids.shape[0] < 3:
@@ -728,7 +728,7 @@ class UnitCell(Basis):
         if len(ids) == 0:
             return ((v[numpy.newaxis, ...] - v[:, numpy.newaxis, :]) ** 2).sum(axis=-1) ** .5
 
-        ids = numpy.array(ids, dtype=numpy.int64)
+        ids = numpy.asanyarray(ids, dtype=numpy.int64)
 
         if len(ids.shape) == 1:
             if ids.shape[0] < 2:
@@ -840,7 +840,7 @@ class UnitCell(Basis):
         
             A new unit cell with spacially isolated species.
         """
-        gaps = numpy.array(gaps, dtype=numpy.float64)
+        gaps = numpy.asanyarray(gaps, dtype=numpy.float64)
         if units == "cartesian":
             gaps /= ((self.vectors ** 2).sum(axis=1) ** .5)
         elif units == "crystal":
@@ -934,7 +934,7 @@ class UnitCell(Basis):
             >>> selection = cell.select((0,0,0,0.5,1,1)) # Selects species in the 'left' part of the unit cell.
             >>> cell.apply(selection) # Applies selection. Species outside the 'left' part are discarded.
         """
-        selection = numpy.array(selection)
+        selection = numpy.asanyarray(selection)
         self.coordinates = self.coordinates[selection, :]
         self.values = self.values[selection]
 
@@ -954,7 +954,7 @@ class UnitCell(Basis):
             >>> selection = cell.select((0,0,0,0.5,1,1)) # Selects species in the 'left' part of the unit cell.
             >>> cell.discard(selection) # Discards selection. Species inside the 'left' part are removed.
         """
-        self.apply(~numpy.array(selection))
+        self.apply(~numpy.asanyarray(selection))
 
     @input_as_list
     def cut(self, piece, select='auto'):
@@ -1086,22 +1086,22 @@ class UnitCell(Basis):
         
             A new supercell.
         """
-        vec = numpy.array(vec, dtype=numpy.float64)
+        vec = numpy.asanyarray(vec, dtype=numpy.float64)
 
         sc_min = None
         sc_max = None
 
         for v in itertools.product((0.0, 1.0), repeat=vec.shape[0]):
 
-            vertex = (vec * numpy.array(v)[:, numpy.newaxis]).sum(axis=0)
+            vertex = (vec * numpy.asanyarray(v)[:, numpy.newaxis]).sum(axis=0)
 
             if sc_min is None:
-                sc_min = numpy.array(v)
+                sc_min = numpy.asanyarray(v)
             else:
                 sc_min = numpy.minimum(sc_min, vertex)
 
             if sc_max is None:
-                sc_max = numpy.array(v)
+                sc_max = numpy.asanyarray(v)
             else:
                 sc_max = numpy.maximum(sc_max, vertex)
 
@@ -1229,7 +1229,7 @@ class UnitCell(Basis):
             A new unit cell with interpolated data.
             
         """
-        points = numpy.array(points, dtype=numpy.float64)
+        points = numpy.asanyarray(points, dtype=numpy.float64)
 
         if driver is None:
             from scipy import interpolate
@@ -1288,8 +1288,8 @@ class Grid(Basis):
             self.meta.update(meta)
 
         dims = self.vectors.shape[0]
-        self.coordinates = list(numpy.array(c, dtype=numpy.float64) for c in coordinates)
-        self.values = numpy.array(values)
+        self.coordinates = list(numpy.asanyarray(c, dtype=numpy.float64) for c in coordinates)
+        self.values = numpy.asanyarray(values)
 
         # Proceed to checks
         if not len(self.coordinates) == dims:
@@ -1449,7 +1449,7 @@ class Grid(Basis):
         
             A new isolated grid.
         """
-        gaps = numpy.array(gaps, dtype=numpy.float64)
+        gaps = numpy.asanyarray(gaps, dtype=numpy.float64)
         if units == "cartesian":
             gaps /= ((self.vectors ** 2).sum(axis=1) ** .5)
         elif units == "crystal":
@@ -1522,7 +1522,7 @@ class Grid(Basis):
         for i in range(len(self.coordinates)):
 
             if not isinstance(selection[i], slice):
-                selection[i] = numpy.array(selection[i])
+                selection[i] = numpy.asanyarray(selection[i])
             self.coordinates[i] = self.coordinates[i][selection[i]]
 
             # Set a valid slice
@@ -1548,7 +1548,7 @@ class Grid(Basis):
             >>> selection = grid.select((0,0,0,0.5,1,1)) # Selects points in the 'left' part of the grid.
             >>> grid.discard(selection) # Discards selection. Points inside the 'left' part are removed.
         """
-        self.apply(tuple(~numpy.array(i) for i in selection))
+        self.apply(tuple(~numpy.asanyarray(i) for i in selection))
 
     @input_as_list
     def cut(self, piece):
@@ -1677,7 +1677,7 @@ class Grid(Basis):
 
         values = numpy.concatenate(tuple(grid.values for grid in grids if isinstance(grid, Grid)), axis=d)
 
-        stackingVectorsLen = numpy.array(tuple((grid.vectors[d] ** 2).sum(axis=-1) ** .5 for grid in grids))
+        stackingVectorsLen = numpy.asanyarray(tuple((grid.vectors[d] ** 2).sum(axis=-1) ** .5 for grid in grids))
         shifts = numpy.cumsum(stackingVectorsLen)
         shifts = shifts / shifts[-1]
 
@@ -1767,7 +1767,7 @@ class Grid(Basis):
             from scipy import interpolate
             driver = interpolate.interpn
 
-        points = numpy.array(points)
+        points = numpy.asanyarray(points)
         normalized = self.normalized()
 
         if periodic:
@@ -1883,7 +1883,7 @@ class Grid(Basis):
             raise ArgumentError("The tetrahedron density method is implemented only for 3D grids")
 
         initial = self.values
-        points = numpy.array(points, dtype=numpy.float64)
+        points = numpy.asanyarray(points, dtype=numpy.float64)
         self.values = numpy.reshape(self.values, self.values.shape[:3] + (-1,))
         minima = numpy.min(self.values, axis=(0, 1, 2))
         maxima = numpy.max(self.values, axis=(0, 1, 2))
@@ -1910,7 +1910,7 @@ class Grid(Basis):
                 weights = numpy.ones(self.values.shape, dtype=numpy.float64)
 
             else:
-                weights = numpy.array(weights, dtype=numpy.float64)
+                weights = numpy.asanyarray(weights, dtype=numpy.float64)
                 weights = numpy.reshape(weights, weights.shape[:3] + (-1,))[..., bottom:top]
 
             raw = tetrahedron_plain(self, points, weights)

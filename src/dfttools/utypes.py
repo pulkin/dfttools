@@ -32,7 +32,7 @@ class RealSpaceBasis(UnitsMixin, types.Basis):
     default_units = dict(vectors="angstrom")
 
 
-class ResiprocalSpaceBasis(UnitsMixin, types.Basis):
+class ReciprocalSpaceBasis(UnitsMixin, types.Basis):
     """
     Basis in reciprocal space.
     """

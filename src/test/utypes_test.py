@@ -3,8 +3,8 @@ import numpy
 import unittest
 import numericalunits
 
-from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ResiprocalSpaceBasis
-from dfttools.util import dumps, loads, array_to_json
+from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis
+from dfttools.util import dumps, loads
 from numpy import testing
 
 
@@ -105,7 +105,7 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = (xx ** 2 + yy ** 2 + zz ** 2) * numericalunits.eV
         self.bs_grid = BandsGrid(
-            ResiprocalSpaceBasis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorombic'),
+            ReciprocalSpaceBasis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorombic'),
             (x, y, z),
             data,
             fermi=1.5 * numericalunits.eV,

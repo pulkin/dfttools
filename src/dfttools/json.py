@@ -9,8 +9,8 @@ class JSONEncoderWithArray(json.JSONEncoder):
             if numpy.iscomplexobj(o):
                 return dict(
                     _custom_type="numpy-complex",
-                    data_r=o.r.tolist(),
-                    data_i=o.i.tolist(),
+                    data_r=o.real.tolist(),
+                    data_i=o.imag.tolist(),
                 )
             else:
                 return dict(

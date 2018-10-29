@@ -65,3 +65,10 @@ class ArrayUnitsTest(unittest.TestCase):
             complex=True,
             units="1/eV",
         ))
+
+    def test_type(self):
+        assert isinstance(self.sample.copy(), array)
+        assert isinstance(self.sample / 2, array)
+        assert isinstance(numpy.asanyarray(self.sample), array)
+        assert isinstance(numpy.asanyarray(self.sample, dtype=int), array)
+        assert isinstance(numpy.tile(self.sample, 2), array)

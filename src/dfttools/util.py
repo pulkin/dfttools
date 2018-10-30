@@ -8,6 +8,15 @@ import numericalunits
 import numpy
 
 
+def __iter_nu__(s):
+    match = re.match(r'\s*\w*((\s*[*/]\s*\w*)*)\s*$', s)
+    if match is None:
+        raise ValueError("Not a valid numericalunits expression: {}".format(s))
+
+    for i in re.finditer(r"([*/])\s*(\w*)", "*" + s):
+        yield i.groups()
+
+
 def eval_nu(s):
     """
     Evaluates numericalunits expression.
@@ -17,14 +26,9 @@ def eval_nu(s):
     Returns:
         The result of evaluation.
     """
-    match = re.match(r'\s*\w*((\s*[*/]\s*\w*)*)\s*$', s)
-    if match is None:
-        raise ValueError("Not a valid numericalunits expression: {}".format(s))
-
     result = 1.
 
-    for i in re.finditer(r"([*/])\s*(\w*)", "*" + s):
-        op, name = i.groups()
+    for op, name in __iter_nu__(s):
         name = str(name)
         if name == "1":
             val = 1.
@@ -38,6 +42,24 @@ def eval_nu(s):
         else:
             result /= val
 
+    return result
+
+
+def invert_nu(s):
+    """
+    Inverts the numericalunits expression.
+    Args:
+        s (str): expression to invert;
+
+    Returns:
+        The inverted expression.
+    """
+    i = {"*": "/", "/": "*"}
+    result = "".join(i[op] + name for op, name in __iter_nu__(s)).replace("/1", "").replace("*1", "")
+    if result.startswith("/"):
+        result = "1" + result
+    elif result.startswith("*"):
+        result = result[1:]
     return result
 
 
@@ -124,17 +146,24 @@ class ArrayWithUnits(numpy.ndarray):
 array = ArrayWithUnits
 
 
-def cast_units(destination, source):
+def cast_units(destination, source, inv=False):
     """
     Casts units from one array to another.
     Args:
         destination (ndarray): destination array;
         source (ndarray): array to cast units from;
+        inv (bool): whether to cast inverse units;
 
     Returns:
         If `a2` is `ArrayWithUnits` casts units from `a2` into `a1`, otherwise returns `a1`.
     """
-    return destination if not isinstance(source, array) else array(destination, units=source.units)
+    if not isinstance(source, array):
+        return destination
+
+    if not inv:
+        return array(destination, units=source.units)
+    else:
+        return array(destination, units=invert_nu(source.units))
 
 
 class JSONEncoderWithArray(json.JSONEncoder):

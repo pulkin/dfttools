@@ -327,7 +327,7 @@ class Basis(object):
             The :math:`2 \pi` multiplier is not present.
         
         """
-        return Basis(numpy.swapaxes(numpy.linalg.inv(self.vectors), 0, 1))
+        return Basis(cast_units(numpy.swapaxes(numpy.linalg.inv(self.vectors), 0, 1), self.vectors, inv=True))
 
     def vertices(self):
         """

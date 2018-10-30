@@ -41,7 +41,8 @@ class CommonTests(unittest.TestCase):
 
         b = RealSpaceBasis(ArrayWithUnits([1, 1, 1, 0, 0, 0], units="nm"), kind="triclinic")
         testing.assert_equal(b.vectors.units, "nm")
-
+        c = b.reciprocal()
+        testing.assert_equal(c.vectors.units, "1/nm")
 
 
 class CellTest(unittest.TestCase):

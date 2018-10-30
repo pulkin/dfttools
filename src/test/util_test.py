@@ -5,7 +5,7 @@ import numericalunits
 import numpy
 from numpy import testing
 
-from dfttools.util import eval_nu, array, dumps, loads
+from dfttools.util import eval_nu, invert_nu, array, dumps, loads
 
 
 class EvalNUTest(unittest.TestCase):
@@ -24,6 +24,13 @@ class EvalNUTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             eval_nu("eV/nonexistent_unit")
         testing.assert_equal(eval_nu("1/angstrom"), 1./numericalunits.angstrom)
+
+    def test_invert(self):
+        testing.assert_equal(invert_nu("angstrom"), "1/angstrom")
+        testing.assert_equal(invert_nu("1/angstrom"), "angstrom")
+        testing.assert_equal(invert_nu("angstrom/eV"), "1/angstrom*eV")
+        testing.assert_equal(invert_nu("angstrom/eV/Hartree"), "1/angstrom*eV*Hartree")
+        testing.assert_equal(invert_nu("1/1/angstrom/eV/Hartree"), "angstrom*eV*Hartree")
 
 
 class ArrayUnitsTest(unittest.TestCase):

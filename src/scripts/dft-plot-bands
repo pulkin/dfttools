@@ -144,7 +144,7 @@ else:
     if options.verbose:
         print("Plotting bands (next: density) ...")
             
-    matplotlib_bands(
+    plot = matplotlib_bands(
         data["bands"],
         ax_left,
         energy_range = options.range,

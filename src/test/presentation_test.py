@@ -336,6 +336,19 @@ class BandDensityPlotTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             matplotlib_bands_density(self.cell, pyplot.gca(), 100, energy_range=(-3, 3), orientation="unknown")
 
+    @cleanup
+    def test_gaussian(self):
+        rl1 = matplotlib_bands_density(self.cell, pyplot.gca(), 100, method="gaussian", gaussian_spread=0.1, units="eV")[0]
+        a = -0.5 / (0.1 * numericalunits.eV) ** 2
+        b = 1 / (2 * math.pi) ** 0.5 / (0.1 * numericalunits.eV)
+        rl2 = matplotlib_bands_density(self.cell, pyplot.gca(), 100, method=lambda x: b * numpy.exp(a * x ** 2))[0]
+
+        x1, y1 = rl1.get_data()
+        x2, y2 = rl2.get_data()
+
+        testing.assert_equal(x1, x2)
+        testing.assert_equal(y1, y2)
+
 
 class ScalarGridPlotTest(unittest.TestCase):
 

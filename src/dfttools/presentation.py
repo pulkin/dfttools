@@ -884,7 +884,7 @@ def matplotlib_bands_density(
         use_fill=False,
         orientation="landscape",
         gaussian_spread=None,
-        method="default",
+        method="optimal",
         **kwargs
 ):
     """
@@ -967,33 +967,44 @@ def matplotlib_bands_density(
         on_top_of = numpy.zeros(cell.values.shape, dtype=numpy.float64)
 
     # Try converting to grid
-    if isinstance(cell, UnitCell) and method == 'optimal':
-        grid = cell.as_grid()
-        if grid.size() == cell.size():
-            cell = grid
-        weights = numpy.reshape(weights, grid.values.shape)
-        on_top_of = numpy.reshape(on_top_of, grid.values.shape)
+    if method == "optimal":
+        method = "gaussian"
+        if isinstance(cell, UnitCell):
+            grid = cell.as_grid()
+            if grid.size() == cell.size():
+                cell = grid
+                method = "tetrahedron"
+                weights = numpy.reshape(weights, grid.values.shape)
+                on_top_of = numpy.reshape(on_top_of, grid.values.shape)
 
     # Calculate DoS using tetrahedron method ...
-    if isinstance(cell, Grid) and not method == 'gaussian':
+    if isinstance(cell, Grid) and method == 'tetrahedron':
 
         data = cell.tetrahedron_density(energies * units, resolved=False, weights=weights)
         data_baseline = cell.tetrahedron_density(energies * units, resolved=False, weights=on_top_of)
 
-    # ... or Gaussian
+    # ... or point-based method
     else:
-        if gaussian_spread is None:
-            gaussian_spread = (energies.max() - energies.min()) / len(energies)
+        if method == "gaussian":
+
+            if gaussian_spread is None:
+                gaussian_spread = (energies.max() - energies.min()) / len(energies)
+            _A = -0.5 / (gaussian_spread * units) ** 2
+            _B = 1 / (2 * math.pi) ** 0.5 / (gaussian_spread * units)
+
+            def method(x):
+                return _B * numpy.exp(_A * x ** 2)
+
+        elif not callable(method):
+            raise ValueError("Method is not a callable: {}".format(repr(method)))
 
         _values = cell.values.reshape(-1)[numpy.newaxis, :]
         _weights = weights.reshape(-1)[numpy.newaxis, :]
         _on_top_of = on_top_of.reshape(-1)[numpy.newaxis, :]
         _energies = energies[:, numpy.newaxis] * units
-        _A = -0.5 / (gaussian_spread * units) ** 2
-        _B = 1 / (2 * math.pi) ** 0.5 / (gaussian_spread * units)
 
-        data = (_B * _weights * numpy.exp(_A * (_values - _energies) ** 2)).sum(axis=-1) / cell.size()
-        data_baseline = (_B * _on_top_of * numpy.exp(_A * (_values - _energies) ** 2)).sum(axis=-1) / cell.size()
+        data = (_weights * method(_values - _energies)).sum(axis=-1) / cell.size()
+        data_baseline = (_on_top_of * method(_values - _energies)).sum(axis=-1) / cell.size()
 
     data += data_baseline
     data *= units

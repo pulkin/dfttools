@@ -82,7 +82,12 @@ class FermiMixin(object):
 
     @fermi.setter
     def fermi(self, v):
-        self.__fermi__ = util.array(v, units=self.default_units.get("fermi", None))
+        if isinstance(v, Number):
+            self.__fermi__ = util.array(v, units=self.default_units.get("fermi", None))
+        elif v is None:
+            self.__fermi__ = None
+        else:
+            raise ValueError("Only numeric values or None are accepted for the Fermi")
 
 
 class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):

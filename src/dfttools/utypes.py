@@ -84,7 +84,7 @@ class FermiMixin(object):
     def fermi(self, v):
         if isinstance(v, util.ArrayWithUnits):
             self.__fermi__ = v.copy()
-        if isinstance(v, Number):
+        elif isinstance(v, Number):
             self.__fermi__ = util.array(v, units=self.default_units.get("fermi", None))
         elif v is None:
             self.__fermi__ = None

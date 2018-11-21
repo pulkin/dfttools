@@ -951,7 +951,7 @@ def matplotlib_bands_density(
     # Set energy range
     if energy_range is None:
         if isinstance(energies, numpy.ndarray):
-            energy_range = energies[(0, -1)]
+            energy_range = energies[0], energies[-1]
         else:
             energy_range = __guess_energy_range__(cell) / units
 

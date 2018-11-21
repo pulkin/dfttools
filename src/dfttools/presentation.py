@@ -969,7 +969,9 @@ def matplotlib_bands_density(
     # Try converting to grid
     if method == "optimal":
         method = "gaussian"
-        if isinstance(cell, UnitCell):
+        if isinstance(cell, Grid):
+            method = "tetrahedron"
+        elif isinstance(cell, UnitCell):
             grid = cell.as_grid()
             if grid.size() == cell.size():
                 cell = grid

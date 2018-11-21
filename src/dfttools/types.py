@@ -1204,7 +1204,7 @@ class UnitCell(Basis):
         )
 
         # Convert values
-        data = fill * numpy.ones(tuple(a.size for a in coordinates) + self.values.shape[1:])
+        data = fill * numpy.ones(tuple(a.size for a in coordinates) + self.values.shape[1:], dtype=self.values.dtype)
 
         for c, v in zip(self.coordinates, self.values):
             indexes = tuple(coord2index[i][cc] for i, cc in enumerate(c))

@@ -885,6 +885,7 @@ def matplotlib_bands_density(
         orientation="landscape",
         gaussian_spread=None,
         method="optimal",
+        postproc=None,
         **kwargs
 ):
     """
@@ -933,6 +934,9 @@ def matplotlib_bands_density(
         
         method (bool): method to calculate density: 'default', 'gaussian'
         or 'optimal';
+        
+        postproc (Callable): a post-processing function accepting density
+        and energy values (in final units) and returning density values;
         
         The rest of kwargs are passed to pyplot plotting functions.
         
@@ -1014,6 +1018,9 @@ def matplotlib_bands_density(
     data += data_baseline
     data *= units
     data_baseline *= units
+    
+    if postproc is not None:
+        data = postproc(data, energies)
 
     kwargs.update(next(axes._get_lines.prop_cycler))
 

@@ -127,7 +127,7 @@ class XSF(AbstractParser):
                     vectors = self.parser.nextFloat((2, 3)) * numericalunits.angstrom
 
                 data = self.parser.nextFloat(tuple(shape[::-1])).swapaxes(0, shape.size - 1)[
-                    [slice(0, -1, 1)] * vectors.shape[0]]
+                    (slice(0, -1, 1),) * vectors.shape[0]]
 
                 self.parser.skip("end_datagrid_" + mode)
 

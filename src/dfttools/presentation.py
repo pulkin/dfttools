@@ -1037,7 +1037,7 @@ def matplotlib_bands_density(
         axes.set_ylim(energy_range)
 
         if not units_name is None:
-            axes.set_xlabel('Density (bands per {})'.format(units_name))
+            axes.set_xlabel('Density (electrons per unit cell per {})'.format(units_name))
             axes.set_ylabel('Energy ({})'.format(units_name))
 
         else:

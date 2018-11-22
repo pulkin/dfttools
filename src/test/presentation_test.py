@@ -265,7 +265,7 @@ class BandDensityPlotTest(unittest.TestCase):
         matplotlib_bands_density(self.cell, pyplot.gca(), 100, units="eV")
 
         assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(eV)")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(bands per eV)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(electrons per unit cell per eV)")
 
     @cleanup
     def test_custom_units_landscape(self):
@@ -273,14 +273,14 @@ class BandDensityPlotTest(unittest.TestCase):
                                  orientation='landscape')
 
         assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(Hartree)")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(bands per Hartree)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(electrons per unit cell per Hartree)")
 
     @cleanup
     def test_custom_units_portrait(self):
         matplotlib_bands_density(self.cell, pyplot.gca(), 100, units=2 * Ry, units_name="Hartree",
                                  orientation='portrait')
 
-        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(bands per Hartree)")
+        assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(electrons per unit cell per Hartree)")
         assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(Hartree)")
 
     @cleanup

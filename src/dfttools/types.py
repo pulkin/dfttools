@@ -1266,7 +1266,7 @@ class UnitCell(Basis):
         return UnitCell(
             self,
             points,
-            driver(data_points, data_values, points_i, **kwargs),
+            cast_units(driver(data_points, data_values, points_i, **kwargs), self.values),
         )
 
 

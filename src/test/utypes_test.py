@@ -115,6 +115,11 @@ class CellTest(unittest.TestCase):
             fermi=self.bs_cell.fermi,
         ))
 
+    def test_interpolate(self):
+        c = self.bs_cell.interpolate(([.1, .2, .3], [.4, .5, .6]))
+        assert isinstance(c.values, ArrayWithUnits)
+        testing.assert_equal(c.values.units, self.bs_cell.values.units)
+
 
 class GridTest(unittest.TestCase):
 

@@ -116,6 +116,10 @@ class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
             g.values,
             fermi=self.fermi,
         )
+    
+    def interpolate(self, *args, **kwargs):
+        result = super(BandsPath, self).interpolate(*args, **kwargs)
+        return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
 
 
 class BandsGrid(FermiMixin, UnitsMixin, types.Grid):

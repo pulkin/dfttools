@@ -2,10 +2,9 @@
 This submodule contains routines presenting data (unit cell) in various
 text formats.
 """
-import json
-
 import numpy
 from dfttools.presentation import __elements_name_lookup_table__
+from dfttools.util import dumps
 import numericalunits
 
 def __xsf_structure__(cell, tag=None, indent=4):
@@ -444,4 +443,4 @@ def json_structure(cell):
     Returns:
         A string with serialized unit cell.
     """
-    return json.dumps(cell.to_json(), indent=2)
+    return dumps(cell.to_json(), indent=2)

@@ -623,6 +623,7 @@ def matplotlib_bands(
         edge_names=[],
         mark_points=None,
         project=None,
+        return_projected=False,
         **kwargs
 ):
     """
@@ -677,6 +678,9 @@ def matplotlib_bands(
         instead of unfolding the entire bands path. If ``coordinate_units``
         specified the direction is expressed in the unit cell vectors,
         otherwise cartesian basis is used;
+        
+        return_projected (bool): if True, additionally returns a 1D array
+        with x coordinates of bands on the plot;
         
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
@@ -868,7 +872,10 @@ def matplotlib_bands(
     else:
         axes.set_ylabel('Energy')
 
-    return lc
+    if return_projected:
+        return lc, kpoints
+    else:
+        return lc
 
 
 def matplotlib_bands_density(

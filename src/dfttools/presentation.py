@@ -727,6 +727,10 @@ def matplotlib_bands(
     if energy_range is None:
         energy_range = __guess_energy_range__(cell) / energy_units
 
+    if "color" in kwargs:
+        kwargs["colors"] = kwargs["color"]
+        del kwargs["color"]
+    
     # Cycle color
     if not "colors" in kwargs:
         kwargs.update(next(axes._get_lines.prop_cycler))

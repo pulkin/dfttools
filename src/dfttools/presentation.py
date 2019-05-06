@@ -624,6 +624,7 @@ def matplotlib_bands(
         mark_points=None,
         project=None,
         return_projected=False,
+        ls="-",
         **kwargs
 ):
     """
@@ -682,6 +683,8 @@ def matplotlib_bands(
         return_projected (bool): if True, additionally returns a 1D array
         with x coordinates of bands on the plot;
         
+        ls (str): a shortcut for line styles: "-", "--", ".", "-.";
+        
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
         
@@ -727,10 +730,22 @@ def matplotlib_bands(
     if energy_range is None:
         energy_range = __guess_energy_range__(cell) / energy_units
     
-    defaults = dict(
-        capstyle="round",
-        joinstyle="round",
-    )
+    defaults = {}
+    if ls == "-":
+        defaults.update(dict(
+            capstyle="round",
+            joinstyle="round",
+            linestyle="solid",
+        ))
+    elif ls == "--":
+        defaults["linestyle"] = "dashed"
+    elif ls == ".":
+        defaults["linestyle"] = "dotted"
+    elif ls == "-.":
+        defaulrs["linestyle"] = "dashdot"
+    else:
+        raise ValueError("Unknown line style: {}".format(ls)
+    
     defaults.update(kwargs)
     kwargs = defaults
 

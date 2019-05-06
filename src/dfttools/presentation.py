@@ -735,14 +735,14 @@ def matplotlib_bands(
         defaults.update(dict(
             capstyle="round",
             joinstyle="round",
-            linestyle="solid",
+            linestyles="solid",
         ))
     elif ls == "--":
-        defaults["linestyle"] = "dashed"
+        defaults["linestyles"] = (0, (1, 2))
     elif ls == ".":
-        defaults["linestyle"] = "dotted"
+        defaults["linestyles"] = "dotted"
     elif ls == "-.":
-        defaults["linestyle"] = "dashdot"
+        defaults["linestyles"] = "dashdot"
     else:
         raise ValueError("Unknown line style: {}".format(ls))
     

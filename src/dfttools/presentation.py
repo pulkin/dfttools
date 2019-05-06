@@ -744,7 +744,7 @@ def matplotlib_bands(
     elif ls == "-.":
         defaulrs["linestyle"] = "dashdot"
     else:
-        raise ValueError("Unknown line style: {}".format(ls)
+        raise ValueError("Unknown line style: {}".format(ls))
     
     defaults.update(kwargs)
     kwargs = defaults

@@ -726,6 +726,13 @@ def matplotlib_bands(
     # Set energy range
     if energy_range is None:
         energy_range = __guess_energy_range__(cell) / energy_units
+    
+    defaults = dict(
+        capstyle="round",
+        joinstyle="round",
+    )
+    defaults.update(kwargs)
+    kwargs = defaults
 
     if "color" in kwargs:
         kwargs["colors"] = kwargs["color"]

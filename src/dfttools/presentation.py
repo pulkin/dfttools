@@ -202,67 +202,67 @@ def svgwrite_unit_cell(
 ):
     """
     Creates an svg drawing of a unit cell.
-    
+
     Args:
-    
+
         cell (UnitCell): the cell to be visualized;
-        
+
         svg (str, svgwrite.Drawing): either file name to save the drawing
         to or an ``svgwrite.Drawing`` object to draw with.
-        
+
     Kwargs:
-    
+
         camera (str, array): the direction of a camera: either 'x','y' or
         'z' or an arbitrary 3D vector;
-        
+
         camera_top (array): a vector pointing up;
-        
+
         insert (array): a top-left corner of the drawing;
-        
+
         size (array): size of the bounding box;
-        
+
         circle_size (float): size of the circles representing atoms,
         arbitrary units;
-        
+
         circle_opacity (float,array): opacity of circles;
-        
+
         margin (float): size of the margin in all directions;
-        
+
         show_cell (bool, str): if True draws the unit cell edges projected,
         if 'invisible' the unit cell is invisible;
-        
+
         show_atoms (bool): if True draws atoms;
-        
+
         show_bonds (bool): if True draws bonds;
-        
+
         show_legend (bool): if True draws legend;
-        
+
         show_numbers (bool): if True shows numbers corresponding to the
         atomic order in the unit cell;
-    
+
         fadeout_strength (float): amount of fadeout applied to more distant atoms;
-        
+
         bg (array): an integer array defining background color;
-        
+
         bond_ratio (float): scale factor to determine whether the bond
         is rendered;
-        
+
         coordinates (str): the coordinate system, either 'left' or 'right';
-        
+
         hook_atomic_color (function): a function accepting integer (atom
         ID) and a 3-element list (suggested RGB color) and returning a
         new color of the atom;
-        
+
         invisible (str,array): make specified atoms invisible. If 'auto'
         specified, creates a supercell and makes all cell replica
         invisible. The bonds of invisible atoms will still be present on
         the final image;
-        
+
         title (str): a title to the drawing presented in the top left
         corner;
-        
+
     Returns:
-    
+
         An ```svgwrite.Drawing`` object. The object is saved if it was
         created inside this method.
     """
@@ -331,7 +331,7 @@ def svgwrite_unit_cell(
         camera_z,
     ))
 
-    # Project atomic coordinates onto the plane    
+    # Project atomic coordinates onto the plane
     projected = projection.transform_from(cell, cell.coordinates)
 
     # Collect elements
@@ -566,20 +566,20 @@ def svgwrite_unit_cell(
 def __guess_energy_range__(cell, bands=10, window=0.05):
     """
     Attempts to guess the energy range of interest.
-    
+
     Args:
-    
+
         cell (UnitCell): cell with the band structure;
-    
+
     Kwargs:
-    
+
         bands (int): number of bands to focus;
-        
+
         window (float): relative size of the gaps below and above
         selected energy range;
-        
+
     Returns:
-    
+
         A tuple with the energy range.
     """
     if cell.fermi is not None and cell.values.shape[1] > bands:
@@ -630,67 +630,67 @@ def matplotlib_bands(
 ):
     """
     Plots basic band structure using pyplot.
-    
+
     Args:
-    
+
         cell (UnitCell): cell with the band structure;
-        
+
         axes (matplotlib.axes.Axes): axes to plot on;
-        
+
     Kwargs:
-        
+
         show_fermi (bool): shows the Fermi level if specified;
-        
+
         fermi_origin (bool): shift the energy origin to the Fermi level;
-        
+
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
-        
+
         energy_units (str, float): either a field from ``numericalunits``
         package or a float with energy units;
-        
+
         energy_units_name (str): a string used for the units. Used only if the
         ``energy_units`` keyword is a float;
-        
+
         coordinate_units (str, float): either a field from ``numericalunits``
         package or a float with coordinate units or None;
-        
+
         coordinate_units_name (str): a string used for the coordinate
         units. Used only if the ``coordinate_units`` keyword is a float;
-        
+
         threshold (float): threshold for determining edges of k point
         path;
-        
+
         weights, weights_color (array): a 2D array with weights on the
         band structure which will be converted to color according to
         current colormap;
-        
+
         weights_size (array): a 2D array with weights on the band
         structure which will be converted to line thickness;
-        
+
         optimize_visible (bool): draw only visible lines;
-        
+
         edge_names (list): the edges names to appear on the band structure;
-        
+
         mark_points (list): marks specific points on the band structure,
         the first number in each list element is interpreted as k-point
         while the second number is band number;
-        
+
         project (array): projects k-points along specified direction
         instead of unfolding the entire bands path. If ``coordinate_units``
         specified the direction is expressed in the unit cell vectors,
         otherwise cartesian basis is used;
-        
+
         return_projected (bool): if True, additionally returns a 1D array
         with x coordinates of bands on the plot;
-        
+
         ls (str): a shortcut for line styles: "-", "--", ".", "-.";
-        
+
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
-        
+
     Returns:
-    
+
         A plotted LineCollection.
     """
 
@@ -730,7 +730,7 @@ def matplotlib_bands(
     # Set energy range
     if energy_range is None:
         energy_range = __guess_energy_range__(cell) / energy_units
-    
+
     defaults = {}
     if ls == "-":
         defaults.update(dict(
@@ -746,14 +746,14 @@ def matplotlib_bands(
         defaults["linestyles"] = "dashdot"
     else:
         raise ValueError("Unknown line style: {}".format(ls))
-    
+
     defaults.update(kwargs)
     kwargs = defaults
 
     if "color" in kwargs:
         kwargs["colors"] = kwargs["color"]
         del kwargs["color"]
-    
+
     # Cycle color
     if not "colors" in kwargs:
         kwargs.update(next(axes._get_lines.prop_cycler))
@@ -924,58 +924,58 @@ def matplotlib_bands_density(
 ):
     """
     Plots density of bands (density of states).
-    
+
     The cell values are considered to be band energies.
-    
+
     Args:
-    
+
         cell (Grid,UnitCell): a unit cell with the band structure,
         possibly on the grid;
-        
+
         axes (matplotlib.axes.Axes): axes to plot on;
-        
-        energies (int,array): energies to calculate density at. The 
+
+        energies (int,array): energies to calculate density at. The
         integer value has the meaning of number of points to cover
         the range ``energy_range``. Otherwise the units of energy are
         defined by the ``units`` keyword;
-        
+
     Kwargs:
-    
+
         show_fermi (bool): shows the Fermi level if specified;
-        
+
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
-        
+
         units (str, float): either a field from ``numericalunits``
         package or a float with energy units;
-        
+
         units_name (str): a string used for the units. Used only if the
         ``units`` keyword is a float;
-        
+
         weights (array): a 2D array with weights on the band structure;
-        
+
         on_top_of (array): a 2D array with weights on the band structure
         to plot on top of;
-        
+
         use_fill (bool): fill the area below plot;
-        
+
         orientation (str): either 'portrait' or 'landscape' - orientation
         of the plot;
-        
+
         gaussian_spread (float): the gaussian spread for the density of
         states. This value is used only if the provided ``cell`` is not
         a Grid;
-        
+
         method (bool): method to calculate density: 'default', 'gaussian'
         or 'optimal';
-        
+
         postproc (Callable): a post-processing function accepting density
         and energy values (in final units) and returning density values;
-        
+
         The rest of kwargs are passed to pyplot plotting functions.
-        
+
     Returns:
-    
+
         A plotted Line2D or a PolyCollection, depending on ``use_fill``.
     """
 
@@ -1052,7 +1052,7 @@ def matplotlib_bands_density(
     data += data_baseline
     data *= units
     data_baseline *= units
-    
+
     if postproc is not None:
         data = postproc(data, energies)
 
@@ -1120,53 +1120,53 @@ def matplotlib_scalar(
 ):
     """
     Plots scalar values on the grid using imshow.
-    
+
     Args:
-    
+
         grid (Grid): a 3D grid to be plotted;
-        
+
         axes (matplotlib.axes.Axes): axes to plot on;
-        
+
         origin (array): origin of the 2D slice to be plotted in the
         units of ``grid``;
-        
+
         plane (str, int): the plotting plane: either 'x','y' or 'z' or a
         correspondint int.
-        
+
     Kwargs:
-    
+
         units (str, float): either a field from ``numericalunits``
         package or a float with energy units;
-        
+
         units_name (str): a string used for the units. Used only if the
         ``units`` keyword is a float;
-        
+
         show_cell (bool): if True then projected unit cell boundaries are
         shown on the final image;
-        
+
         normalize (bool): normalize data before plotting such that the
         minimum is set at zero and the maximum is equal to one;
-        
+
         ppu (float): points per ``unit`` for the raster image;
-        
+
         isolines (array): plot isolines at the specified levels;
-        
+
         window (array): 4 values representing a window to plot the data:
         minimum and maximum 'x' coordinate and minimum and maximum 'y'
         coordinate;
-        
+
         margins (float): adds margins to the grid where the data is
         interpolated;
-        
+
         scale_bar (int): adds a scal bar to the image at the specified
         location;
-        
+
         scale_bar_location (int): location of the scale bar;
-        
+
         The rest of kwargs are passed to ``pyplot.imshow`` or ``pyplot.contour``.
-        
+
     Returns:
-    
+
         A ``matplotlib.image.AxesImage`` plotted.
     """
 

@@ -3,6 +3,7 @@ This submodule contains data visualization routines.
 """
 import base64
 import math
+from xml.etree import ElementTree
 
 from .types import Basis, UnitCell, Grid, __xyz2i__
 
@@ -1318,32 +1319,55 @@ def matplotlib_scalar(
     return image
 
 
-def matplotlib2svgwrite(fig, svg, insert, size, **kwargs):
+def matplotlib2svgwrite(fig, svg, insert, size, method="firm", image_format=None, **kwargs):
     """
     Saves a matplotlib image to an existing svgwrite object.
-    
+
     Args:
-    
+
         fig (matplotlib.figure.Figure): a figure to save;
-        
+
         svg (svgwrite.Drawing): an svg drawing to save to;
-        
+
         insert (tuple): a tuple of ints defining destination to insert
         a drawing;
-        
+
         size (tuple): size of the inserted image;
-        
+
+        embed (str): the embedding method: either 'loose' (the plot is
+        rasterized) or 'firm' (the plot's svg is embedded via <svg> tag);
+
     Kwargs:
-    
+
         The kwargs are passed to ``fig.savefig`` used to print the plot.
     """
+    if image_format is None:
+        image_format = dict(loose="png", firm="svg")[method]
+    if method == "firm" and image_format != "svg":
+        raise ValueError("Only SVG images may be embedded with the 'firm' method")
+    if method == "firm" and svg._parameter.profile != "full":
+        raise ValueError("'firm' method requires a full svg profile")
 
     image_bin = StringIO()
-    fig.savefig(image_bin, format="png", **kwargs)
+    fig.savefig(image_bin, format=image_format, **kwargs)
     image_bin.seek(0)
-    image_str = "data:image/png;base64," + base64.b64encode(image_bin.buf)
 
-    svg.add(svg.image(image_str,
-                      insert=insert,
-                      size=size,
-                      ))
+    if method == "loose":
+        image_str = "data:image/{};base64,".format(image_format) + base64.b64encode(image_bin.buf)
+        svg.add(svg.image(
+            image_str,
+            insert=insert,
+            size=size,
+        ))
+
+    elif method == "firm":
+        root = ElementTree.fromstring(image_bin.buf)
+        root.attrib["x"], root.attrib["y"] = map(str, insert)
+        root.attrib["width"], root.attrib["height"] = map(str, size)
+        esvg = svg.g()
+        esvg.get_xml = lambda: root
+        svg.add(esvg)
+
+    else:
+        raise ValueError("Illegal 'embed' value")
+

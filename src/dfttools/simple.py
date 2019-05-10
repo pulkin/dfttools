@@ -147,19 +147,20 @@ def parse(f, tag, *args):
             if "__tags__" in dir(attr) and tag in attr.__tags__:
                 try:
 
-                    attempted.append(parser.__class__.__name__ + "." + attr.__name__)
                     if attr.__take_file__:
                         return attr(f, *args)
                     else:
                         return attr(*args)
 
-                except (StopIteration, ParseError):
-                    pass
+                except (StopIteration, ParseError) as e:
+                    attempted.append((parser.__class__.__name__ + "." + attr.__name__, e))
 
     if len(attempted) == 0:
-        raise ParseError("No matching parser found\n" + debug_data)
+        raise ParseError("No matching parser method found in the following candidates:\n" + "\n".join(tuple(
+            " - " + str(i) for i in candidates
+        )))
 
     else:
-        raise ParseError("Parsing failed, attempted following candidates:\n" + "\n".join(tuple(
-            " - " + str(i) for i in candidates
+        raise ParseError("Parsing failed, attempted the following candidates:\n" + "\n".join(tuple(
+            " - " + str(i) + ": " + repr(j) for i, j in attempted
         )))

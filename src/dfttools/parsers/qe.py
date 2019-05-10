@@ -18,9 +18,9 @@ class Bands(AbstractParser):
     """
     Class for parsing output files created by bands.x binary of Quantum
     Espresso package.
-    
+
     Args:
-    
+
         data (str): string with the contents of the bands.x output file.
     """
 
@@ -31,9 +31,9 @@ class Bands(AbstractParser):
     def nk(self):
         """
         Retrieves number of k points from the output file header.
-        
+
         Returns:
-        
+
             Integer number of k points.
         """
 
@@ -44,9 +44,9 @@ class Bands(AbstractParser):
     def ne(self):
         """
         Retrieves number of bands from the output file header.
-        
+
         Returns:
-        
+
             Integer number of bands.
         """
 
@@ -58,14 +58,14 @@ class Bands(AbstractParser):
     def reciprocal_data(self, basis):
         """
         Retrieves the band structure data.
-        
+
         Args:
-        
+
             basis (types.Basis): the reciprocal unit cell of the band
             structure.
-            
+
         Returns:
-        
+
             A unit cell containing band structure data.
         """
         nk = self.nk()
@@ -85,14 +85,14 @@ class Bands(AbstractParser):
     def bands(self, basis):
         """
         Retrieves the bands.
-        
+
         Args:
-        
+
             basis (types.Basis): the reciprocal unit cell of the band
             structure.
-            
+
         Returns:
-        
+
             A unit cell containing band energies.
         """
         result = self.reciprocal_data(basis)
@@ -105,9 +105,9 @@ class Output(AbstractParser):
     """
     Class for parsing output files created by pw.x binary of Quantum
     Espresso package.
-    
+
     Args:
-    
+
         data (str): string with the contents of the output file.
     """
 
@@ -118,9 +118,9 @@ class Output(AbstractParser):
     def success(self):
         """
         Checks for success signature in the end of the file.
-        
+
         Returns:
-        
+
             True if the signature is present.
         """
         return 'JOB DONE.' in self.data
@@ -128,9 +128,9 @@ class Output(AbstractParser):
     def routineError(self):
         """
         Checks "error in routine" entry in the file.
-        
+
         Returns:
-        
+
             String with textual information about the error. Returns
             None if no error recorded.
         """
@@ -143,9 +143,9 @@ class Output(AbstractParser):
     def scf_accuracy(self):
         """
         Retrieves scf convergence history.
-        
+
         Returns:
-        
+
             A numpy array containing estimated errors after all scf
             steps during calculations. The energies are given in **eV**.
         """
@@ -161,9 +161,9 @@ class Output(AbstractParser):
     def scf_steps(self):
         """
         Retrieved number of scf steps.
-        
+
         Returns:
-        
+
             A numpy array containing numbers of consequetive scf steps
             performed to reach convergences.
         """
@@ -173,9 +173,9 @@ class Output(AbstractParser):
     def scf_failed(self):
         """
         Checks for "convergence NOT achieved" signature.
-        
+
         Returns:
-        
+
             True if the signature is present.
         """
         return 'convergence NOT achieved' in self.data
@@ -183,9 +183,9 @@ class Output(AbstractParser):
     def fermi(self):
         """
         Retrieves Fermi energies.
-        
+
         Returns:
-        
+
             A numpy array containing Fermi energies for each MD step.
         """
         result = []
@@ -224,9 +224,9 @@ class Output(AbstractParser):
     def force(self):
         """
         Retrieves total force.
-        
+
         Returns:
-        
+
             A numpy array containing total forces for each
             self-consistent calculation.
         """
@@ -242,9 +242,9 @@ class Output(AbstractParser):
     def total(self):
         """
         Retrieves total energies.
-        
+
         Returns:
-        
+
             A numpy array containing total energies for each
             self-consistent calculation.
         """
@@ -260,9 +260,9 @@ class Output(AbstractParser):
     def threads(self):
         """
         Retrieves the number of MPI threads.
-        
+
         Returns:
-        
+
             A number of MPI threads for this calculation as an integer.
         """
         return int(re.findall(r"running on\s+(\d+) processors", self.data)[-1])
@@ -270,9 +270,9 @@ class Output(AbstractParser):
     def time(self):
         """
         Retrieves cpu times.
-        
+
         Returns:
-        
+
             Time stamps measured by Quantum Espresso in a numpy array.
         """
         self.parser.reset()
@@ -287,9 +287,9 @@ class Output(AbstractParser):
     def alat(self):
         """
         Retrieves QE "alat" length.
-        
+
         Returns:
-        
+
             The first record of "alat" in **m** as float.
         """
         self.parser.reset()
@@ -308,9 +308,9 @@ class Output(AbstractParser):
     def unitCells(self):
         """
         Retrieves atomic position data.
-        
+
         Returns:
-        
+
             A set of all unit cells found.
         """
         result = []
@@ -406,26 +406,26 @@ class Output(AbstractParser):
     def bands(self, index=-1, skipVCRelaxException=False):
         """
         Retrieves bands.
-        
+
         Kwargs:
-        
+
             index (int or None): index of a band structure or ``None``
             if all band structures need to be parsed. Supports negative
             indexing.
-        
+
             skipVCRelaxException (bool): forces to skip variable cell
             relaxation exception. In this very special case no
             reciprocal lattice vectors are provided for the new cells
             in the output file.
-                
+
         Returns:
-        
+
             A set of Cell objects with bands data stored in ``Cell.values``.
             Specifically, ``Cell.values`` is a n by m array where n is a
             number of k points and m is a number of bands.
-            
+
         Raises:
-        
+
             Exception: if a variable cell calculation data found.
         """
         fermi = self.fermi()
@@ -525,9 +525,9 @@ class Proj(AbstractParser):
     """
     Class for parsing output files created by projwfc.x binary of
     Quantum Espresso package.
-    
+
     Args:
-    
+
         data (str): string with the contents of the output file.
     """
 
@@ -538,11 +538,11 @@ class Proj(AbstractParser):
     def basis(self):
         """
         Retrieves the localized basis set.
-        
+
         Returns:
-        
+
             A numpy array of records:
-            
+
             * state (int): ID of the state as provided by Quantum Espresso;
             * atom (int): ID of particular atom in the unit cell;
             * atomName (str): chemical caption;
@@ -626,11 +626,11 @@ class Proj(AbstractParser):
     def weights(self):
         """
         Retrieves projection weights onto localized basis set.
-        
+
         Returns:
-        
+
             A k by n by m numpy array with weights.
-            
+
             * k is a number of k points
             * n is a number of bands
             * m is a localized basis set size
@@ -677,9 +677,9 @@ class Cond(AbstractParser):
     """
     Class for parsing output files created by pwcond.x binary of Quantum
     Espresso package.
-    
+
     Args:
-    
+
         data (str): string with the contents of the output file.
     """
 
@@ -690,12 +690,12 @@ class Cond(AbstractParser):
     def transmission(self, kind="resolved"):
         """
         Retrives transmission data from pwcond output file.
-        
+
         Kwargs:
-        
+
             kind (str): either "resolved", "total", "states_in" or
                 "states_out".
-            
+
                 * resolved: retrieves transmisson matrix elements btw
                   pairs of states;
                 * total: retrieves total transmission for all incoming
@@ -705,17 +705,17 @@ class Cond(AbstractParser):
                   transmissions.
 
         .. warning::
-                  
+
             The "resolved" mode essentially picks all transmission
             matrix elements available in the input. Therefore it
             will not record incident states without corresponding
             outgoing states. However these states will show up in
             "total" regime with zero transmission.
-                  
+
         Returns:
-        
+
             A numpy array of records with states and transmission:
-            
+
             * energy (float): energy of the state in **eV**;
             * kx,ky (float): x and y components of k-vectors;
             * incoming (float): z component of k-vector of incoming
@@ -726,7 +726,7 @@ class Cond(AbstractParser):
             * transmission (float): corresponding transmission matrix
               element or total transmission (only for kind == "resolved"
               or kind == "total").
-                
+
             The k vector projections are given in units of reciprocal
             lattice.
         """
@@ -892,9 +892,9 @@ class Input(AbstractParser):
     """
     Class for parsing input file for pw.x binary of a Quantum Espresso
     package.
-    
+
     Args:
-    
+
         data (str): string with the contents of the input file.
     """
 
@@ -915,9 +915,9 @@ class Input(AbstractParser):
     def namelists(self):
         """
         Retrieves all namelists.
-        
+
         Returns:
-        
+
             A dictionary representing this namelist.
         """
         self.parser.reset()
@@ -961,9 +961,9 @@ class Input(AbstractParser):
     def unitCell(self):
         """
         Retrieves a unit cell from this input file.
-        
+
         Returns:
-        
+
             A unit cell with atomic coordinates.
         """
         nl = self.namelists()

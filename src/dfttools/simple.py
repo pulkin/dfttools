@@ -10,9 +10,9 @@ from parsers.generic import AbstractParser, ParseError
 def tag_method(*tags, **kwargs):
     """
     A generic decorator tagging some method.
-    
+
     Kwargs:
-    
+
         take_file (bool): set to True and the File object will be passed
         to this method.
     """
@@ -30,7 +30,7 @@ def tag_method(*tags, **kwargs):
         if len(tags) > 0 and not (func.__doc__ is None):
             func.__doc__ += """
     .. note::
-    
+
         This method can be shortcut """ + (
                 ", ".join("``dfttools.simple.parse(file,\"" + i + "\")``" for i in tags)) + ".\n"
 
@@ -46,14 +46,14 @@ unit_cell = tag_method("unit-cell")
 def get_all_parsers(*modules):
     """
     Retrieves all parsers.
-    
+
     Kwargs:
-    
+
         modules (list): a list of names of ``parsers`` submodules to
         search at.
-        
+
     Returns:
-    
+
         A list of parsing classes.
     """
 
@@ -81,13 +81,13 @@ def get_all_parsers(*modules):
 def guess_parser(f):
     """
     Guesses parsers for a given data.
-    
+
     Args:
-    
+
         f (file): a file to parse.
-        
+
     Returns:
-    
+
         A list of parser candidates.
     """
     result = []
@@ -118,20 +118,19 @@ def guess_parser(f):
 def parse(f, tag, *args):
     """
     Identifies and parses data.
-    
+
     Args:
-    
+
         f (file): a file to parse;
-        
+
         tag (str): the data tag, such as ``unit-cell`` or
         ``band-structure``;
-        
+
     Returns:
-    
+
         The parsed data.
     """
     candidates = guess_parser(f)
-    debug_data = "Candidate classes:\n" + "\n".join(" - " + str(i) for i in candidates)
 
     if len(candidates) == 0:
         raise ParseError("Unidentified data: no parser match")

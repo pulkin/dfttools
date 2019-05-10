@@ -30,7 +30,7 @@ else:
     ext_modules += [
         Extension("dfttools.blochl", [ "cython/blochl.c" ]),
     ]
-    
+
 ext_modules += [
     Extension("dfttools.parsers.native_openmx", [ "c/generic-parser.c", "c/native_openmx.c" ]),
     Extension("dfttools.parsers.native_qe", [ "c/generic-parser.c", "c/native_qe.c" ]),
@@ -58,6 +58,7 @@ setup(
         'numericalunits',
         'matplotlib',
         'svgwrite',
+        'requests',
     ],
     scripts=[
         'scripts/dft-plot-bands',

@@ -497,23 +497,24 @@ class Output(AbstractParser):
 
         elif index < 0:
 
-            if (-index > counter):
-                raise ParseError("Only {:d} band structures found ({:d} requested)".format(counter, index))
+            if (-index <= counter):
 
-            for i in range(-index):
-                self.parser.pop()
+                for i in range(-index):
+                    self.parser.pop()
 
-            c = self.__bands_energies__(parseMode_kp, basis, kpoints, fermi[index] if -index <= len(fermi) else None,
-                                        alat)
+                c = self.__bands_energies__(parseMode_kp, basis, kpoints, fermi[index] if -index <= len(fermi) else None,
+                                            alat)
 
-            for i in range(counter + index):
-                self.parser.pop()
+                for i in range(counter + index):
+                    self.parser.pop()
 
-            return c
+                return c
+
+        if counter == 0:
+            raise ParseError("No band structures found")
 
         else:
-
-            raise ParseError("Only {:d} band structures found ({:d} requested)".format(counter, index))
+            raise ParseError("Band structure index {:d} is out of range 0-{:d}".format(index, counter-1))
 
     @band_structure
     def __bands_silent__(self):

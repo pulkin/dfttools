@@ -192,6 +192,7 @@ def svgwrite_unit_cell(
         show_bonds=True,
         show_legend=True,
         show_numbers=False,
+        show_vectors=False,
         fadeout_strength=0.8,
         bg=(0xFF, 0xFF, 0xFF),
         bond_ratio=1,
@@ -239,6 +240,9 @@ def svgwrite_unit_cell(
 
         show_numbers (bool): if True shows numbers corresponding to the
         atomic order in the unit cell;
+
+        show_vectors (bool, tuple): if True, shows unit vectors in the bottom-left
+        corner. If tuple specified, names the vectors accordingly;
 
         fadeout_strength (float): amount of fadeout applied to more distant atoms;
 
@@ -556,6 +560,51 @@ def svgwrite_unit_cell(
                            font_size=__text_size__,
                            font_family="monospace",
                            ))
+
+    if show_vectors:
+        __arrow_w__ = 1.
+        __arrow_head_w__ = 3 * __arrow_w__
+        __arrow_head_l__ = 2 * __arrow_head_w__
+        __arrow_l__ = 3 * __arrow_head_l__
+
+        a_group = svg.g()
+
+        xarrow = svg.path(fill="black")
+        xarrow.push(
+            'M', 0, -__arrow_w__ / 2,
+            'l', 0, __arrow_w__,
+            'l', __arrow_l__ - __arrow_head_l__, 0,
+            'l', 0, (__arrow_head_w__ - __arrow_w__) / 2,
+            'l', __arrow_head_l__, -__arrow_head_w__ / 2,
+            'l', -__arrow_head_l__, -__arrow_head_w__ / 2,
+            'l', 0, (__arrow_head_w__ - __arrow_w__) / 2,
+            'z'
+        )
+        subgroup.add(a_group)
+
+        obj = []
+
+        obj_z = []
+        pvecs = projection.transform_from_cartesian(cell.vectors)
+        pvecs_r = numpy.linalg.norm(pvecs, axis=-1)
+        pvecs_p = numpy.arctan2(pvecs[:, 1], pvecs[:, 0])
+        pvecs_t = numpy.arcsin(pvecs[:, 2] / pvecs_r)
+
+        pvecs_a = numpy.linalg.norm(pvecs[:, :2], axis=-1)
+
+        for vec in pvecs:
+            x, y, z = vec / numpy.linalg.norm(vec)
+            r = (x ** 2 + y ** 2) ** .5
+            if r>1e-6:
+                g = svg.g()
+                g.add(xarrow)
+                g.matrix(x, y, -y/r, x/r, 0, 0)
+                obj.append(g)
+                obj_z.append(vec[2])
+
+        order = numpy.argsort(obj_z)
+        for i in order[::-1]:
+            a_group.add(obj[i])
 
     if save:
         svg.save()

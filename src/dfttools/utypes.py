@@ -68,7 +68,7 @@ class FermiMixin(object):
 
     def __getstate__(self):
         state = super(FermiMixin, self).__getstate__()
-        state["fermi"] = self.fermi.copy()
+        state["fermi"] = self.fermi.copy() if self.fermi is not None else None
         return state
 
     def __setstate__(self, state):
@@ -116,7 +116,7 @@ class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
             g.values,
             fermi=self.fermi,
         )
-    
+
     def interpolate(self, *args, **kwargs):
         result = super(BandsPath, self).interpolate(*args, **kwargs)
         return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)

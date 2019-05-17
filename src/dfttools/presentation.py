@@ -1368,7 +1368,7 @@ def matplotlib_scalar(
     return image
 
 
-def matplotlib2svgwrite(fig, svg, insert, size, method="firm", image_format=None, **kwargs):
+def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format=None, **kwargs):
     """
     Saves a matplotlib image to an existing svgwrite object.
 
@@ -1412,7 +1412,8 @@ def matplotlib2svgwrite(fig, svg, insert, size, method="firm", image_format=None
     elif method == "firm":
         root = ElementTree.fromstring(image_bin.buf)
         root.attrib["x"], root.attrib["y"] = map(str, insert)
-        root.attrib["width"], root.attrib["height"] = map(str, size)
+        if size is not None:
+            root.attrib["width"], root.attrib["height"] = map(str, size)
         esvg = svg.g()
         esvg.get_xml = lambda: root
         svg.add(esvg)

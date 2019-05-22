@@ -4,6 +4,7 @@ This submodule contains data visualization routines.
 import base64
 import math
 from xml.etree import ElementTree
+from itertools import product
 
 from .types import Basis, UnitCell, Grid, __xyz2i__
 
@@ -193,6 +194,7 @@ def svgwrite_unit_cell(
         show_legend=True,
         show_numbers=False,
         show_vectors=False,
+        vectors_offset=None,
         fadeout_strength=0.8,
         bg=(0xFF, 0xFF, 0xFF),
         bond_ratio=1,
@@ -200,6 +202,11 @@ def svgwrite_unit_cell(
         coordinates='right',
         invisible=None,
         title=None,
+        font_family=None,
+        font_size=None,
+        font_size_small=None,
+        return_coords=False,
+        overlay_opacity=0.8,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -242,7 +249,9 @@ def svgwrite_unit_cell(
         atomic order in the unit cell;
 
         show_vectors (bool, tuple): if True, shows unit vectors in the bottom-left
-        corner. If tuple specified, names the vectors accordingly;
+        corner;
+
+        vectors_offset (float, tuple): sets a custom offset for vectors (in px);
 
         fadeout_strength (float): amount of fadeout applied to more distant atoms;
 
@@ -265,11 +274,32 @@ def svgwrite_unit_cell(
         title (str): a title to the drawing presented in the top left
         corner;
 
+        font_family (dict): the font family for captions;
+
+        font_size (float): the size of the font in points;
+
+        font_size_small (float): the size of the small font in points;
+
+        return_coords (bool): if True, additionally returns a 2-tuple of
+        the svg group containing coordinates as well as an array with
+        all atomic coordinates inside the group;
+
+        overlay_opacity (float): the opacity of overlays;
+
     Returns:
 
         An ```svgwrite.Drawing`` object. The object is saved if it was
         created inside this method.
     """
+    if font_family is None:
+        font_family = "Liberation Sans"
+    if font_size is None:
+        font_size = 10
+    if font_size_small is None:
+        font_size_small = 0.8 * font_size
+
+    font_props = dict(font_family=font_family, font_size="{:.1f}pt".format(font_size))
+    font_props_small = dict(font_family=font_family, font_size="{:.1f}pt".format(font_size_small))
 
     if invisible is None:
         visible = numpy.ones(cell.size(), dtype=bool)
@@ -285,6 +315,7 @@ def svgwrite_unit_cell(
 
     insert = numpy.array(insert, dtype=numpy.float64)
     size = numpy.array(size, dtype=numpy.float64)
+    osize = size - 2 * margin
 
     if isinstance(svg, str):
         import svgwrite
@@ -339,9 +370,10 @@ def svgwrite_unit_cell(
     projected = projection.transform_from(cell, cell.coordinates)
 
     # Collect elements
-    elements = tuple(__elements_name_lookup_table__[i.lower()] if i.lower() in __elements_name_lookup_table__ else (
-                                                                                                                   -1,) + __unknown_element__
-                     for i in cell.values)
+    elements = tuple(
+        __elements_name_lookup_table__[i.lower()] if i.lower() in __elements_name_lookup_table__ else (-1,) + __unknown_element__
+        for i in cell.values
+    )
     e_color = tuple(i[2] for i in elements)
     e_size = numpy.array(tuple(i[3] for i in elements)) * numericalunits.angstrom
     e_covsize = numpy.array(tuple(i[4] for i in elements)) * numericalunits.angstrom
@@ -364,11 +396,11 @@ def svgwrite_unit_cell(
         b_max = numpy.maximum(b_max, projected_edges.reshape(-1, projected_edges.shape[-1]).max(axis=0))
 
     center = 0.5 * (b_min + b_max)[:2]
-    scale = ((size - 2 * margin) / (b_max[:2] - b_min[:2])).min()
-    shift = 0.5 * (size - 2 * margin) - center * scale
+    scale = (osize / (b_max[:2] - b_min[:2])).min()
+    shift = 0.5 * osize - center * scale
 
     # Calculate base colors
-    colors_base = tuple(__fadeout_z__(e_color[i], projected[i, 2], b_max[2], b_min[2], fadeout_strength, bg) for i in
+    colors_base = tuple(__fadeout_z__(e_color[i], projected[i, 2], b_max[2], b_min[2], fadeout_strength, bg if bg is not None else (0xFF, 0xFF, 0xFF)) for i in
                         range(cell.size()))
     if hook_atomic_color:
         if invisible != "auto":
@@ -387,7 +419,7 @@ def svgwrite_unit_cell(
     svg.add(group)
 
     # BG
-    if not bg is None:
+    if bg is not None:
         group.add(svg.rect(
             insert=(0, 0),
             size=size,
@@ -454,12 +486,14 @@ def svgwrite_unit_cell(
                 g.add(circle)
 
                 if show_numbers:
-                    g.add(svg.text(str(i - 13 * N if invisible == "auto" else i),
-                                   insert=(0, radius / 4),
-                                   fill=__svg_color__(__dark__(colors_base[i])),
-                                   text_anchor="middle",
-                                   font_size=radius,
-                                   ))
+                    g.add(svg.text(
+                        str(i - 13 * N if invisible == "auto" else i),
+                        insert=(0, radius * 0.35),
+                        fill=__svg_color__(__dark__(colors_base[i])),
+                        text_anchor="middle",
+                        font_size=radius,
+                        font_family=font_family,
+                    ))
 
                 obj.append(g)
                 obj_z.append(projected[i, 2])
@@ -485,7 +519,7 @@ def svgwrite_unit_cell(
                         start = projected[i, :2] * scale + shift
                         end = projected[j, :2] * scale + shift
 
-                    start, end = __window__(start, end, (0, 0, size[0] - 2 * margin, size[1] - 2 * margin))
+                    start, end = __window__(start, end, (0, 0, osize[0], osize[1]))
 
                     if not start is None:
                         obj.append(svg.line(
@@ -509,12 +543,10 @@ def svgwrite_unit_cell(
                 unique.append(i)
 
         __legend_margin__ = 10
-        __box_size__ = 30
-        __text_baseline__ = 5
-        __text_size__ = 18
-        __i_size__ = 10
-        __i_x__ = 7
-        __i_y__ = 10
+        __box_size__ = (font_size + font_size_small) * 1.2
+        __text_baseline__ = font_size * 0.2
+        __i_x__ = font_size_small * 0.9
+        __i_y__ = font_size_small * 1.2
         x = size[0] - (__legend_margin__ + __box_size__) * len(unique)
         y = __legend_margin__
 
@@ -528,88 +560,190 @@ def svgwrite_unit_cell(
                 insert=(xx, yy),
                 size=(__box_size__, __box_size__),
                 fill=__svg_color__(e[2]),
-                stroke_width=2,
+                stroke_width=1,
                 stroke=__svg_color__(color_1),
                 rx=2,
                 ry=2,
             ))
 
-            group.add(svg.text(str(e[0] + 1),
-                               insert=(xx + __i_x__, yy + __i_y__),
-                               fill=__svg_color__(color_1),
-                               text_anchor="middle",
-                               font_size=__i_size__,
-                               ))
+            group.add(svg.text(
+                str(e[0] + 1),
+                insert=(xx + __i_x__, yy + __i_y__),
+                fill=__svg_color__(color_1),
+                text_anchor="middle",
+                **font_props_small
+            ))
 
-            group.add(svg.text(e[1],
-                               insert=(xx + __box_size__ / 2, yy + __box_size__ - __text_baseline__),
-                               fill=__svg_color__(color_1),
-                               text_anchor="middle",
-                               font_size=__text_size__,
-                               ))
+            group.add(svg.text(
+                e[1],
+                insert=(xx + __box_size__ / 2, yy + __box_size__ - __text_baseline__),
+                fill=__svg_color__(color_1),
+                text_anchor="middle",
+                **font_props
+            ))
 
-    if not title is None:
-        __text_margin__ = 10
-        __text_baseline__ = 35
-        __text_size__ = 18
-
-        group.add(svg.text(title,
-                           insert=(__text_margin__, __text_baseline__),
-                           fill="black",
-                           text_anchor="start",
-                           font_size=__text_size__,
-                           font_family="monospace",
-                           ))
-
+    # This variable holds the background rectangle in case it spans the entire left side
+    # To share it with the title
+    left_side_box = False
     if show_vectors:
-        __arrow_w__ = 1.
-        __arrow_head_w__ = 3 * __arrow_w__
-        __arrow_head_l__ = 2 * __arrow_head_w__
-        __arrow_l__ = 3 * __arrow_head_l__
+        __w__ = 4
+        __h__ = 3
+        __l__ = 20
+        __offset__ = font_size * 0.9
+        __offset2__ = font_size * 0.3
+        __tmargin__ = font_size * 0.6
+        __box_offset__ = 3
+        __collapse_threshold__ = 0.2
+
+        arrow_marker = svg.marker(
+            insert=(__w__, __h__),
+            size=(2*__w__, 2*__h__),
+            orient="auto",
+            markerUnits="strokeWidth",
+        )
+        arrow_marker.add(svg.path(d="M0,0 L0,{:d} L{:d},{:d} z".format(2*__h__, 2*__w__, __h__), fill="black"))
+        svg.defs.add(arrow_marker)
 
         a_group = svg.g()
-
-        xarrow = svg.path(fill="black")
-        xarrow.push(
-            'M', 0, -__arrow_w__ / 2,
-            'l', 0, __arrow_w__,
-            'l', __arrow_l__ - __arrow_head_l__, 0,
-            'l', 0, (__arrow_head_w__ - __arrow_w__) / 2,
-            'l', __arrow_head_l__, -__arrow_head_w__ / 2,
-            'l', -__arrow_head_l__, -__arrow_head_w__ / 2,
-            'l', 0, (__arrow_head_w__ - __arrow_w__) / 2,
-            'z'
-        )
         subgroup.add(a_group)
 
-        obj = []
-
-        obj_z = []
         pvecs = projection.transform_from_cartesian(cell.vectors)
-        pvecs_r = numpy.linalg.norm(pvecs, axis=-1)
-        pvecs_p = numpy.arctan2(pvecs[:, 1], pvecs[:, 0])
-        pvecs_t = numpy.arcsin(pvecs[:, 2] / pvecs_r)
 
-        pvecs_a = numpy.linalg.norm(pvecs[:, :2], axis=-1)
+        pvecs_n = pvecs / numpy.linalg.norm(pvecs, axis=-1)[:, numpy.newaxis]
+        pvecs_rxy = numpy.linalg.norm(pvecs_n[:, :2], axis=-1)
 
-        for vec in pvecs:
-            x, y, z = vec / numpy.linalg.norm(vec)
-            r = (x ** 2 + y ** 2) ** .5
-            if r>1e-6:
-                g = svg.g()
-                g.add(xarrow)
-                g.matrix(x, y, -y/r, x/r, 0, 0)
-                obj.append(g)
-                obj_z.append(vec[2])
+        pvecs_selection = pvecs_rxy > __collapse_threshold__
+
+        pvecs_n = pvecs_n[pvecs_selection, :]
+        pvecs_label = tuple(i for i, j in zip("xyz", pvecs_selection) if j)
+        pvecs_rxy = pvecs_rxy[pvecs_selection]
+        pvecs_nxy = pvecs_n[:, :2] / pvecs_rxy[:, numpy.newaxis]
+        # Label location candidates:
+        # To the left of the axis
+        pvecs_llc = pvecs_nxy.dot([[0, 1], [-1, 0]]) * __offset__  + pvecs_n[:, :2] * __l__ / 2
+        # To the right of the axis
+        pvecs_llc2 = pvecs_nxy.dot([[0, -1], [1, 0]]) * __offset__  + pvecs_n[:, :2] * __l__ / 2
+        # On top of the vector
+        pvecs_llc3 = pvecs_n[:, :2] * __l__ + pvecs_nxy * __offset__
+        pvecs_llc = numpy.concatenate((pvecs_llc[:, numpy.newaxis, :], pvecs_llc2[:, numpy.newaxis, :], pvecs_llc3[:, numpy.newaxis, :]), axis=1)
+
+        a = numpy.arctan2(pvecs_n[:, 1], pvecs_n[:, 0])
+        correct_order = numpy.argsort(a)
+        # Roll the order until it starts with zero
+        correct_order = numpy.roll(correct_order, -numpy.argmin(correct_order))
+
+
+        best = None
+        best_d = None
+
+        for llc in product(*pvecs_llc):
+            llc = numpy.array(llc)
+            a = numpy.arctan2(*llc[:, ::-1].T)
+            trial_order = numpy.argsort(a)
+            trial_order = numpy.roll(trial_order, -numpy.argmin(trial_order))
+            if numpy.all(trial_order == correct_order):
+                d = numpy.linalg.norm(llc[numpy.newaxis, :, :] - llc[:, numpy.newaxis, :], axis=-1)
+                wf = abs(d - __l__ * 1.4).sum()
+                if best is None or wf < best_d:
+                    best_d = wf
+                    best = llc
+        if best is not None:
+            pvecs_llc = best
+        else:
+            pvecs_llc = llc
+
+        obj = []
+        obj_z = []
+        boxes = []
+
+        for (x, y, z), (nx, ny), l, (tx, ty) in zip(pvecs_n, pvecs_nxy, pvecs_label, pvecs_llc):
+            line = svg.line((0, 0), (__l__, 0), stroke="black", marker_end=arrow_marker.get_funciri())
+            line.matrix(x, y, -ny, nx, 0, 0)
+
+            text = svg.text(
+                l,
+                insert=(tx, ty),
+                text_anchor="middle",
+                **font_props
+            )
+
+            if coordinates == 'right':
+                text.matrix(1, 0, 0, -1, 0, 2*ty - __offset2__)
+
+            obj.append(line)
+            obj_z.append(z)
+
+            obj.append(text)
+            obj_z.append(z)
+
+            boxes.extend((
+                (0, 0),
+                (x * (__l__ + __w__), y * (__l__ + __w__)),
+                (tx - __tmargin__, ty - __tmargin__),
+                (tx + __tmargin__, ty + __tmargin__)
+            ))
+
+        boxes = numpy.array(boxes)
+        bmin = boxes.min(axis=0) - __box_offset__
+        if vectors_offset is not None:
+            bmin -= vectors_offset
+        bmax = boxes.max(axis=0) + __box_offset__
+        bwh = bmax - bmin
+        if bwh[0] > osize[0] / 2:
+            bwh[0] = osize[0] + margin
+        if bwh[1] > osize[1] / 2:
+            bwh[1] = osize[1] + margin
+            left_side_box = True
+
+        rect = svg.rect(
+            insert=bmin - margin,
+            size=bwh + margin,
+            fill="white",
+            opacity=overlay_opacity,
+        )
+        if left_side_box:
+            left_side_box = rect
+        a_group.add(rect)
+        a_group.translate(*(-bmin))
 
         order = numpy.argsort(obj_z)
         for i in order[::-1]:
             a_group.add(obj[i])
 
+    if title is not None:
+        __text_margin__ = font_size * 0.25
+        __w__ = font_size * len(title)
+        __h__ = font_size
+
+        g = svg.g()
+        if not left_side_box:
+            g.add(svg.rect(
+                insert=(-margin, -margin),
+                size=(__w__ + margin, __h__ + margin),
+                fill="white",
+                opacity=overlay_opacity,
+            ))
+        else:
+            left_side_box["width"] = max(left_side_box["width"], __w__ + margin)
+
+        g.add(svg.text(
+            title,
+            insert=(__w__ * 0.5, __h__ - __text_margin__),
+            fill="black",
+            text_anchor="middle",
+            **font_props
+        ))
+        g.translate(margin, margin)
+        group.add(g)
+
     if save:
         svg.save()
 
-    return svg
+    if return_coords:
+        return svg, (subgroup, (projected[13*N : 14*N] if invisible=="auto" else projected)[:, :2] * scale + shift)
+
+    else:
+        return svg
 
 
 def __guess_energy_range__(cell, bands=10, window=0.05):

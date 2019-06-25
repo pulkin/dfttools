@@ -207,6 +207,7 @@ def svgwrite_unit_cell(
         font_size_small=None,
         return_coords=False,
         overlay_opacity=0.8,
+        perspective_correction=0,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -285,6 +286,10 @@ def svgwrite_unit_cell(
         all atomic coordinates inside the group;
 
         overlay_opacity (float): the opacity of overlays;
+
+        perspective_correction (float): the degree of perspective correction:
+        from 0 (no correction) to infinity (everything is projected into a
+        point);
 
     Returns:
 
@@ -404,6 +409,19 @@ def svgwrite_unit_cell(
     center = 0.5 * (b_min + b_max)[:2]
     scale = (osize / (b_max[:2] - b_min[:2])).min()
     shift = 0.5 * osize - center * scale
+    shift = numpy.append(shift, 0)
+
+    projected *= scale
+    projected += shift
+
+    if show_cell:
+        projected_edges *= scale
+        projected_edges += shift
+
+    b_max *= scale
+    b_min *= scale
+    b_max += shift
+    b_min += shift
 
     # Calculate base colors
     colors_base = tuple(__fadeout_z__(e_color[i], projected[i, 2], b_max[2], b_min[2], fadeout_strength, bg if bg is not None else (0xFF, 0xFF, 0xFF)) for i in
@@ -451,8 +469,8 @@ def svgwrite_unit_cell(
         # Draw unit cell edges
         for pair in projected_edges:
             obj.append(svg.line(
-                start=pair[0][:2] * scale + shift,
-                end=pair[1][:2] * scale + shift,
+                start=pair[0][:2],
+                end=pair[1][:2],
                 stroke="black",
                 opacity=0.1,
                 stroke_width=0.01 * max(*size),
@@ -469,7 +487,7 @@ def svgwrite_unit_cell(
                 radius = e_size[i] * scale * circle_size
 
                 g = svg.g()
-                g.translate(*tuple(projected[i, :2] * scale + shift))
+                g.translate(*tuple(projected[i, :2]))
                 if coordinates == 'right':
                     g.scale(1.0, -1.0)
 
@@ -518,12 +536,12 @@ def svgwrite_unit_cell(
                     unit = unit / ((unit ** 2).sum()) ** 0.5
 
                     if show_atoms:
-                        start = (projected[i, :2] + unit[:2] * e_size[i] * circle_size) * scale + shift
-                        end = (projected[j, :2] - unit[:2] * e_size[j] * circle_size) * scale + shift
+                        start = projected[i, :2] + unit[:2] * e_size[i] * circle_size * scale
+                        end = projected[j, :2] - unit[:2] * e_size[j] * circle_size * scale
 
                     else:
-                        start = projected[i, :2] * scale + shift
-                        end = projected[j, :2] * scale + shift
+                        start = projected[i, :2]
+                        end = projected[j, :2]
 
                     start, end = __window__(start, end, (0, 0, osize[0], osize[1]))
 
@@ -746,7 +764,7 @@ def svgwrite_unit_cell(
         svg.save()
 
     if return_coords:
-        return svg, (subgroup, (projected[13*N : 14*N] if invisible=="auto" else projected)[:, :2] * scale + shift)
+        return svg, (subgroup, (projected[13*N : 14*N] if invisible=="auto" else projected)[:, :2])
 
     else:
         return svg

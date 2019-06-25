@@ -412,16 +412,36 @@ def svgwrite_unit_cell(
     shift = numpy.append(shift, 0)
 
     projected *= scale
-    projected += shift
+    projected += shift[numpy.newaxis, :]
 
     if show_cell:
         projected_edges *= scale
-        projected_edges += shift
+        projected_edges += shift[numpy.newaxis, :]
 
     b_max *= scale
     b_min *= scale
+    center *= scale
     b_max += shift
     b_min += shift
+    center += shift[:2]
+
+    center = center
+
+    # Perspective correction
+    def correct_perspective(a):
+        z = a[..., 2].copy()
+        z -= b_min[2]
+        z /= (b_max[2] - b_min[2])
+        alpha = 1./ (z * perspective_correction + 1)
+        pshape = (1,) * (a.ndim - 1) + (2,)
+        a[..., :2] -= center.reshape(pshape)
+        a[..., :2] *= alpha[..., numpy.newaxis]
+        a[..., :2] += center.reshape(pshape)
+
+    correct_perspective(projected)
+
+    if show_cell:
+        correct_perspective(projected_edges)
 
     # Calculate base colors
     colors_base = tuple(__fadeout_z__(e_color[i], projected[i, 2], b_max[2], b_min[2], fadeout_strength, bg if bg is not None else (0xFF, 0xFF, 0xFF)) for i in

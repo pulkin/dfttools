@@ -320,7 +320,7 @@ def svgwrite_unit_cell(
     if isinstance(svg, str):
         import svgwrite
         save = True
-        svg = svgwrite.Drawing(svg, size=(size).tolist(), profile='tiny')
+        svg = svgwrite.Drawing(svg, size=(size).tolist(), profile='full')
     else:
         save = False
 

@@ -327,7 +327,13 @@ def svgwrite_unit_cell(
     # Camera vector
     if camera is None:
         # Determine the largest face
-        areas = list((numpy.cross(cell.vectors[(i + 1) % 3], cell.vectors[(i + 2) % 3]) ** 2).sum() for i in range(3))
+        cv = cell.vectors
+        if not show_cell:
+            c = cell.coordinates
+            cmin = c.min(axis=0)
+            cmax = c.max(axis=0)
+            cv = cv * (cmax-cmin)[:, numpy.newaxis]
+        areas = list((numpy.cross(cv[(i + 1) % 3], cv[(i + 2) % 3]) ** 2).sum() for i in range(3))
         camera = "xyz"[numpy.argmax(areas)]
 
     try:

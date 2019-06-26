@@ -208,6 +208,7 @@ def svgwrite_unit_cell(
         return_coords=False,
         overlay_opacity=0.8,
         perspective_correction=0,
+        circle_stroke=0.1,
 ):
     """
     Creates an svg drawing of a unit cell.
@@ -291,11 +292,20 @@ def svgwrite_unit_cell(
         from 0 (no correction) to infinity (everything is projected into a
         point);
 
+        circle_stroke (float): the size of the stroke of circles in units
+        of radius;
+
     Returns:
 
         An ```svgwrite.Drawing`` object. The object is saved if it was
         created inside this method.
     """
+
+    def collect_element_props(_values):
+        return tuple(
+                __elements_name_lookup_table__[i.lower()] if i.lower() in __elements_name_lookup_table__ else (-1,) + __unknown_element__
+               for i in _values)
+
     if font_family is None:
         font_family = "Liberation Sans"
     if font_size is None:
@@ -309,7 +319,7 @@ def svgwrite_unit_cell(
     if invisible is None:
         visible = numpy.ones(cell.size(), dtype=bool)
 
-    elif isinstance(invisible, str) and invisible == 'auto':
+    elif invisible == 'auto':
         N = cell.size()
         initial_cell = cell
         cell = cell.repeated(3, 3, 3)
@@ -350,6 +360,14 @@ def svgwrite_unit_cell(
     except KeyError:
         pass
     camera = numpy.array(camera, dtype=numpy.float64)
+
+    if len(camera) == 2:
+        theta, phi = camera * numpy.pi
+        camera = numpy.array((
+            numpy.sin(theta) * numpy.cos(phi),
+            numpy.sin(theta) * numpy.sin(phi),
+            numpy.cos(theta),
+        ))
     camera_z = camera / numpy.linalg.norm(camera)
 
     # Camera top vector
@@ -381,13 +399,10 @@ def svgwrite_unit_cell(
     projected = projection.transform_from(cell, cell.coordinates)
 
     # Collect elements
-    elements = tuple(
-        __elements_name_lookup_table__[i.lower()] if i.lower() in __elements_name_lookup_table__ else (-1,) + __unknown_element__
-        for i in cell.values
-    )
+    elements = collect_element_props(cell.values)
     e_color = tuple(i[2] for i in elements)
     e_size = numpy.array(tuple(i[3] for i in elements)) * numericalunits.angstrom
-    e_covsize = numpy.array(tuple(i[4] for i in elements)) * numericalunits.angstrom
+    e_covsize = numpy.array(tuple(i[4] for i in elements)) * numericalunits.angstrom * bond_ratio
 
     # Determine boundaries
     b_min = numpy.min((projected - e_size[..., numpy.newaxis] * circle_size)[visible, :], axis=0)
@@ -523,7 +538,7 @@ def svgwrite_unit_cell(
                     r=radius,
                     fill=__svg_color__(colors_base[i]),
                     stroke=__svg_color__(__dark__(colors_base[i])),
-                    stroke_width=0.1 * radius,
+                    stroke_width=circle_stroke * radius,
                 )
 
                 if not circle_opacity is None:
@@ -549,14 +564,14 @@ def svgwrite_unit_cell(
                 obj.append(g)
                 obj_z.append(projected[i, 2])
 
-    d = cell.distances()
+    d = cell.distances(threshold=2*e_covsize.max())
 
     if show_bonds:
 
         # Draw lines
         for i in range(d.shape[0]):
             for j in range(i, d.shape[1]):
-                if (visible[i] or visible[j]) and (d[i, j] < (e_covsize[i] + e_covsize[j]) * bond_ratio) and (
+                if (visible[i] or visible[j]) and (0 < d[i, j] < (e_covsize[i] + e_covsize[j])) and (
                         d[i, j] > (e_size[i] + e_size[j]) * circle_size):
 
                     unit = projected[j] - projected[i]

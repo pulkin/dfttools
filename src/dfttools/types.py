@@ -7,6 +7,7 @@ from functools import wraps
 
 import numpy
 from numpy import random
+from scipy.spatial import cKDTree
 
 from .blochl import tetrahedron, tetrahedron_plain
 from .util import cast_units
@@ -713,30 +714,38 @@ class UnitCell(Basis):
         return __angle__(vectors_1, vectors_2)
 
     @input_as_list
-    def distances(self, ids):
+    def distances(self, ids, threshold=None):
         """
         Computes distances between species and specified points.
-        
+
         Args:
-        
+
             ids (array): a list of specimen IDs to compute distances
             between. Several shapes are accepted:
-            
+
             * empty: returns a 2D matrix of all possible distances
             * nx2 array of ints: returns n distances between each pair
               of [n,0]-[n,1] species;
             * 1D array of ints of length n: returns n-1 distances
               between each pair of [n-1]-[n] species;
-        
+
+            threshold (float): if specified, returns a sparse distance
+            matrix with entries less that the threshold. Only for empty
+            `ids`;
+
         Returns:
-        
+
             A numpy array containing list of distances.
         """
 
         v = self.cartesian()
 
         if len(ids) == 0:
-            return ((v[numpy.newaxis, ...] - v[:, numpy.newaxis, :]) ** 2).sum(axis=-1) ** .5
+            if threshold is not None:
+                tree = cKDTree(v)
+                return tree.sparse_distance_matrix(tree, max_distance=threshold)
+            else:
+                return ((v[numpy.newaxis, ...] - v[:, numpy.newaxis, :]) ** 2).sum(axis=-1) ** .5
 
         ids = numpy.asanyarray(ids, dtype=numpy.int64)
 

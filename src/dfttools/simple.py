@@ -3,8 +3,8 @@ This submodule contains commonly used shortcuts to parse the data.
 """
 import inspect
 
-import parsers
-from parsers.generic import AbstractParser, ParseError
+from . import parsers
+from .parsers.generic import AbstractParser, ParseError
 
 
 def tag_method(*tags, **kwargs):
@@ -78,13 +78,14 @@ def get_all_parsers(*modules):
     return result
 
 
-def guess_parser(f):
+def guess_parser(f, debug=False):
     """
     Guesses parsers for a given data.
 
     Args:
 
-        f (file): a file to parse.
+        f (file): a file to parse;
+        debug (bool): prints debug output if True;
 
     Returns:
 
@@ -96,21 +97,37 @@ def guess_parser(f):
     f.seek(0)
     header = f.read(1024 * 1024)
     for parser_class in get_all_parsers():
+        if debug:
+            print("Attempting {}".format(parser_class))
         try:
             if parser_class.valid_header(header):
+                if debug:
+                    print("  accepted")
                 result.append(parser_class)
+            elif debug:
+                print("  rejected")
         except NotImplementedError:
-            pass
+            if debug:
+                print("  \"by header\" not implemented")
     f.seek(0)
 
     # Guess by name
     if "name" in dir(f) and isinstance(f.name, str):
         for parser_class in get_all_parsers():
+            if debug:
+                print("Attempting {}".format(parser_class))
             try:
                 if parser_class.valid_filename(f.name):
+                    if debug:
+                        print("  accepted")
                     result.append(parser_class)
+                elif debug:
+                    print("  rejected")
             except NotImplementedError:
-                pass
+                if debug:
+                    print("  \"by name\" not implemented")
+    elif debug:
+        print("Skipping file name (not available)")
 
     return result
 

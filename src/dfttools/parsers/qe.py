@@ -391,7 +391,7 @@ class Output(AbstractParser):
             self.parser.nextLine(2)
             sub_energies = []
 
-            while self.parser.closest((cre_float, "\n\n")) == 0:
+            while self.parser.closest((cre_float, cre_word)) == 0:
                 sub_energies.append(self.parser.nextFloat() * numericalunits.eV)
 
             energies.append(sub_energies)

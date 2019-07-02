@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 import argparse
 
-parser = argparse.ArgumentParser(description = "Plots a band structure from a supported file")
-parser.add_argument("-o", "--output", nargs = 1, help = "plotted band structure file name", metavar = "FILENAME")
-parser.add_argument("-d", "--density", nargs = '?', help = "plot density of states", metavar = "FILENAME", const = True)
-parser.add_argument("-f", "--fermi", nargs = 1, help = "Fermi level in eV", metavar = "VALUE")
-parser.add_argument("-e", "--range", nargs = 2, help = "Energy range in eV", metavar = "VALUE")
-parser.add_argument("-c", "--color", nargs = 1, help = "Color bands according to a scalar", metavar = "FILENAME")
-parser.add_argument("-m", "--cmap", nargs = 1, help = "Color map used for coloring bands", metavar = "VALUE")
-parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose output")
-parser.add_argument("file", help = "file with the band structure", metavar = "FILENAME")
+parser = argparse.ArgumentParser(description="Plots a band structure from a supported file")
+parser.add_argument("-o", "--output", nargs=1, help="plotted band structure file name", metavar="FILENAME")
+parser.add_argument("-d", "--density", nargs='?', help="plot density of states", metavar="FILENAME", const=True)
+parser.add_argument("-f", "--fermi", nargs=1, help="Fermi level in eV", metavar="VALUE")
+parser.add_argument("-0", "--fermi-origin", nargs='?', help="Set Fermi level to zero", const=True)
+parser.add_argument("-e", "--range", nargs=2, help="Energy range in eV", metavar="VALUE")
+parser.add_argument("-c", "--color", nargs=1, help="Color bands according to a scalar", metavar="FILENAME")
+parser.add_argument("-m", "--cmap", nargs=1, help="Color map used for coloring bands", metavar="VALUE")
+parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+parser.add_argument("file", help="file with the band structure", metavar="FILENAME")
 
 options = parser.parse_args()
 
@@ -72,8 +73,12 @@ for file_name, destination in ((options.file, "bands"), (options.density[0] if "
                     print("Could not parse file '{}'\n".format(file_name))
                     raise
                 
-                if not options.fermi is None:
+                if options.fermi is not None:
                     bands.fermi = options.fermi
+
+                if options.fermi_origin:
+                    bands.values -= bands.fermi
+                    bands.fermi = 0
                 
                 data[destination] = bands
                 

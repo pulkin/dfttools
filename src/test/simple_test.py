@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from dfttools.parsers import qe, openmx, elk, structure
+from dfttools.parsers import qe, openmx, elk, structure, tools
 from dfttools.parsers.generic import AbstractParser, ParseError
 from dfttools.simple import get_all_parsers, guess_parser, parse
 
@@ -37,6 +37,7 @@ class Test_methods(unittest.TestCase):
             ("structure.xsf.0.testcase", structure.XSF),
             ("structure.xsf.1.testcase", structure.XSF),
             ("structure.xsf.2.testcase", structure.XSF),
+            ("dfttools.0.testcase", tools.JSONStorage),
         )
 
     def test_get_all_parsers(self):

@@ -19,13 +19,18 @@ class Test_dft_plot_bands(unittest.TestCase):
 
     def test_output(self):
         fname = get_fname(self, "0.pdf")
-        assert subprocess.call((
+        this = os.path.dirname(os.path.realpath(__file__))
+        p = subprocess.Popen((
             sys.executable,
-            "scripts/dft-plot-bands",
-            "test/parsers/cases/qe.output.0.testcase",
+            os.path.join(this, "../scripts/dft-plot-bands"),
+            os.path.join(this, "parsers/cases/qe.output.0.testcase"),
             "-o",
             fname,
-        )) == 0
+        ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = p.communicate("")
+        print(output)
+        print(error)
+        assert p.returncode == 0
         assert os.path.exists(fname)
 
 
@@ -40,10 +45,15 @@ class Test_dft_svg_struct(unittest.TestCase):
 
     def test_output(self):
         fname = get_fname(self, "0.svg")
-        assert subprocess.call((
+        this = os.path.dirname(os.path.realpath(__file__))
+        p = subprocess.Popen((
             sys.executable,
-            "scripts/dft-svg-structure",
-            "test/parsers/cases/qe.output.0.testcase",
+            os.path.join(this, "../scripts/dft-svg-structure"),
+            os.path.join(this, "parsers/cases/qe.output.0.testcase"),
             fname,
-        )) == 0
+        ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = p.communicate("")
+        print(output)
+        print(error)
+        assert p.returncode == 0
         assert os.path.exists(fname)

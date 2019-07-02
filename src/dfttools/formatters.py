@@ -30,13 +30,13 @@ def xsf_structure(*cells):
     """
     Generates an `xcrysden <http://www.xcrysden.org>`_ file with the
     structure.
-    
+
     Args:
-    
+
         cells (list): unit cells with atomic coordinates;
-        
+
     Returns:
-    
+
         A string contating XSF-formatted data.
     """
     if len(cells) == 1:
@@ -54,19 +54,19 @@ def xsf_grid(grid, cell, npl=6):
     """
     Generates an `xcrysden <http://www.xcrysden.org>`_ file with the
     data on the grid.
-    
+
     Args:
-    
+
         grid (Grid): data on the grid;
-        
+
         cell (UnitCell): structural data;
-        
+
     Kwargs:
-    
+
         npl (int): numbers per line in the grid section;
-        
+
     Returns:
-    
+
         A string contating XSF-formatted data.
     """
     result = __xsf_structure__(cell)
@@ -93,25 +93,25 @@ def xsf_grid(grid, cell, npl=6):
 def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, pseudopotentials={}, indent=4):
     """
     Generates Quantum Espresso input file.
-    
+
     Kwargs:
-    
+
         cell (UnitCell): a unit cell with atomic coordinates;
-        
+
         relax_triggers (array,int): array with triggers for relaxation
         written asadditional columns in the input file;
-        
+
         parameters (dict): parameters for the input file;
-        
+
         inline_parameters (dict): a dict of inline parameters such as
         ``crystal_b``, etc;
-        
+
         pseudopotentials (dict): a dict of pseudopotential file names;
-        
+
         indent (int): size of indent;
-        
+
     Returns:
-    
+
         String contating Quantum Espresso input file contents.
     """
     indent = ' ' * indent
@@ -119,6 +119,11 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
     # Parameters to an upper case
     parameters = dict((k.upper(), parameters[k]) for k in parameters)
     inline_parameters = dict((k.upper(), inline_parameters[k]) for k in inline_parameters)
+
+    alias = ("control", "system", "electrons", "ions", "cell")
+    alias = dict((i.upper(), "&"+i.upper()) for i in alias)
+    parameters = dict((alias.get(k, k), v) for k, v in parameters.items())
+    inline_parameters = dict((alias.get(k, k), v) for k, v in inline_parameters.items())
 
     if not cell is None:
 
@@ -236,17 +241,17 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
 def siesta_input(cell, indent=4):
     """
     Generates Siesta minimal input file with atomic structure.
-    
+
     Args:
-    
+
         cell (UnitCell): input unit cell;
-        
+
     Kwargs:
-    
+
         indent (int): size of indent;
 
     Returns:
-    
+
         String with Siesta input file contents.
     """
     indent = ' ' * indent
@@ -299,26 +304,26 @@ AtomicCoordinatesFormat Fractional
 def openmx_input(cell, populations, l=None, r=None, tolerance=1e-10, indent=4):
     """
     Generates OpenMX minimal input file with atomic structure.
-    
+
     Args:
-    
+
         cell (UnitCell): input unit cell;
-        
+
         populations (dict): a dict with initial electronic populations data;
-        
+
     Kwargs:
-    
+
         l (UnitCell): left lead;
-        
+
         r (UnitCell): right lead;
-        
+
         tolerance (float): tolerance for checking whether left-center-right
         unit cells can be stacked;
-        
+
         indent (int): size of indent;
 
     Returns:
-    
+
         String with OpenMX input file formatted data.
     """
     indent = ' ' * indent
@@ -398,15 +403,15 @@ RightLeadAtoms.SpeciesAndCoordinates>
 def pyscf_cell(cell, **kwargs):
     """
     Constructs a unit cell object in pyscf.
-    
+
     Args:
-    
+
         cell (UnitCell): a unit cell object to convert from;
-        
+
     Kwargs are passed to pyscf.pbc.gto.M.
-    
+
     Returns:
-    
+
         A Pyscf Cell object.
     """
     from pyscf.pbc.gto import Cell
@@ -439,7 +444,7 @@ def json_structure(cell):
     Outputs the unit cell into JSON string.
     Args:
         cell (UnitCell): a unit cell to serialize;
-        
+
     Returns:
         A string with serialized unit cell.
     """

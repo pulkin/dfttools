@@ -86,10 +86,11 @@ class AbstractJSONParser(AbstractParser):
     
         data (str): text representation of JSON to parse.
     """
+    loads = staticmethod(json.loads)
 
     def __init__(self, data):
         if isinstance(data, (str, unicode)):
-            self.json = json.loads(data)
+            self.json = self.loads(data)
         elif isinstance(data, dict):
             self.json = data
         else:

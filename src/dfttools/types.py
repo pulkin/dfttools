@@ -494,7 +494,7 @@ class Basis(object):
 
         self.vectors = self.vectors[new, :]
 
-    def generate_path(self, points, n, anchor=True):
+    def generate_path(self, points, n, skip_segments=None):
         """
         Generates a path given key points and the total number of points
         on the path.
@@ -502,44 +502,54 @@ class Basis(object):
         Args:
 
             points (array): key points of the path expressed in this basis;
-
-            n (int): the total number of points on the path.
-
-        Kwargs:
-
-            anchor (bool): force the specified points to be present in
-            the final path. If True alters slightly the total point number;
+            n (int): the total number of points on the path;
+            skip_segments (list): a list of segments to skip;
 
         Returns:
 
             Path coordinates expressed in this basis.
         """
+
+        def interpolate(p1, p2, n, e):
+            x = numpy.linspace(0, 1, n + 2)[:, numpy.newaxis]
+            if not e:
+                x = x[:-1]
+            return p1[numpy.newaxis, :] * (1-x) + p2[numpy.newaxis] * x
+
+        if skip_segments is None:
+            skip_segments = tuple()
+        skip_segments = numpy.array(skip_segments, dtype=int)
+
         points = numpy.asanyarray(points)
-        points_c = self.transform_to_cartesian(points)
-        lengths = ((points_c[1:] - points_c[:-1]) ** 2).sum(axis=-1) ** .5
-        lengths_cs = numpy.cumsum(lengths)
+        lengths = numpy.linalg.norm(self.transform_from_cartesian(points[:-1] - points[1:]), axis=1)
 
-        if anchor:
+        mask_segment = numpy.ones(len(points), dtype=bool)
+        mask_segment[skip_segments] = False
+        mask_segment[-1] = False
+        n_reserved = (numpy.logical_or(mask_segment[1:], mask_segment[:-1]).sum())
+        n_reserved += mask_segment[0]
 
-            lengths_n = numpy.round(lengths * n / lengths_cs[-1]).astype(numpy.int)
-            path = []
+        if n_reserved == 0:
+            raise ValueError("Empty edges specified")
 
-            for i in range(lengths_n.size):
-                path_pos = numpy.linspace(0, 1, lengths_n[i], endpoint=False)[:, numpy.newaxis]
-                path.append(points[i, numpy.newaxis, :] * (1 - path_pos) + points[i + 1, numpy.newaxis, :] * path_pos)
+        if n < n_reserved:
+            raise ValueError("The number of points is less then the number of edges {:d} < {:d}".format(n, n_reserved))
 
-            path.append(points[-1, numpy.newaxis, :])
-            path = numpy.concatenate(path, axis=0)
+        mask_endpoint = numpy.logical_not(mask_segment[1:])
+        mask_segment = mask_segment[:-1]
 
-        else:
-
-            path_l = numpy.linspace(0, 1, n) * lengths_cs[-1]
-            path_id = numpy.searchsorted(lengths_cs, path_l)
-            path_pos = (lengths_cs[path_id] - path_l) / lengths[path_id]
-            path = points[path_id, :] * path_pos[:, numpy.newaxis] + points[path_id + 1, :] * (
-                        1 - path_pos[:, numpy.newaxis])
-
-        return numpy.asanyarray(path)
+        points_l = points[:-1][mask_segment]
+        points_r = points[1:][mask_segment]
+        lengths = lengths[mask_segment]
+        buckets = numpy.zeros(len(lengths))
+        endpoints = mask_endpoint[mask_segment]
+        for i in range(n - n_reserved):
+            dl = lengths / (buckets + 1)
+            buckets[numpy.argmax(dl)] += 1
+        result = []
+        for pt1, pt2, _n, e in zip(points_l, points_r, buckets, endpoints):
+            result.append(interpolate(pt1, pt2, _n, e))
+        return numpy.concatenate(result)
 
 
 def diamond_basis(a):
@@ -1850,7 +1860,7 @@ class Grid(Basis):
         """
         return UnitCell(self, points, self.interpolate_to_array(points, **kwargs))
 
-    def interpolate_to_path(self, points, n, anchor=True, **kwargs):
+    def interpolate_to_path(self, points, n, **kwargs):
         """
         Interpolates values to a path: performs path generation using
         ``Basis.generate_path`` and interpolates values on it.
@@ -1858,21 +1868,13 @@ class Grid(Basis):
         Args:
 
             points (array): key points of the path expressed in lattice coordinates;
-
             n (int): the total number of points on the path.
-
-        Kwargs:
-
-            anchor (bool): force the specified points to be present in
-            the final path. If True alters slightly the total point number;
-
             kwargs: keywords to the 'interpolate_to_cell' routine.
 
         Returns:
-
             A unit cell interpolated values.
         """
-        return self.interpolate_to_cell(self.generate_path(points, n, anchor=anchor), **kwargs)
+        return self.interpolate_to_cell(self.generate_path(points, n), **kwargs)
 
     def tetrahedron_density(self, points, resolved=False, weights=None):
         """

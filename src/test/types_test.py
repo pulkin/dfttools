@@ -191,8 +191,6 @@ class BasisTest(unittest.TestCase):
     def test_genpath(self):
         keys = ((0, 0, 0), (1, 0, 0), (1, 1, 0), (1, 1, 1))
         pth = self.c.generate_path(keys, 7)
-        pth2 = self.c.generate_path(keys, 7, anchor=False)
-        testing.assert_allclose(pth, pth2)
         testing.assert_allclose(pth, (
             (0, 0, 0),
             (.5, 0, 0),
@@ -205,11 +203,61 @@ class BasisTest(unittest.TestCase):
 
     def test_genpath2(self):
         keys = ((0, 0, 0), (1, 0, 0), (1, 1, 0), (1, 1, 1))
-        pth = self.c.generate_path(keys, 7, anchor=True)
+        pth = self.c.generate_path(keys, 7)
         for k in keys:
             a = numpy.array(k, dtype=float).tolist()
             b = pth.tolist()
             assert a in b
+
+    def test_genpath3(self):
+        keys = ((0, 0, 0), (1, 0, 0), (1, 1, 0), (1, 1, 1))
+        pth = self.c.generate_path(keys, 6, skip_segments=(1,))
+        testing.assert_allclose(pth, (
+            (0, 0, 0),
+            (.5, 0, 0),
+            (1, 0, 0),
+            (1, 1, 0),
+            (1, 1, .5),
+            (1, 1, 1)
+        ))
+
+        pth = self.c.generate_path(keys, 5, skip_segments=(0,))
+        testing.assert_allclose(pth, (
+            (1, 0, 0),
+            (1, .5, 0),
+            (1, 1, 0),
+            (1, 1, .5),
+            (1, 1, 1)
+        ))
+
+        pth = self.c.generate_path(keys, 5, skip_segments=(2,))
+        testing.assert_allclose(pth, (
+            (0, 0, 0),
+            (.5, 0, 0),
+            (1, 0, 0),
+            (1, .5, 0),
+            (1, 1, 0),
+        ))
+
+        pth = self.c.generate_path(keys, 3, skip_segments=(1, 0))
+        testing.assert_allclose(pth, (
+            (1, 1, 0),
+            (1, 1, .5),
+            (1, 1, 1)
+        ))
+
+        pth = self.c.generate_path(keys, 3, skip_segments=(2, 0))
+        testing.assert_allclose(pth, (
+            (1, 0, 0),
+            (1, .5, 0),
+            (1, 1, 0),
+        ))
+
+        with self.assertRaises(ValueError):
+            self.c.generate_path(keys, 3, skip_segments=(1,))
+
+        with self.assertRaises(ValueError):
+            self.c.generate_path(keys, 3, skip_segments=(0, 1, 2))
 
     def test_rotated(self):
         b1 = self.b.rotated((0, 0, -1), numpy.pi / 2)

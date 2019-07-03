@@ -186,6 +186,7 @@ def svgwrite_unit_cell(
         insert=(0, 0),
         size=(600, 600),
         circle_size=0.4,
+        bond_size=1,
         circle_opacity=None,
         margin=6,
         show_cell=False,
@@ -231,8 +232,9 @@ def svgwrite_unit_cell(
 
         size (array): size of the bounding box;
 
-        circle_size (float): size of the circles representing atoms,
-        arbitrary units;
+        circle_size (float): relative radius of atoms;
+
+        bond_size (float): relative radius of bonds;
 
         circle_opacity (float,array): opacity of circles;
 
@@ -571,7 +573,7 @@ def svgwrite_unit_cell(
         # Draw lines
         for i in range(d.shape[0]):
             for j in range(i, d.shape[1]):
-                if (visible[i] or visible[j]) and (0 < d[i, j] < (e_covsize[i] + e_covsize[j])) and (
+                if (visible[i] or visible[j]) and (0 < d[i, j] < bond_size * (e_covsize[i] + e_covsize[j])) and (
                         d[i, j] > (e_size[i] + e_size[j]) * circle_size):
 
                     unit = projected[j] - projected[i]

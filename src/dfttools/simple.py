@@ -114,18 +114,22 @@ def guess_parser(f, debug=False):
     # Guess by name
     if "name" in dir(f) and isinstance(f.name, str):
         for parser_class in get_all_parsers():
-            if debug:
-                print("Attempting {}".format(parser_class))
-            try:
-                if parser_class.valid_filename(f.name):
-                    if debug:
-                        print("  accepted")
-                    result.append(parser_class)
-                elif debug:
-                    print("  rejected")
-            except NotImplementedError:
+            if parser_class not in result:
                 if debug:
-                    print("  \"by name\" not implemented")
+                    print("Attempting {}".format(parser_class))
+                try:
+                    if parser_class.valid_filename(f.name):
+                        if debug:
+                            print("  accepted")
+                        result.append(parser_class)
+                    elif debug:
+                        print("  rejected")
+                except NotImplementedError:
+                    if debug:
+                        print("  \"by name\" not implemented")
+            else:
+                if debug:
+                    print("Parser {} already accepted; skipping".format(parser_class))
     elif debug:
         print("Skipping file name (not available)")
 

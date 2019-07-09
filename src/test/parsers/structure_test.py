@@ -3,7 +3,7 @@ import unittest
 
 import numericalunits
 import numpy
-from dfttools.parsers.structure import xsf, cube
+from dfttools.parsers.structure import xsf, cube, cif
 from ..utypes_test import assert_standard_crystal_cell, assert_standard_real_space_grid
 from numpy import testing
 
@@ -285,3 +285,69 @@ class Test_cube1(unittest.TestCase):
         assert c.values[0].lower() == 'o'
         assert c.values[1].lower() == 'h'
         assert c.values[2].lower() == 'h'
+
+
+class Test_cif0(unittest.TestCase):
+
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/structure.cif.0.testcase"),
+                  'r') as f:
+            self.parser = cif(f.read())
+
+    def test_unitCell(self):
+        cells = self.parser.unitCells()
+        assert len(cells) == 1
+        cell = cells[0]
+
+        assert_standard_crystal_cell(cell)
+
+        m = cell.vectors.dot(cell.vectors.T) / numericalunits.angstrom ** 2
+        a, b, c = 9.52700, 8.65870, 5.13060
+        g = numpy.cos(105.06700 * numpy.pi / 180)
+        testing.assert_allclose(m, (
+            (a*a, 0, a*c*g),
+            (0, b*b, 0),
+            (a*c*g, 0, c*c),
+        ), atol=1e-6)
+
+        testing.assert_allclose(cell.coordinates, (
+            (0.00000, 0.91060, 0.25000),
+            (0.00000, 0.30588, 0.25000),
+            (0.28614, 0.09547, 0.22733),
+            (0.11520, 0.08809, 0.14222),
+            (0.35914, 0.25645, 0.32137),
+            (0.35342, 0.02336, 0.98756),
+        ))
+
+        testing.assert_equal(cell.values, ("MgM1", "CaM2", "Si", "O1", "O2", "O3"))
+
+
+class Test_cif1(unittest.TestCase):
+
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/structure.cif.1.testcase"),
+                  'r') as f:
+            self.parser = cif(f.read())
+
+    def test_unitCell(self):
+        cells = self.parser.unitCells()
+        assert len(cells) == 1
+        cell = cells[0]
+
+        assert_standard_crystal_cell(cell)
+
+        m = cell.vectors.dot(cell.vectors.T) / numericalunits.angstrom ** 2
+        a, b, c = 12.564575, 12.24754, 30.445
+        g = numpy.cos(120.2902 * numpy.pi / 180)
+        testing.assert_allclose(m, (
+            (a*a, a*b*g, 0),
+            (a*b*g, b*b, 0),
+            (0, 0, c*c),
+        ), atol=1e-5)
+
+        testing.assert_allclose(cell.coordinates, (
+            (0.00385969,  0.00269148,  0.51418327),
+            (0.25165061,  0.12384214,  0.32650931),
+        ))
+
+        testing.assert_equal(cell.values, ("bi", "se"))

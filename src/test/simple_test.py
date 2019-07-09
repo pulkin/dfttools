@@ -38,6 +38,7 @@ class Test_methods(unittest.TestCase):
             ("structure.xsf.1.testcase", structure.XSF),
             ("structure.xsf.2.testcase", structure.XSF),
             ("dfttools.0.testcase", tools.JSONStorage),
+            ("structure.cif.0.testcase", structure.CIF)
         )
 
     def test_get_all_parsers(self):
@@ -49,8 +50,12 @@ class Test_methods(unittest.TestCase):
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsers/cases/" + f)
             with open(path, "r") as fl:
                 parsers = guess_parser(fl)
-                assert len(parsers) == 1
-                assert parsers[0] == p
+                try:
+                    assert len(parsers) == 1
+                    assert parsers[0] == p
+                except AssertionError:
+                    print(parsers)
+                    raise
 
     def test_parse_0(self):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsers/cases/qe.output.0.testcase")

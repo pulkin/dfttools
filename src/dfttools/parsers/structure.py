@@ -14,10 +14,6 @@ class XSF(AbstractParser):
     """
     Class for parsing `xcrysden <http://www.xcrysden.org>`_ files
     commonly used in solid state visualisations.
-    
-    Args:
-    
-        data (str): string with the contents of the xsf file.
     """
 
     @staticmethod
@@ -150,10 +146,6 @@ class XSF(AbstractParser):
 class GaussianCube(AbstractParser):
     """
     Class for parsing `Gaussian CUBE <http://www.gaussian.com/>`_ files.
-    
-    Args:
-    
-        data (str): string with the contents of the Gaussian CUBE file.
     """
 
     @staticmethod
@@ -260,10 +252,6 @@ class GaussianCube(AbstractParser):
 class XYZ(AbstractParser):
     """
     Class for parsing XYZ structure files.
-    
-    Args:
-    
-        data (str): string with the contents of the XYZ file.
     """
 
     vacuum_size = numericalunits.nm
@@ -281,8 +269,6 @@ class XYZ(AbstractParser):
         
             A unit cell with atomic positions data.
         """
-        result = []
-
         self.parser.reset()
 
         # Number of atoms
@@ -304,7 +290,95 @@ class XYZ(AbstractParser):
         return CrystalCell(RealSpaceBasis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
 
 
+class CIF(AbstractParser):
+    """
+    Class for parsing CIF files.
+    """
+    @staticmethod
+    def valid_filename(name):
+        return ".cif" in name
+
+    @staticmethod
+    def valid_header(header):
+        return "loop_" in header
+
+    def basis(self):
+        """
+        Retrieves the crystal basis.
+
+        Returns:
+            The crystal basis.
+        """
+        self.parser.reset()
+        tokens = ("_cell_length_a", "_cell_length_b", "_cell_length_c",
+                  "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma")
+        vecs = [None] * 6
+
+        while True:
+            c = self.parser.closest(tokens)
+            if c is None:
+                break
+            self.parser.skip(tokens[c])
+            x = self.parser.nextFloat()
+            if c < 3:
+                vecs[c] = x * numericalunits.angstrom
+            else:
+                vecs[c] = numpy.cos(x * numpy.pi / 180)
+        if any(i is None for i in vecs):
+            raise ValueError("Missing the following tokens: {}".format(", ".join(
+                t for i, t in zip(vecs, tokens) if i is None
+            )))
+        return RealSpaceBasis(vecs, kind="triclinic")
+
+    @unit_cell
+    def unitCells(self):
+        """
+        Retrieves the unit cell.
+
+        Returns:
+            The unit cell with atomic positions data.
+        """
+        basis = self.basis()
+        self.parser.reset()
+
+        tokens = "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z", "_atom_site_label", \
+                 "_atom_site_type_symbol"
+        cells = []
+        while self.parser.present("loop_"):
+            while True:
+                ptrs = [None] * 5
+                ptr_set = [False] * 5
+                self.parser.skip("loop_")
+                fields = []
+                self.parser.nextLine()
+                while self.parser.distance("_", default=-1) == 0:
+                    fields.append(self.parser.nextMatch(cre_nonspace))
+                    self.parser.nextLine()
+
+                for i, t in enumerate(tokens):
+                    if t in fields:
+                        ptrs[i] = fields.index(t)
+                        ptr_set[i] = True
+
+                if all(ptr_set[:3]) and any(ptr_set[3:]):
+                    break
+
+            data = []
+            while self.parser.closest(("_", cre_nonspace)) == 1:
+                data.append(self.parser.nextMatch(cre_nonspace, len(fields)))
+
+            data = numpy.array(data)
+            coords = data[:, ptrs[:3]].astype(float)
+            if ptr_set[4]:
+                vals = map(str.lower, data[:, ptrs[4]])
+            else:
+                vals = data[:, ptrs[3]].astype(str)
+            cells.append(CrystalCell(basis, coords, vals))
+        return cells
+
+
 # Lower case versions
 xsf = XSF
 cube = GaussianCube
 xyz = XYZ
+cif = CIF

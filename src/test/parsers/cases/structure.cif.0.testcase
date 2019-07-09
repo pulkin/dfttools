@@ -1,0 +1,55 @@
+#------------------------------------------------------------------------------
+#$Date: 2016-02-18 17:37:37 +0200 (Thu, 18 Feb 2016) $
+#$Revision: 176729 $
+#$URL: svn://www.crystallography.net/cod/cif/1/00/00/1000015.cif $
+#------------------------------------------------------------------------------
+#
+# This file is available in the Crystallography Open Database (COD),
+# http://www.crystallography.net/
+#
+# All data on this site have been placed in the public domain by the
+# contributors.
+#
+data_1000015
+loop_
+_publ_author_name
+'Thompson, R. M.'
+'Downs, R. T.'
+_publ_section_title
+;
+ The crystal structure of diopside at pressure to 10 GPa
+ Locality: DeKalb, New York
+ Sample: P = 9.50 GPa
+;
+_journal_name_full               'American Mineralogist'
+_journal_page_first              177
+_journal_page_last               186
+_journal_paper_doi               10.2138/am.2008.2684
+_journal_volume                  93
+_journal_year                    2008
+_chemical_formula_structural     CaMg(Si2O6)
+_chemical_formula_sum            'Ca Mg O6 Si2'
+_chemical_name_mineral           Diopside
+_symmetry_space_group_name_H-M   'C 1 2/c 1'
+_cell_angle_alpha                90.00000
+_cell_angle_beta                 105.06700
+_cell_angle_gamma                90.00000
+_cell_length_a                   9.52700
+_cell_length_b                   8.65870
+_cell_length_c                   5.13060
+_diffrn_ambient_pressure         9.5e+06
+_exptl_crystal_density_diffrn    3.520
+_cod_original_sg_symbol_H-M      C2/c
+_cod_database_code               1000015
+loop_
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+_atom_site_U_iso_or_equiv
+MgM1 0.00000 0.91060 0.25000 0.00494
+CaM2 0.00000 0.30588 0.25000 0.00887
+Si 0.28614 0.09547 0.22733 0.00633
+O1 0.11520 0.08809 0.14222 0.00823
+O2 0.35914 0.25645 0.32137 0.00861
+O3 0.35342 0.02336 0.98756 0.00823

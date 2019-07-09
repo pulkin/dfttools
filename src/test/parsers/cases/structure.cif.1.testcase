@@ -1,0 +1,16 @@
+data_
+_audit_creation_method    ''
+_cell_length_a           12.564575
+_cell_length_b           12.24754
+_cell_length_c           30.445
+_cell_angle_alpha     90.0
+_cell_angle_beta      90.0
+_cell_angle_gamma     120.2902
+loop_
+_atom_site_type_symbol
+_atom_site_label
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+   Bi   Bi1	  0.00385969  0.00269148  0.51418327
+   Se   Se9	  0.25165061  0.12384214  0.32650931

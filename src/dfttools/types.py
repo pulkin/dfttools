@@ -541,7 +541,7 @@ class Basis(object):
         points_l = points[:-1][mask_segment]
         points_r = points[1:][mask_segment]
         lengths = lengths[mask_segment]
-        buckets = numpy.zeros(len(lengths))
+        buckets = numpy.zeros(len(lengths), dtype=int)
         endpoints = mask_endpoint[mask_segment]
         for i in range(n - n_reserved):
             dl = lengths / (buckets + 1)

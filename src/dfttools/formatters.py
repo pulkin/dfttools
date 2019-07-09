@@ -120,12 +120,12 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
     parameters = dict((k.upper(), parameters[k]) for k in parameters)
     inline_parameters = dict((k.upper(), inline_parameters[k]) for k in inline_parameters)
 
-    alias = ("control", "system", "electrons", "ions", "cell")
+    alias = ("control", "system", "electrons", "ions", "cell", "inputpp")
     alias = dict((i.upper(), "&"+i.upper()) for i in alias)
     parameters = dict((alias.get(k, k), v) for k, v in parameters.items())
     inline_parameters = dict((alias.get(k, k), v) for k, v in inline_parameters.items())
 
-    if not cell is None:
+    if cell is not None:
 
         # Relax_triggers to array
         if isinstance(relax_triggers, int):

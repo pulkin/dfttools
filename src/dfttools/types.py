@@ -521,7 +521,7 @@ class Basis(object):
         skip_segments = numpy.array(skip_segments, dtype=int)
 
         points = numpy.asanyarray(points)
-        lengths = numpy.linalg.norm(self.transform_from_cartesian(points[:-1] - points[1:]), axis=1)
+        lengths = numpy.linalg.norm(self.transform_to_cartesian(points[:-1] - points[1:]), axis=1)
 
         mask_segment = numpy.ones(len(points), dtype=bool)
         mask_segment[skip_segments] = False

@@ -99,7 +99,7 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
         cell (UnitCell): a unit cell with atomic coordinates;
 
         relax_triggers (array,int): array with triggers for relaxation
-        written asadditional columns in the input file;
+        written as additional columns in the input file;
 
         parameters (dict): parameters for the input file;
 

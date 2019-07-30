@@ -259,6 +259,21 @@ class BasisTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.c.generate_path(keys, 3, skip_segments=(0, 1, 2))
 
+    def test_genpath4(self):
+        c = Basis(
+            (1, 1, .1, 0, 0, .5),
+            kind='triclinic',
+        )
+        pth = c.generate_path([(0, 0, 0), (1, 0, 0), (1, 0, 1)], 6)
+        testing.assert_allclose(pth, (
+            (0, 0, 0),
+            (.25, 0, 0),
+            (.5, 0, 0),
+            (.75, 0, 0),
+            (1, 0, 0),
+            (1, 0, 1),
+        ))
+
     def test_rotated(self):
         b1 = self.b.rotated((0, 0, -1), numpy.pi / 2)
         testing.assert_allclose(b1.vectors, (

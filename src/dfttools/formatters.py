@@ -80,7 +80,7 @@ def xsf_grid(grid, cell, npl=6):
     l = numpy.concatenate((l, l[:, 0:1, :]), axis=1)
     l = numpy.concatenate((l, l[:, :, 0:1]), axis=2)
     l = l.reshape(-1, order='F')
-    for i in range(l.shape[0] / npl):
+    for i in range(l.shape[0] // npl):
         result += " ".join(("{:e}",) * npl).format(*l[i * npl:(i + 1) * npl]) + "\n"
 
     rest = l.shape[0] - (i + 1) * npl
@@ -255,7 +255,7 @@ def siesta_input(cell, indent=4):
         String with Siesta input file contents.
     """
     indent = ' ' * indent
-    species = cell.species().keys()
+    species = tuple(cell.species().keys())
 
     section_csl = "\n".join(tuple(
         indent + "{:d} {:d} {}".format(i + 1, __elements_name_lookup_table__[s.lower()][0], s)
@@ -330,7 +330,7 @@ def openmx_input(cell, populations, l=None, r=None, tolerance=1e-10, indent=4):
     left = l
     right = r
 
-    if not left is None and not right is None:
+    if left is not None and right is not None:
         target = left.stack(cell, right, vector='x', tolerance=tolerance)
         frac = False
 
@@ -379,7 +379,7 @@ Atoms.SpeciesAndCoordinates.Unit {}
 Atoms.SpeciesAndCoordinates>
 """
 
-    if not left is None:
+    if left is not None:
         result += """
 LeftLeadAtoms.Number {anum:d}""".format(anum=left.size()) + """
 <LeftLeadAtoms.SpeciesAndCoordinates
@@ -387,7 +387,7 @@ LeftLeadAtoms.Number {anum:d}""".format(anum=left.size()) + """
 LeftLeadAtoms.SpeciesAndCoordinates>
 """
 
-    if not right is None:
+    if right is not None:
         offset += cell.size()
 
         result += """

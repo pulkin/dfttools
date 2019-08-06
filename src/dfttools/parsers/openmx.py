@@ -4,13 +4,14 @@ Parsing `OpenMX <http://openmx-square.org/>`_ files.
 import json
 import os
 import re
+from itertools import chain
 
 import numericalunits
 import numpy
 import os.path
 
-from .generic import cre_varName, cre_word, cre_nonspace, re_int, cre_int, cre_float, AbstractParser, \
-    AbstractJSONParser, ParseError
+from .generic import cre_var_name, cre_word, cre_non_space, re_int, cre_int, cre_float, AbstractTextParser, \
+    AbstractJSONParser, IdentifiableParser, ParseError
 from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, tag_method
 from ..utypes import CrystalCell, BandsPath
@@ -77,8 +78,8 @@ def joint_populations(files):
         if i > 0:
             if not numpy.all(p["bands"] == p2["bands"]):
                 raise ValueError("Different bands reported at k #0 and k #{:d}".format(i))
-            for k in p["basis"].keys() + p2["basis"].keys():
-                if not k in p["basis"] or not k in p2["basis"]:
+            for k in chain(p["basis"].keys(), p2["basis"].keys()):
+                if k not in p["basis"] or k not in p2["basis"]:
                     raise ValueError("The basis description '{}' is missing for k #0 or k #{:d}".format(k, i))
                 if not numpy.all(p["basis"][k] == p2["basis"][k]):
                     raise ValueError("The basis description '{}' is different for k #0 and k #{:d}".format(k, i))
@@ -94,7 +95,7 @@ def joint_populations(files):
     return result
 
 
-class JSON_DOS(AbstractJSONParser):
+class JSON_DOS(AbstractJSONParser, IdentifiableParser):
     """
     Parses JSON with OpenMX density of states.
     
@@ -180,7 +181,7 @@ class JSON_DOS(AbstractJSONParser):
         return self.__k__(1)
 
 
-class Input(AbstractParser):
+class Input(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing parameter values from OpenMX input files.
     
@@ -193,6 +194,10 @@ class Input(AbstractParser):
     def valid_header(header):
         l = header.lower()
         return "definition.of.atomic.species" in l
+
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
 
     def systemName(self):
         return self.getNonSpaced("system.name")
@@ -211,7 +216,7 @@ class Input(AbstractParser):
             parameter value
         """
         self.parser.reset()
-        return self.parser.matchAfter(parameter, cre_word)
+        return self.parser.match_after(parameter, cre_word)
 
     def getNonSpaced(self, parameter):
         """
@@ -227,7 +232,7 @@ class Input(AbstractParser):
             parameter value
         """
         self.parser.reset()
-        return self.parser.matchAfter(parameter, cre_nonspace)
+        return self.parser.match_after(parameter, cre_non_space)
 
     def getFloat(self, parameter):
         """
@@ -243,7 +248,7 @@ class Input(AbstractParser):
             parameter value
         """
         self.parser.reset()
-        return self.parser.floatAfter(parameter)
+        return self.parser.float_after(parameter)
 
     def getInt(self, parameter):
         """
@@ -259,7 +264,7 @@ class Input(AbstractParser):
             parameter value
         """
         self.parser.reset()
-        return self.parser.intAfter(parameter)
+        return self.parser.int_after(parameter)
 
     @unit_cell
     def unitCell(self, l=None, r=None, tolerance=1e-12):
@@ -304,10 +309,10 @@ class Input(AbstractParser):
         coordinates = numpy.zeros((n, 3))
         values = []
         for i in range(n):
-            self.parser.nextInt()
-            values.append(self.parser.nextMatch(cre_word))
-            coordinates[i, :] = self.parser.nextFloat(3)
-            self.parser.nextLine()
+            self.parser.next_int()
+            values.append(self.parser.next_match(cre_word))
+            coordinates[i, :] = self.parser.next_float(3)
+            self.parser.next_line()
         self.parser.pop()
 
         if units.lower() == "ang":
@@ -317,18 +322,18 @@ class Input(AbstractParser):
 
         if no_vectors:
 
-            nl = self.parser.intAfter("LeftLeadAtoms.Number")
-            nr = self.parser.intAfter("RightLeadAtoms.Number")
+            nl = self.parser.int_after("LeftLeadAtoms.Number")
+            nr = self.parser.int_after("RightLeadAtoms.Number")
 
             self.parser.skip("<LeftLeadAtoms.SpeciesAndCoordinates")
             coordinatesl = numpy.zeros((nl, 3))
             valuesl = []
 
             for i in range(nl):
-                self.parser.nextInt()
-                valuesl.append(self.parser.nextMatch(cre_word))
-                coordinatesl[i, :] = self.parser.nextFloat(3)
-                self.parser.nextLine()
+                self.parser.next_int()
+                valuesl.append(self.parser.next_match(cre_word))
+                coordinatesl[i, :] = self.parser.next_float(3)
+                self.parser.next_line()
 
             self.parser.reset()
 
@@ -337,10 +342,10 @@ class Input(AbstractParser):
             valuesr = []
 
             for i in range(nr):
-                self.parser.nextInt()
-                valuesr.append(self.parser.nextMatch(cre_word))
-                coordinatesr[i, :] = self.parser.nextFloat(3)
-                self.parser.nextLine()
+                self.parser.next_int()
+                valuesr.append(self.parser.next_match(cre_word))
+                coordinatesr[i, :] = self.parser.next_float(3)
+                self.parser.next_line()
 
             self.parser.reset()
 
@@ -372,8 +377,8 @@ class Input(AbstractParser):
 
         else:
 
-            units_cell = self.parser.matchAfter("Atoms.UnitVectors.Unit", cre_word).lower()
-            shape = self.parser.floatAfter("<Atoms.UnitVectors", n=(3, 3))
+            units_cell = self.parser.match_after("Atoms.UnitVectors.Unit", cre_word).lower()
+            shape = self.parser.float_after("<Atoms.UnitVectors", n=(3, 3))
 
             if units_cell == "ang":
                 shape *= numericalunits.angstrom
@@ -388,7 +393,7 @@ class Input(AbstractParser):
         )
 
 
-class Output(AbstractParser):
+class Output(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing parameter values from OpenMX output files.
     
@@ -401,6 +406,10 @@ class Output(AbstractParser):
     def valid_header(header):
         return "Welcome to OpenMX" in header and "T. Ozaki" in header
 
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
+
     def version(self):
         """
         Retrieves OpenMX version as reported in the output.
@@ -411,7 +420,7 @@ class Output(AbstractParser):
         """
         self.parser.reset()
         self.parser.skip(re.compile("Welcome to OpenMX\s+Ver\."))
-        return self.parser.nextMatch(cre_varName, n="\n")[0]
+        return self.parser.next_match(cre_var_name, n="\n")[0]
 
     def total(self):
         """
@@ -426,7 +435,7 @@ class Output(AbstractParser):
 
         while self.parser.present("Utot  ="):
             self.parser.skip("Utot  =")
-            result.append(self.parser.nextFloat() * numericalunits.Hartree)
+            result.append(self.parser.next_float() * numericalunits.Hartree)
 
         return numpy.array(result)
 
@@ -443,7 +452,7 @@ class Output(AbstractParser):
         self.parser.skip("maximum force")
 
         n = 0
-        while self.parser.closest(("XYZ(ang)", "***")) == 0:
+        while self.parser.match_closest(("XYZ(ang)", "***")) == 0:
             self.parser.skip("XYZ(ang)")
             n += 1
 
@@ -476,15 +485,15 @@ class Output(AbstractParser):
             try:
 
                 self.parser.skip("lattice vectors (bohr)")
-                shape = self.parser.nextFloat((3, 3)) * numericalunits.aBohr
+                shape = self.parser.next_float((3, 3)) * numericalunits.aBohr
 
                 self.parser.skip("MD or geometry opt. at MD")
                 self.parser.skip("maximum force")
                 coordinates = []
 
-                while self.parser.closest(("XYZ(ang)", "***")) == 0:
+                while self.parser.match_closest(("XYZ(ang)", "***")) == 0:
                     self.parser.skip("XYZ(ang)")
-                    coordinates.append(self.parser.nextFloat(3) * numericalunits.angstrom)
+                    coordinates.append(self.parser.next_float(3) * numericalunits.angstrom)
 
                 cells.append(CrystalCell(
                     shape,
@@ -536,17 +545,17 @@ class Output(AbstractParser):
 
             self.parser.skip(re.compile(r"\*{19} MD=\s*\d*\s*SCF=\s*\d*\s*\*{19}"))
             self.parser.goto(re.compile(r"\n\s*" + re_int))
-            self.parser.nextLine()
+            self.parser.next_line()
 
             c = []
 
-            while self.parser.closest(("Sum of MulP", cre_int)) == 1:
+            while self.parser.match_closest(("Sum of MulP", cre_int)) == 1:
                 self.parser.skip("sum")
-                c.append(self.parser.nextFloat())
-                self.parser.nextLine()
+                c.append(self.parser.next_float())
+                self.parser.next_line()
 
             self.parser.skip("total=")
-            total = self.parser.nextFloat()
+            total = self.parser.next_float()
 
             self.parser.skip("NormRD")
             c = numpy.array(c)
@@ -564,7 +573,7 @@ class Output(AbstractParser):
             The number of electrons.
         """
         self.parser.reset()
-        return self.parser.floatAfter("ideal(neutral)=")
+        return self.parser.float_after("ideal(neutral)=")
 
     def solvers(self):
         """
@@ -580,8 +589,8 @@ class Output(AbstractParser):
         while self.parser.present("NormRD"):
             self.parser.skip(re.compile(r"\*{19} MD=\s*\d*\s*SCF=\s*\d*\s*\*{19}"))
             self.parser.goto("_DFT>")
-            self.parser.startOfLine()
-            result.append(self.parser.nextMatch(cre_word))
+            self.parser.rtn()
+            result.append(self.parser.next_match(cre_word))
             self.parser.skip("NormRD")
 
         return result
@@ -599,12 +608,12 @@ class Output(AbstractParser):
 
         while self.parser.present("NormRD"):
             self.parser.skip("NormRD")
-            result.append(self.parser.nextFloat())
+            result.append(self.parser.next_float())
 
         return numpy.array(result)
 
 
-class Bands(AbstractParser):
+class Bands(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing band structure from openmx.Band file.
     
@@ -612,6 +621,10 @@ class Bands(AbstractParser):
     
         data (string): contents of OpenMX Band file
     """
+
+    @staticmethod
+    def valid_header(header):
+        raise NotImplementedError
 
     @staticmethod
     def valid_filename(name):
@@ -628,9 +641,9 @@ class Bands(AbstractParser):
         self.parser.reset()
         p = self.parser
 
-        p.nextInt()
-        p.nextInt()
-        return p.nextFloat() * numericalunits.Hartree
+        p.next_int()
+        p.next_int()
+        return p.next_float() * numericalunits.Hartree
 
     def captions(self):
         """
@@ -643,23 +656,23 @@ class Bands(AbstractParser):
         self.parser.reset()
         p = self.parser
 
-        p.nextLine(2)
+        p.next_line(2)
 
         # nk = number of K points
-        npath = p.nextInt()
+        npath = p.next_int()
         nk = 0
         result = {}
 
         for i in range(npath):
-            n = p.nextInt()
-            fr = p.nextFloat(3)
-            to = p.nextFloat(3)
-            fr_c = p.nextMatch(cre_nonspace)
-            to_c = p.nextMatch(cre_nonspace)
+            n = p.next_int()
+            fr = p.next_float(3)
+            to = p.next_float(3)
+            fr_c = p.next_match(cre_non_space)
+            to_c = p.next_match(cre_non_space)
             result[nk] = fr_c
             nk += n
             result[nk - 1] = to_c
-            p.nextLine()
+            p.next_line()
 
         return result
 
@@ -677,8 +690,8 @@ class Bands(AbstractParser):
         self.parser.reset()
         p = self.parser
 
-        p.nextLine()
-        shape = p.nextFloat((3, 3)) / numericalunits.aBohr
+        p.next_line()
+        shape = p.next_float((3, 3)) / numericalunits.aBohr
 
         data = openmx_bands_bands(self.data)
 
@@ -691,7 +704,7 @@ class Bands(AbstractParser):
         )
 
 
-class Transmission(AbstractParser):
+class Transmission(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing transmission from openmx.tran file.
     
@@ -724,12 +737,12 @@ class Transmission(AbstractParser):
 
         # Skip comments
         while self.parser.present("#"):
-            self.parser.nextLine()
+            self.parser.next_line()
 
         result = []
         while self.parser.present(cre_float):
-            result.append(self.parser.nextFloat("\n"))
-            self.parser.nextLine()
+            result.append(self.parser.next_float("\n"))
+            self.parser.next_line()
 
         return numpy.array(result)
 
@@ -742,7 +755,7 @@ class Transmission(AbstractParser):
             SpinP_switch as reported in the file.
         """
         self.parser.reset()
-        return self.parser.intAfter("spinp_switch")
+        return self.parser.int_after("spinp_switch")
 
     def total(self):
         """

@@ -4,7 +4,7 @@ This submodule contains commonly used shortcuts to parse the data.
 import inspect
 
 from . import parsers
-from .parsers.generic import AbstractParser, ParseError
+from .parsers.generic import IdentifiableParser, ParseError
 
 
 def tag_method(*tags, **kwargs):
@@ -71,8 +71,10 @@ def get_all_parsers(*modules):
         module = getattr(parsers, name)
         for obj_name in dir(module):
             obj = getattr(module, obj_name)
-            if inspect.isclass(obj) and issubclass(obj,
-                                                   AbstractParser) and not obj == AbstractParser and not obj in result:
+            if inspect.isclass(obj) and \
+                    issubclass(obj, IdentifiableParser) and \
+                    obj is not IdentifiableParser and \
+                    obj not in result:
                 result.append(obj)
 
     return result

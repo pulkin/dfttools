@@ -7,14 +7,15 @@ import re
 import numericalunits
 import numpy
 
-from .generic import parse, cre_varName, cre_word, cre_float, cre_quotedText, cre_int, ParseError, \
-    AbstractParser
+from .generic import parse, cre_var_name, cre_word, cre_float, cre_quotedText, cre_int, ParseError, \
+    AbstractTextParser, IdentifiableParser
 from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
 from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
+from ..types import element_type
 
 
-class Bands(AbstractParser):
+class Bands(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing output files created by bands.x binary of Quantum
     Espresso package.
@@ -28,6 +29,10 @@ class Bands(AbstractParser):
     def valid_header(header):
         return "&plot" in header and "nbnd" in header and "nks" in header
 
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
+
     def nk(self):
         """
         Retrieves number of k points from the output file header.
@@ -39,7 +44,7 @@ class Bands(AbstractParser):
 
         self.parser.reset()
         self.parser.skip("nks=")
-        return self.parser.nextInt()
+        return self.parser.next_int()
 
     def ne(self):
         """
@@ -52,7 +57,7 @@ class Bands(AbstractParser):
 
         self.parser.reset()
         self.parser.skip("nbnd=")
-        return self.parser.nextInt()
+        return self.parser.next_int()
 
     @tag_method("basis-dependent")
     def reciprocal_data(self, basis):
@@ -76,9 +81,9 @@ class Bands(AbstractParser):
         values = numpy.zeros((nk, ne))
 
         for i in range(nk):
-            self.parser.nextLine()
-            coordinates[i, :] = self.parser.nextFloat(3)
-            values[i, :] = self.parser.nextFloat(ne)
+            self.parser.next_line()
+            coordinates[i, :] = self.parser.next_float(3)
+            values[i, :] = self.parser.next_float(ne)
 
         return BandsPath(basis, coordinates, values)
 
@@ -101,7 +106,7 @@ class Bands(AbstractParser):
         return result
 
 
-class Output(AbstractParser):
+class Output(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing output files created by pw.x binary of Quantum
     Espresso package.
@@ -114,6 +119,10 @@ class Output(AbstractParser):
     @staticmethod
     def valid_header(header):
         return "Program PWSCF" in header
+
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
 
     def success(self):
         """
@@ -154,7 +163,7 @@ class Output(AbstractParser):
 
         while self.parser.present("estimated scf accuracy"):
             self.parser.skip("estimated scf accuracy")
-            result.append(self.parser.nextFloat())
+            result.append(self.parser.next_float())
 
         return numpy.array(result) * numericalunits.Ry
 
@@ -193,7 +202,7 @@ class Output(AbstractParser):
 
         while True:
 
-            parseMode = self.parser.closest(("End of self-consistent calculation", "End of band structure calculation"))
+            parseMode = self.parser.match_closest(("End of self-consistent calculation", "End of band structure calculation"))
 
             if parseMode is None:
                 break
@@ -202,16 +211,16 @@ class Output(AbstractParser):
             elif parseMode == 1:
                 self.parser.skip("End of band structure calculation")
 
-            x = self.parser.closest(("the Fermi energy is", "highest occupied level",
+            x = self.parser.match_closest(("the Fermi energy is", "highest occupied level",
                                      "End of self-consistent calculation", "End of band structure calculation"))
 
             if x == 0:
                 self.parser.skip("the Fermi energy is")
-                result.append(self.parser.nextFloat() * numericalunits.eV)
+                result.append(self.parser.next_float() * numericalunits.eV)
 
             elif x == 1:
                 self.parser.skip("highest occupied level")
-                result.append(self.parser.nextFloat() * numericalunits.eV)
+                result.append(self.parser.next_float() * numericalunits.eV)
 
             elif x == 2 or x == 3:
                 result.append(None)
@@ -235,7 +244,7 @@ class Output(AbstractParser):
 
         while self.parser.present("Total force ="):
             self.parser.skip("Total force =")
-            result.append(self.parser.nextFloat())
+            result.append(self.parser.next_float())
 
         return numpy.array(result) * numericalunits.Ry / numericalunits.aBohr
 
@@ -253,7 +262,7 @@ class Output(AbstractParser):
 
         while self.parser.present("!    total energy"):
             self.parser.skip("!    total energy")
-            result.append(self.parser.nextFloat())
+            result.append(self.parser.next_float())
 
         return numpy.array(result) * numericalunits.Ry
 
@@ -280,7 +289,7 @@ class Output(AbstractParser):
 
         while self.parser.present("total cpu time spent up to now is"):
             self.parser.skip("total cpu time spent up to now is")
-            result.append(self.parser.nextFloat())
+            result.append(self.parser.next_float())
 
         return numpy.array(result)
 
@@ -294,11 +303,11 @@ class Output(AbstractParser):
         """
         self.parser.reset()
         self.parser.skip("lattice parameter (alat)")
-        alat = self.parser.nextFloat()
+        alat = self.parser.next_float()
 
         # Determine alat in more precise way, if possible
         self.parser.skip("celldm(1)=")
-        alat_precise = self.parser.nextFloat()
+        alat_precise = self.parser.next_float()
         if alat_precise != 0:
             return alat_precise * numericalunits.aBohr
         else:
@@ -321,21 +330,21 @@ class Output(AbstractParser):
 
         # Parse initial unit cell
         self.parser.skip("number of atoms/cell")
-        n = self.parser.nextInt()
+        n = self.parser.next_int()
 
         self.parser.skip("crystal axes: (cart. coord. in units of alat)")
-        shape = self.parser.nextFloat((3, 4))[:, 1:] * alat
+        shape = self.parser.next_float((3, 4))[:, 1:] * alat
 
         self.parser.skip("Cartesian axes")
         coordinates = numpy.zeros((n, 3))
-        captions = numpy.zeros(n, dtype='S2')
-        self.parser.nextLine(3)
+        captions = numpy.zeros(n, dtype=element_type)
+        self.parser.next_line(3)
 
         for i in range(n):
-            self.parser.nextInt()
-            captions[i] = self.parser.nextMatch(cre_word)
+            self.parser.next_int()
+            captions[i] = self.parser.next_match(cre_word)
             self.parser.skip("=")
-            coordinates[i, :] = self.parser.nextFloat(3)
+            coordinates[i, :] = self.parser.next_float(3)
 
         coordinates *= alat
         result.append(CrystalCell(shape, coordinates, captions, c_basis="cartesian"))
@@ -344,30 +353,30 @@ class Output(AbstractParser):
         while self.parser.present("ATOMIC_POSITIONS"):
 
             coordinates = numpy.zeros((n, 3))
-            captions = numpy.zeros(n, dtype='S2')
+            captions = numpy.zeros(n, dtype=element_type)
 
             # Check if vcr steps are present
             if self.parser.present("CELL_PARAMETERS") and (
                     self.parser.distance("CELL_PARAMETERS") < self.parser.distance("ATOMIC_POSITIONS")):
 
                 self.parser.skip("CELL_PARAMETERS")
-                mode = self.parser.closest(("(alat=", "(angstrom)"))
+                mode = self.parser.match_closest(("(alat=", "(angstrom)"))
                 if mode == 0:
-                    alat = self.parser.nextFloat() * numericalunits.aBohr
-                    shape = self.parser.nextFloat((3, 3)) * alat
+                    alat = self.parser.next_float() * numericalunits.aBohr
+                    shape = self.parser.next_float((3, 3)) * alat
                 elif mode == 1:
-                    shape = self.parser.nextFloat((3, 3)) * numericalunits.angstrom
+                    shape = self.parser.next_float((3, 3)) * numericalunits.angstrom
                 else:
                     raise RuntimeError("Unknown format")
 
             # Parse atomic data
             self.parser.skip("ATOMIC_POSITIONS")
-            units = self.parser.nextMatch(cre_word)
+            units = self.parser.next_match(cre_word)
 
             for i in range(n):
-                captions[i] = self.parser.nextMatch(cre_word)
-                coordinates[i, :] = self.parser.nextFloat(3)
-                self.parser.nextLine()
+                captions[i] = self.parser.next_match(cre_word)
+                coordinates[i, :] = self.parser.next_float(3)
+                self.parser.next_line()
 
             if units == "crystal":
                 result.append(CrystalCell(shape, coordinates, captions))
@@ -388,11 +397,11 @@ class Output(AbstractParser):
         for i in range(n_kp):
 
             self.parser.skip("k =")
-            self.parser.nextLine(2)
+            self.parser.next_line(2)
             sub_energies = []
 
-            while self.parser.closest((cre_float, cre_word)) == 0:
-                sub_energies.append(self.parser.nextFloat() * numericalunits.eV)
+            while self.parser.match_closest((cre_float, cre_word)) == 0:
+                sub_energies.append(self.parser.next_float() * numericalunits.eV)
 
             energies.append(sub_energies)
 
@@ -440,22 +449,22 @@ class Output(AbstractParser):
 
         self.parser.reset()
         self.parser.skip("reciprocal axes: (cart. coord. in units 2 pi/alat)")
-        basis = self.parser.nextFloat((3, 4))[:, 1:] * 2 * math.pi / alat
+        basis = self.parser.next_float((3, 4))[:, 1:] * 2 * math.pi / alat
 
         self.parser.skip("number of k points=")
-        n_kp = self.parser.nextInt()
+        n_kp = self.parser.next_int()
 
         if self.parser.present("cryst. coord."):
 
             parseMode_kp = 0
             self.parser.skip("cryst. coord.")
-            kpoints = self.parser.nextFloat((n_kp, 5))[:, 1:4]
+            kpoints = self.parser.next_float((n_kp, 5))[:, 1:4]
 
         elif self.parser.present("cart. coord. in units 2pi/alat"):
 
             parseMode_kp = 1
             self.parser.skip("cart. coord. in units 2pi/alat")
-            kpoints = self.parser.nextFloat((n_kp, 5))[:, 1:4]
+            kpoints = self.parser.next_float((n_kp, 5))[:, 1:4]
 
         else:
             raise Exception("No kpoint data found in the file.")
@@ -466,7 +475,7 @@ class Output(AbstractParser):
 
         while True:
 
-            parseMode = self.parser.closest(("End of self-consistent calculation", "End of band structure calculation"))
+            parseMode = self.parser.match_closest(("End of self-consistent calculation", "End of band structure calculation"))
 
             if parseMode is None:
                 break
@@ -521,7 +530,7 @@ class Output(AbstractParser):
         return self.bands(skipVCRelaxException=True)
 
 
-class Proj(AbstractParser):
+class Proj(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing output files created by projwfc.x binary of
     Quantum Espresso package.
@@ -534,6 +543,10 @@ class Proj(AbstractParser):
     @staticmethod
     def valid_header(header):
         return "Program PROJWFC" in header
+
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
 
     def basis(self):
         """
@@ -569,18 +582,18 @@ class Proj(AbstractParser):
 
             result = []
 
-            while self.parser.closest(("state #", " k = ")) == 0:
+            while self.parser.match_closest(("state #", " k = ")) == 0:
                 self.parser.skip("state #")
                 state += 1
                 self.parser.skip(":")
 
                 result.append((
                     state,
-                    self.parser.nextInt(),
-                    self.parser.nextMatch(cre_word),
-                    self.parser.nextInt(),
-                    self.parser.nextFloat(),
-                    self.parser.nextFloat()
+                    self.parser.next_int(),
+                    self.parser.next_match(cre_word),
+                    self.parser.next_int(),
+                    self.parser.next_float(),
+                    self.parser.next_float()
                 ))
 
             states = numpy.array(result, dtype=dataType)
@@ -601,19 +614,19 @@ class Proj(AbstractParser):
 
             result = []
 
-            while self.parser.closest(("state #", " k = ")) == 0:
+            while self.parser.match_closest(("state #", " k = ")) == 0:
                 self.parser.skip("state #")
                 state += 1
                 self.parser.skip(":")
 
                 result.append((
                     state,
-                    self.parser.nextInt(),
-                    self.parser.nextMatch(cre_word),
-                    self.parser.nextInt(),
-                    self.parser.nextFloat(),
-                    self.parser.nextFloat(),
-                    self.parser.nextFloat()
+                    self.parser.next_int(),
+                    self.parser.next_match(cre_word),
+                    self.parser.next_int(),
+                    self.parser.next_float(),
+                    self.parser.next_float(),
+                    self.parser.next_float()
                 ))
 
             states = numpy.array(result, dtype=dataType)
@@ -654,14 +667,14 @@ class Proj(AbstractParser):
             for i in range(lower):
                 self.parser.skip("==== e(")
 
-            while self.parser.closest(("==== e(", "k =")) == 0:
+            while self.parser.match_closest(("==== e(", "k =")) == 0:
 
                 self.parser.skip("==== e(")
-                self.parser.nextLine()
-                rawData = self.parser.nextFloat("|psi|^2")
+                self.parser.next_line()
+                rawData = self.parser.next_float("|psi|^2")
 
                 projections_ke = numpy.zeros(basisSize)
-                for i in range(rawData.shape[0] / 2):
+                for i in range(rawData.shape[0] // 2):
                     projections_ke[int(rawData[2 * i + 1]) - 1] = rawData[2 * i]
                 projections_k.append(projections_ke)
 
@@ -673,7 +686,7 @@ class Proj(AbstractParser):
         return numpy.array(projections)
 
 
-class Cond(AbstractParser):
+class Cond(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing output files created by pwcond.x binary of Quantum
     Espresso package.
@@ -686,6 +699,10 @@ class Cond(AbstractParser):
     @staticmethod
     def valid_header(header):
         return "Program PWCOND" in header
+
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
 
     def transmission(self, kind="resolved"):
         """
@@ -776,26 +793,26 @@ class Cond(AbstractParser):
 
                 self.parser.skip("---  E-Ef")
 
-                previous['energy'] = self.parser.nextFloat()
-                previous['kx'] = self.parser.nextFloat()
-                previous['ky'] = self.parser.nextFloat()
+                previous['energy'] = self.parser.next_float()
+                previous['kx'] = self.parser.next_float()
+                previous['ky'] = self.parser.next_float()
 
                 channels = {"left": {"left": None, "right": None},
                             "right": {"left": None, "right": None}}
 
                 for lead in channels.keys():
 
-                    if self.parser.closest(("Nchannels of the %s tip =" % lead, "---  E-Ef")) == 0:
+                    if self.parser.match_closest(("Nchannels of the %s tip =" % lead, "---  E-Ef")) == 0:
 
                         self.parser.save()
                         self.parser.skip("Nchannels of the %s tip =" % lead)
-                        numberOfChannels = self.parser.nextInt()
+                        numberOfChannels = self.parser.next_int()
 
                         for direction in channels[lead].keys():
                             self.parser.save()
                             self.parser.skip("%s moving states:" % direction)
-                            self.parser.nextLine(2)
-                            states = self.parser.nextFloat((numberOfChannels, 3))
+                            self.parser.next_line(2)
+                            states = self.parser.next_float((numberOfChannels, 3))
                             channels[lead][direction] = states[:, 0] + 1.j * states[:, 1]
                             self.parser.pop()
 
@@ -832,42 +849,42 @@ class Cond(AbstractParser):
 
                     self.parser.skip("to transmit")
 
-                    entry = self.parser.closest(("-->", "Total T_j, R_j =", "E-Ef(ev), T ="))
+                    entry = self.parser.match_closest(("-->", "Total T_j, R_j =", "E-Ef(ev), T ="))
                     while (entry == 0) or (entry == 1):
 
                         if entry == 0:
 
                             self.parser.goto("-->")
-                            self.parser.startOfLine()
+                            self.parser.rtn()
 
-                            initial = self.parser.nextInt() - 1
+                            initial = self.parser.next_int() - 1
                             previous["incoming"] = channels["left"]["right"][initial]
 
-                            final = self.parser.nextInt() - 1
+                            final = self.parser.next_int() - 1
 
                             if final < len(channels["right"]["right"]) and kind == "resolved":
-                                t = self.parser.nextFloat()
+                                t = self.parser.next_float()
 
                                 previous["outgoing"] = channels["right"]["right"][final]
                                 previous["transmission"] = t
                                 result.append(previous)
                                 previous = previous.copy()
 
-                            self.parser.nextLine()
+                            self.parser.next_line()
 
                         elif entry == 1:
 
                             self.parser.skip("Total T_j, R_j =")
 
-                            t = self.parser.nextFloat()
-                            self.parser.nextLine()
+                            t = self.parser.next_float()
+                            self.parser.next_line()
 
                             if kind == "total":
                                 previous["transmission"] = t
                                 result.append(previous)
                                 previous = previous.copy()
 
-                        entry = self.parser.closest(("-->", "Total T_j, R_j =", "E-Ef(ev), T ="))
+                        entry = self.parser.match_closest(("-->", "Total T_j, R_j =", "E-Ef(ev), T ="))
 
                     # If no outgoing states found and total transmission is
                     # required adds incoming states with zero transmission
@@ -888,7 +905,7 @@ class Cond(AbstractParser):
         return numpy.concatenate(result)
 
 
-class Input(AbstractParser):
+class Input(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing input file for pw.x binary of a Quantum Espresso
     package.
@@ -912,6 +929,10 @@ class Input(AbstractParser):
         l = header.lower()
         return ("&control" in l or "&system" in l or "&electrons" in l or "&ions" in l) and not "program pwscf" in l
 
+    @staticmethod
+    def valid_filename(name):
+        raise NotImplementedError
+
     def namelists(self):
         """
         Retrieves all namelists.
@@ -927,19 +948,19 @@ class Input(AbstractParser):
 
             self.parser.skip("&")
 
-            nl = self.parser.nextMatch(cre_varName).lower()
+            nl = self.parser.next_match(cre_var_name).lower()
             result[nl] = {}
 
             while True:
 
-                nxt = self.parser.closest(("/", cre_varName))
+                nxt = self.parser.match_closest(("/", cre_var_name))
 
                 if nxt == 0 or nxt == -1:
                     break
 
-                name = self.parser.nextMatch(cre_varName).lower()
+                name = self.parser.next_match(cre_var_name).lower()
                 self.parser.skip("=")
-                dataType = self.parser.closest(("false", "true", cre_float, cre_quotedText))
+                dataType = self.parser.match_closest(("false", "true", cre_float, cre_quotedText))
                 if dataType == 0:
                     result[nl][name] = False
                     self.parser.skip("false")
@@ -947,9 +968,9 @@ class Input(AbstractParser):
                     result[nl][name] = True
                     self.parser.skip("true")
                 elif dataType == 2:
-                    result[nl][name] = self.parser.nextFloat()
+                    result[nl][name] = self.parser.next_float()
                 elif dataType == 3:
-                    result[nl][name] = self.parser.nextMatch(cre_quotedText)[1:-1]
+                    result[nl][name] = self.parser.next_match(cre_quotedText)[1:-1]
                 else:
                     raise Exception("Could not retrieve value for {}.{}".format(nl, name))
 
@@ -987,8 +1008,8 @@ class Input(AbstractParser):
 
             self.parser.reset()
             self.parser.skip("cell_parameters")
-            units = self.parser.nextMatch(cre_word)
-            vectors = self.parser.nextFloat(n=(3, 3)) * units_dict[units]
+            units = self.parser.next_match(cre_word)
+            vectors = self.parser.next_float(n=(3, 3)) * units_dict[units]
             basis = RealSpaceBasis(vectors)
 
         elif ibrav == 2:
@@ -1003,24 +1024,24 @@ class Input(AbstractParser):
 
         self.parser.reset()
         self.parser.skip("atomic_positions")
-        units = self.parser.nextMatch(cre_word, n="\n")
+        units = self.parser.next_match(cre_word, n="\n")
         if len(units) == 0:
             units = "alat"
         else:
             units = units[0]
         coordinates = numpy.zeros((int(nl["system"]["nat"]), 3))
         statics = numpy.ones(coordinates.shape, dtype=numpy.float)
-        values = numpy.zeros(coordinates.shape[0], "S2")
+        values = numpy.zeros(coordinates.shape[0], dtype=element_type)
 
         for i in range(coordinates.shape[0]):
 
-            values[i] = self.parser.nextMatch(cre_word)
-            coordinates[i, :] = self.parser.nextFloat(3)
+            values[i] = self.parser.next_match(cre_word)
+            coordinates[i, :] = self.parser.next_float(3)
 
-            if self.parser.closest(("\n", cre_int)) == 1:
-                statics[i, :] = self.parser.nextFloat(3)
+            if self.parser.match_closest(("\n", cre_int)) == 1:
+                statics[i, :] = self.parser.next_float(3)
 
-            self.parser.nextLine()
+            self.parser.next_line()
 
         if units == "alat":
             result = CrystalCell(basis, coordinates * units_dict["alat"], values, c_basis="cartesian")

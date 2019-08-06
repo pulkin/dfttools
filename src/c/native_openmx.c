@@ -5,6 +5,7 @@
 
 #include "generic-parser.h"
 
+static char module_name[] = "native_openmx";
 static char module_docstring[] = "A module containing native parsing implementations of OpenMX parsing routines";
 static char openmx_bands_bands_docstring[] = "Retrieves OpenMX bands data";
 static PyObject *openmx_bands_bands(PyObject *self, PyObject *string_data);
@@ -14,14 +15,39 @@ static PyMethodDef module_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    module_name,         /* m_name */
+    module_docstring,    /* m_doc */
+    -1,                  /* m_size */
+    module_methods,      /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
+
+PyMODINIT_FUNC PyInit_native_openmx(void)
+{
+    PyObject *m = PyModule_Create(&moduledef);
+    if (m == NULL)
+        return NULL;
+    import_array();
+    return m;
+}
+
+#else
+
 PyMODINIT_FUNC initnative_openmx(void)
 {
-    PyObject *m = Py_InitModule3("native_openmx", module_methods, module_docstring);
+    PyObject *m = Py_InitModule3(module_name, module_methods, module_docstring);
     if (m == NULL)
         return;
-
     import_array();
 }
+
+#endif
 
 int bands(double **data, int dims[2], FILE *f) {
 

@@ -4,13 +4,14 @@ Parsing various atomic structure files.
 import numericalunits
 import numpy
 
-from .generic import cre_word, cre_nonspace, AbstractParser
+from .generic import cre_word, cre_non_space, AbstractTextParser, IdentifiableParser
 from ..presentation import __elements_table__
 from ..simple import unit_cell
 from ..utypes import CrystalCell, CrystalGrid, RealSpaceBasis
+from ..types import element_type
 
 
-class XSF(AbstractParser):
+class XSF(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing `xcrysden <http://www.xcrysden.org>`_ files
     commonly used in solid state visualisations.
@@ -40,23 +41,23 @@ class XSF(AbstractParser):
 
         while True:
 
-            mode = self.parser.closest(("primvec", "primcoord"))
+            mode = self.parser.match_closest(("primvec", "primcoord"))
 
             if mode == 0:
                 self.parser.skip("primvec")
-                self.parser.nextLine()
-                shape = self.parser.nextFloat((3, 3)) * numericalunits.angstrom
+                self.parser.next_line()
+                shape = self.parser.next_float((3, 3)) * numericalunits.angstrom
 
             elif mode == 1:
                 self.parser.skip('primcoord')
-                self.parser.nextLine()
-                n = self.parser.nextInt()
+                self.parser.next_line()
+                n = self.parser.next_int()
                 coordinates = numpy.zeros((n, 3))
-                values = numpy.zeros(n, dtype='S2')
+                values = numpy.zeros(n, dtype=element_type)
                 for i in range(n):
-                    self.parser.nextLine()
-                    values[i] = self.parser.nextMatch(cre_word)
-                    coordinates[i, :] = self.parser.nextFloat(3) * numericalunits.angstrom
+                    self.parser.next_line()
+                    values[i] = self.parser.next_match(cre_word)
+                    coordinates[i, :] = self.parser.next_float(3) * numericalunits.angstrom
                 result.append(CrystalCell(
                     shape,
                     coordinates,
@@ -91,13 +92,13 @@ class XSF(AbstractParser):
             else:
                 raise Exception("Failed to determine grid dimensions")
 
-            self.parser.nextLine()
-            block_name = self.parser.nextMatch(cre_nonspace)
+            self.parser.next_line()
+            block_name = self.parser.next_match(cre_non_space)
 
             while True:
 
-                self.parser.nextLine()
-                grid_name = self.parser.nextMatch(cre_nonspace)
+                self.parser.next_line()
+                grid_name = self.parser.next_match(cre_non_space)
                 expecting = "begin_datagrid_" + mode
                 expecting_2 = "datagrid_" + mode
 
@@ -111,18 +112,18 @@ class XSF(AbstractParser):
                     raise Exception("Failed to continue parsing grids at '{}'".format(grid_name))
 
                 if mode == "3d":
-                    shape = self.parser.nextInt(3)
+                    shape = self.parser.next_int(3)
                 else:
-                    shape = self.parser.nextInt(2)
+                    shape = self.parser.next_int(2)
 
-                origin = self.parser.nextFloat(3) * numericalunits.angstrom
+                origin = self.parser.next_float(3) * numericalunits.angstrom
 
                 if mode == "3d":
-                    vectors = self.parser.nextFloat((3, 3)) * numericalunits.angstrom
+                    vectors = self.parser.next_float((3, 3)) * numericalunits.angstrom
                 else:
-                    vectors = self.parser.nextFloat((2, 3)) * numericalunits.angstrom
+                    vectors = self.parser.next_float((2, 3)) * numericalunits.angstrom
 
-                data = self.parser.nextFloat(tuple(shape[::-1])).swapaxes(0, shape.size - 1)[
+                data = self.parser.next_float(tuple(shape[::-1])).swapaxes(0, shape.size - 1)[
                     (slice(0, -1, 1),) * vectors.shape[0]]
 
                 self.parser.skip("end_datagrid_" + mode)
@@ -143,10 +144,14 @@ class XSF(AbstractParser):
         return result
 
 
-class GaussianCube(AbstractParser):
+class GaussianCube(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing `Gaussian CUBE <http://www.gaussian.com/>`_ files.
     """
+
+    @staticmethod
+    def valid_header(header):
+        raise NotImplementedError
 
     @staticmethod
     def valid_filename(name):
@@ -161,35 +166,37 @@ class GaussianCube(AbstractParser):
             A grid.
         """
         self.parser.reset()
-        self.parser.nextLine(2)
+        self.parser.next_line(2)
 
-        n = self.parser.nextInt()
+        n = self.parser.next_int()
         if n < 0:
-            origin = self.parser.nextFloat(3) * numericalunits.angstrom
+            origin = self.parser.next_float(3) * numericalunits.angstrom
         else:
-            origin = self.parser.nextFloat(3) * numericalunits.aBohr
+            origin = self.parser.next_float(3) * numericalunits.aBohr
+        if not numpy.all(origin == 0):
+            raise NotImplementedError("Ambiguous origin shift in CUBE is not implemented")
         n = abs(n)
 
         size = []
         spacing = []
 
         for i in range(3):
-            s = self.parser.nextInt()
+            s = self.parser.next_int()
             size.append(s)
 
             if s < 0:
-                spacing.append(self.parser.nextFloat(3) * numericalunits.angstrom)
+                spacing.append(self.parser.next_float(3) * numericalunits.angstrom)
             else:
-                spacing.append(self.parser.nextFloat(3) * numericalunits.aBohr)
+                spacing.append(self.parser.next_float(3) * numericalunits.aBohr)
 
         spacing = numpy.array(spacing)
         size = numpy.abs(size)
         vectors = spacing * size[:, numpy.newaxis]
 
         # Skip atomic coordinates
-        self.parser.nextLine(n + 1)
+        self.parser.next_line(n + 1)
 
-        data = self.parser.nextFloat(size)
+        data = self.parser.next_float(size)
 
         return CrystalGrid(
             vectors,
@@ -209,18 +216,18 @@ class GaussianCube(AbstractParser):
         result = []
 
         self.parser.reset()
-        self.parser.nextLine(2)
+        self.parser.next_line(2)
 
         # Number of atoms
-        n = self.parser.nextInt()
-        self.parser.nextLine()
+        n = self.parser.next_int()
+        self.parser.next_line()
 
         # Lattice vectors
         shape = []
         for i in range(3):
 
-            nv = self.parser.nextInt()
-            v = self.parser.nextFloat(3)
+            nv = self.parser.next_int()
+            v = self.parser.next_float(3)
 
             if nv < 0:
                 shape.append(v * abs(nv) * numericalunits.angstrom)
@@ -232,9 +239,9 @@ class GaussianCube(AbstractParser):
 
         for i in range(abs(n)):
 
-            aid = self.parser.nextInt()
-            self.parser.nextFloat()
-            ac = self.parser.nextFloat(3)
+            aid = self.parser.next_int()
+            self.parser.next_float()
+            ac = self.parser.next_float(3)
 
             if not aid == 0:
                 v.append(__elements_table__[abs(aid) - 1][0])
@@ -249,12 +256,16 @@ class GaussianCube(AbstractParser):
         return CrystalCell(shape, c, v, c_basis="cartesian")
 
 
-class XYZ(AbstractParser):
+class XYZ(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing XYZ structure files.
     """
 
     vacuum_size = numericalunits.nm
+
+    @staticmethod
+    def valid_header(header):
+        raise NotImplementedError
 
     @staticmethod
     def valid_filename(name):
@@ -272,15 +283,15 @@ class XYZ(AbstractParser):
         self.parser.reset()
 
         # Number of atoms
-        n = self.parser.nextInt()
-        self.parser.nextLine(2)
+        n = self.parser.next_int()
+        self.parser.next_line(2)
 
         c = []
         v = []
 
         for i in range(abs(n)):
-            v.append(self.parser.nextMatch(cre_word))
-            c.append(self.parser.nextFloat(3) * numericalunits.angstrom)
+            v.append(self.parser.next_match(cre_word))
+            c.append(self.parser.next_float(3) * numericalunits.angstrom)
 
         c = numpy.array(c)
         mx = c.max(axis=0)
@@ -290,7 +301,7 @@ class XYZ(AbstractParser):
         return CrystalCell(RealSpaceBasis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
 
 
-class CIF(AbstractParser):
+class CIF(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing CIF files.
     """
@@ -315,11 +326,11 @@ class CIF(AbstractParser):
         vecs = [None] * 6
 
         while True:
-            c = self.parser.closest(tokens)
+            c = self.parser.match_closest(tokens)
             if c is None:
                 break
             self.parser.skip(tokens[c])
-            x = self.parser.nextFloat()
+            x = self.parser.next_float()
             if c < 3:
                 vecs[c] = x * numericalunits.angstrom
             else:
@@ -350,10 +361,10 @@ class CIF(AbstractParser):
                 ptr_set = [False] * 5
                 self.parser.skip("loop_")
                 fields = []
-                self.parser.nextLine()
+                self.parser.next_line()
                 while self.parser.distance("_", default=-1) == 0:
-                    fields.append(self.parser.nextMatch(cre_nonspace))
-                    self.parser.nextLine()
+                    fields.append(self.parser.next_match(cre_non_space))
+                    self.parser.next_line()
 
                 for i, t in enumerate(tokens):
                     if t in fields:
@@ -364,8 +375,8 @@ class CIF(AbstractParser):
                     break
 
             data = []
-            while self.parser.closest(("_", cre_nonspace)) == 1:
-                data.append(self.parser.nextMatch(cre_nonspace, len(fields)))
+            while self.parser.match_closest(("_", cre_non_space)) == 1:
+                data.append(self.parser.next_match(cre_non_space, len(fields)))
 
             data = numpy.array(data)
             coords = data[:, ptrs[:3]].astype(float)
@@ -373,7 +384,7 @@ class CIF(AbstractParser):
                 vals = map(str.lower, data[:, ptrs[4]])
             else:
                 vals = data[:, ptrs[3]].astype(str)
-            cells.append(CrystalCell(basis, coords, vals))
+            cells.append(CrystalCell(basis, coords, tuple(vals)))
         return cells
 
 

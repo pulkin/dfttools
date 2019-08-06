@@ -5,6 +5,7 @@
 
 #include "generic-parser.h"
 
+static char module_name[] = "native_qe";
 static char module_docstring[] = "A module containing native parsing implementations of QE parsing routines";
 static char qeproj_weights_docstring[] = "Retrieves projection weights as a numpy array";
 static PyObject *qeproj_weights(PyObject *self, PyObject *string_data);
@@ -14,14 +15,39 @@ static PyMethodDef module_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+#if PY_MAJOR_VERSION >= 3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    module_name,         /* m_name */
+    module_docstring,    /* m_doc */
+    -1,                  /* m_size */
+    module_methods,      /* m_methods */
+    NULL,                /* m_reload */
+    NULL,                /* m_traverse */
+    NULL,                /* m_clear */
+    NULL,                /* m_free */
+};
+
+PyMODINIT_FUNC PyInit_native_qe(void)
+{
+    PyObject *m = PyModule_Create(&moduledef);
+    if (m == NULL)
+        return NULL;
+    import_array();
+    return m;
+}
+
+#else
+
 PyMODINIT_FUNC initnative_qe(void)
 {
-    PyObject *m = Py_InitModule3("native_qe", module_methods, module_docstring);
+    PyObject *m = Py_InitModule3(module_name, module_methods, module_docstring);
     if (m == NULL)
         return;
-
     import_array();
 }
+
+#endif
 
 
 int n_bands(FILE *f) {

@@ -12,6 +12,10 @@ from scipy.spatial import cKDTree
 from .blochl import tetrahedron, tetrahedron_plain
 from .util import cast_units
 
+# This is here to determine the default string data type.
+# It is expected to be 'S2' in python2 and 'U2' in python3.
+element_type = numpy.array("Ca").dtype
+
 
 def input_as_list(func):
     @wraps(func)
@@ -393,15 +397,10 @@ class Basis(object):
 
             basises (list): basises to stack. Corresponding
             vectors of all basises being stacked should match.
-
-        Kwargs:
-
-            vector (str,int): a vector along which to stack, either 'x',
+            vector (str, int): a vector along which to stack, either 'x',
             'y', 'z' or an int specifying the vector;
-
             tolerance (float): a largest possible error in input basises'
             vectors;
-
             restrict_collinear (bool): if True will raise an exception
             if the vectors to stack along are not collinear
 
@@ -463,8 +462,6 @@ class Basis(object):
         """
         c = self
         for i, t in enumerate(times):
-            if not isinstance(t, int):
-                raise ValueError("The input [{:d}] should be integers, found {} instead".format(i, times))
             c = c.stack(*((c,) * (t - 1)), vector=i)
 
         return c
@@ -573,25 +570,19 @@ class UnitCell(Basis):
     A class describing a crystal unit cell in a periodic environment.
 
     Args:
-
-        vectors (Basis,array): a crystal basis.
-
-        coordinates (array): a 2D array of coordinates of atoms (or any
-        other instances)
-
-        values (array): an array of atoms (or any other instances) with
-        the leading dimenstion being the same as the one of
-        ``coordinates`` array.
-
-    Kwargs:
-
-        meta (dict): a metadata for this UnitCell;
-
+        vectors (Basis, array): crystal basis;
+        coordinates (array): 2D array of coordinates of atoms (or any
+        other instances);
+        values (array): array of atoms (or any other instances) with
+        the leading dimension being the same as the one of
+        ``coordinates`` array;
+        meta (dict): metadata for this UnitCell;
         c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
-        if coordinates are passed in the cartesian basis.
+        if coordinates are passed in the cartesian basis;
+        dtype (type): enforcing data type for `values`;
     """
 
-    def __init__(self, vectors, coordinates, values, meta=None, c_basis=None):
+    def __init__(self, vectors, coordinates, values, meta=None, c_basis=None, dtype=None):
 
         if isinstance(vectors, Basis):
             Basis.__init__(self, vectors.vectors, meta=vectors.meta)
@@ -622,7 +613,7 @@ class UnitCell(Basis):
                         self.coordinates.shape[1], dims))
 
         # Coordinates are now prepeared, proceed to values
-        self.values = numpy.asanyarray(values)
+        self.values = numpy.asanyarray(values, dtype=dtype)
         if len(self.values.shape) == 0:
             self.values = self.values[numpy.newaxis, ...]
 
@@ -988,25 +979,19 @@ class UnitCell(Basis):
     @input_as_list
     def cut(self, piece, select='auto'):
         """
-        Selects a piece of this unit cell and returns it as a smaller
-        unit cell.
+        Selects a piece of this unit cell and returns it as a smaller unit cell.
 
         Args:
-
             piece (array): fraction of the cell to be selected. The order
             of coordinates in ``piece`` is ``x_from, y_from, ..., z_from, x_to, y_to, ..., z_to``.
-
-        Kwargs:
-
             select (array): manual selection of points insisde the
             unit cell. By default, selects only those pieces which drop
             into the box defined by `piece`.
 
         Returns:
-
             A smaller unit cell selected.
         """
-        if isinstance(select, (str, unicode)) and select == 'auto':
+        if select == 'auto':
             select = self.select(piece)
         result = self.copy()
         result.apply(select)
@@ -1294,20 +1279,14 @@ class Grid(Basis):
     A class describing a data on a grid in a periodic environment.
 
     Args:
-
-        vectors (Basis,array): a crystal basis.
-
-        coordinates (array): a list of arrays of coordinates specifying
-        grid.
-
+        vectors (Basis,array): crystal basis;
+        coordinates (array): list of arrays of coordinates specifying the grid;
         values (array): a multidimensional array with data on the grid.
-
-    Kwargs:
-
         meta (dict): a metadata for this Grid;
+        dtype (type): enforcing data type for `values`;
     """
 
-    def __init__(self, vectors, coordinates, values, meta=None):
+    def __init__(self, vectors, coordinates, values, meta=None, dtype=None):
 
         if isinstance(vectors, Basis):
             Basis.__init__(self, vectors.vectors, meta=vectors.meta)
@@ -1318,7 +1297,7 @@ class Grid(Basis):
 
         dims = self.vectors.shape[0]
         self.coordinates = list(numpy.asanyarray(c, dtype=numpy.float64) for c in coordinates)
-        self.values = numpy.asanyarray(values)
+        self.values = numpy.asanyarray(values, dtype=dtype)
 
         # Proceed to checks
         if not len(self.coordinates) == dims:

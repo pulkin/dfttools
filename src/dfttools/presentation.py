@@ -148,7 +148,7 @@ def __light__(color, delta=0.4):
 
 
 def __svg_color__(color):
-    return "rgb({:d},{:d},{:d})".format(*color)
+    return "rgb({:.0f},{:.0f},{:.0f})".format(*color)
 
 
 def __window__(p1, p2, window):
@@ -1604,7 +1604,7 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
     image_bin.seek(0)
 
     if method == "loose":
-        image_str = "data:image/{};base64,".format(image_format) + base64.b64encode(image_bin.buf)
+        image_str = "data:image/{};base64,".format(image_format) + base64.b64encode(image_bin.read())
         svg.add(svg.image(
             image_str,
             insert=insert,
@@ -1612,7 +1612,7 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
         ))
 
     elif method == "firm":
-        root = ElementTree.fromstring(image_bin.buf)
+        root = ElementTree.fromstring(image_bin.read())
         root.attrib["x"], root.attrib["y"] = map(str, insert)
         if size is not None:
             root.attrib["width"], root.attrib["height"] = map(str, size)

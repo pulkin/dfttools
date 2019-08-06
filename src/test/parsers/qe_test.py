@@ -104,9 +104,7 @@ class Test_output0(unittest.TestCase):
         cells = self.parser.unitCells()
         assert len(cells) == 20
         for i in range(20):
-            testing.assert_equal(cells[i].values,
-                                 ('As', 'As')
-                                 )
+            testing.assert_equal(cells[i].values, ('As', 'As'))
         assert_standard_crystal_cell(cells[0])
         testing.assert_allclose(cells[0].vectors, numpy.array(
             ((0.580130, 0.000000, 0.814524),
@@ -147,15 +145,16 @@ class Test_output0(unittest.TestCase):
         self.assertRaises(Exception, self.parser.bands)
         b = self.parser.bands(index=None, skipVCRelaxException=True)
         assert len(b) == 19
+        units = 2 * math.pi / 7.0103 / numericalunits.aBohr
         for i in range(len(b)):
             assert_standard_bands_path(b[i])
             testing.assert_allclose(b[i].vectors, numpy.array(
                 ((1.149169, 0.000000, 0.409237),
                  (-0.574584, 0.995209, 0.409237),
                  (-0.574584, -0.995209, 0.409237))
-            ) * 2 * math.pi / 7.0103 / numericalunits.aBohr)
+            ) * units)
 
-        testing.assert_allclose(b[0].cartesian(), numpy.array(
+        testing.assert_allclose(b[0].cartesian() / units, numpy.array(
             ((0.0000, 0.0000, 0.1535),
              (-0.1436, -0.2488, 0.2558),
              (0.2873, 0.4976, -0.0512),
@@ -166,7 +165,7 @@ class Test_output0(unittest.TestCase):
              (0.5746, 0.0000, -0.2558),
              (0.0000, 0.0000, 0.4604),
              (0.4309, 0.7464, 0.1535))
-        ) * 2 * math.pi / 7.0103 / numericalunits.aBohr, atol=1e-4, rtol=1)
+        ), atol=1e-4)
         testing.assert_allclose(b[0].values, numpy.array(
             ((-6.9960, 4.5196, 5.9667, 5.9667, 8.4360, 11.0403, 11.7601, 11.7601, 16.5645),
              (-5.9250, 0.3917, 5.3512, 5.6501, 9.2996, 10.5303, 11.7005, 13.5632, 15.7167),
@@ -179,7 +178,7 @@ class Test_output0(unittest.TestCase):
              (-5.8586, 0.8361, 5.8840, 5.8840, 7.4114, 10.0627, 10.0627, 12.1191, 17.3944),
              (-4.8492, -0.0498, 2.4338, 4.7831, 7.5088, 11.6828, 12.0642, 14.4760, 17.7700))
         ) * numericalunits.eV)
-        testing.assert_allclose(b[-1].cartesian(), numpy.array(
+        testing.assert_allclose(b[-1].cartesian() / units, numpy.array(
             ((0.0000, -0.0000, 0.1436),
              (-0.1404, -0.2431, 0.2393),
              (0.2807, 0.4863, -0.0479),
@@ -190,7 +189,7 @@ class Test_output0(unittest.TestCase):
              (0.5615, -0.0000, -0.2393),
              (0.0000, 0.0000, 0.4308),
              (0.4211, 0.7294, 0.1436))
-        ) * 2 * math.pi / 7.0103 / numericalunits.aBohr, atol=1e-4, rtol=1)
+        ), atol=3e-2)
         testing.assert_allclose(b[-1].values, numpy.array(
             ((-7.1166, 1.7721, 5.6229, 5.6229, 6.5346, 9.9927, 10.5558, 10.5558, 14.5337),
              (-6.0954, -0.8486, 3.9924, 5.6835, 8.0573, 8.3099, 9.0569, 11.8901, 13.9362),
@@ -239,9 +238,7 @@ class Test_output1(unittest.TestCase):
         assert len(cells) == 6
         for i in range(6):
             assert_standard_crystal_cell(cells[i])
-            testing.assert_equal(cells[i].values,
-                                 ('C', 'O')
-                                 )
+            testing.assert_equal(cells[i].values, ('C', 'O'))
             testing.assert_allclose(cells[i].vectors, numpy.array(
                 ((1.0, 0.0, 0.0),
                  (0.0, 1.0, 0.0),
@@ -272,9 +269,7 @@ class Test_output2(unittest.TestCase):
         assert len(cells) == 14
         for i in range(14):
             assert_standard_crystal_cell(cells[i])
-            testing.assert_equal(cells[i].values,
-                                 ('Al',) * 7
-                                 )
+            testing.assert_equal(cells[i].values, ('Al',) * 7)
             testing.assert_allclose(cells[i].vectors, numpy.array(
                 ((1.0, 0.0, 0.0),
                  (0.0, 1.0, 0.0),
@@ -362,6 +357,7 @@ class Test_output3(unittest.TestCase):
             self.parser = output(f.read())
 
     def test_bands(self):
+        units = 2 * math.pi / 10.2 / numericalunits.aBohr
         b = self.parser.bands(index=None)
         assert len(b) == 1
         b = b[0]
@@ -373,19 +369,19 @@ class Test_output3(unittest.TestCase):
         ) * 2 * math.pi / 10.2 / numericalunits.aBohr)
         assert b.size() == 28
         crds = b.cartesian()
-        testing.assert_allclose(crds[:, 0], numpy.array(
+        testing.assert_allclose(crds[:, 0] / units, numpy.array(
             (0.,) * 22 + \
             tuple(0.1 * i for i in range(6))
-        ) * 2 * math.pi / 10.2 / numericalunits.aBohr, atol=1)
-        testing.assert_allclose(crds[:, 1], numpy.array(
+        ), atol=1e-8)
+        testing.assert_allclose(crds[:, 1] / units, numpy.array(
             (0.,) * 12 + \
             tuple(0.1 * i for i in range(1, 11)) + \
             tuple(0.1 * i for i in range(6))
-        ) * 2 * math.pi / 10.2 / numericalunits.aBohr, atol=1)
-        testing.assert_allclose(crds[:, 2], numpy.array(
+        ), atol=1e-8)
+        testing.assert_allclose(crds[:, 2] / units, numpy.array(
             tuple(0.1 * i for i in range(11)) * 2 + \
             tuple(0.1 * i for i in range(6))
-        ) * 2 * math.pi / 10.2 / numericalunits.aBohr, atol=1)
+        ), atol=1e-8)
         testing.assert_allclose(b.values[0, :], numpy.array(
             (-5.8099, 6.2549, 6.2549, 6.2549, 8.8221, 8.8221, 8.8221, 9.7232)) * numericalunits.eV)
         testing.assert_allclose(b.values[-1, :], numpy.array(
@@ -445,9 +441,7 @@ class Test_output5(unittest.TestCase):
         cells = self.parser.unitCells()
         assert len(cells) == 4
         for i in range(4):
-            testing.assert_equal(cells[i].values,
-                                 ('W', 'Se', 'Se', 'W', 'Se', 'Se'),
-                                 )
+            testing.assert_equal(cells[i].values, ('W', 'Se', 'Se', 'W', 'Se', 'Se'))
         testing.assert_allclose(cells[1].vectors, numpy.array((
             (5.952508067, 0, 0,),
             (0, 3.312746029, 0,),
@@ -898,12 +892,8 @@ K_POINTS automatic
                                 rtol=1e-10,
                                 atol=1e-15,
                                 )
-        testing.assert_array_equal(cell.coordinates,
-                                   ((.5, .5, .3), (.5, .5, .7))
-                                   )
-        testing.assert_array_equal(cell.values,
-                                   ('c',) * 2
-                                   )
+        testing.assert_array_equal(cell.coordinates, ((.5, .5, .3), (.5, .5, .7)))
+        testing.assert_array_equal(cell.values, ('c',) * 2)
 
     def test_valid_header(self):
         assert input.valid_header(self.parser.parser.string[:1000])

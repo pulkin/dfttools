@@ -7,14 +7,14 @@ import re
 import numericalunits
 import numpy
 
-from .generic import cre_nonspace, cre_float, cre_word, AbstractParser
+from .generic import cre_non_space, cre_float, cre_word, AbstractTextParser, IdentifiableParser
 from ..simple import band_structure, unit_cell
 from ..utypes import CrystalCell, BandsPath
 from ..types import Basis
 from ..util import array
 
 
-class UnitCellsParser(AbstractParser):
+class UnitCellsParser(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing elk GEOMETRY_OPT.OUT.
     
@@ -34,14 +34,14 @@ class UnitCellsParser(AbstractParser):
     def __tosection__(self, section):
         kw = re.compile(r'\b' + section + r'\b')
         self.parser.skip(kw)
-        self.parser.nextLine()
+        self.parser.next_line()
 
     def __next_unit_cell__(self):
 
         self.parser.save()
         try:
             self.__tosection__('scale')
-            scale = [self.parser.nextFloat() * numericalunits.aBohr] * 3
+            scale = [self.parser.next_float() * numericalunits.aBohr] * 3
 
         except StopIteration:
             scale = [numericalunits.aBohr] * 3
@@ -52,32 +52,32 @@ class UnitCellsParser(AbstractParser):
             self.parser.save()
             try:
                 self.__tosection__('scale{:d}'.format(i + 1))
-                scale[i] = self.parser.nextFloat() * numericalunits.aBohr
+                scale[i] = self.parser.next_float() * numericalunits.aBohr
             except StopIteration:
                 pass
             self.parser.pop()
 
         self.parser.save()
         self.__tosection__('avec')
-        vectors = self.parser.nextFloat(n=(3, 3)) * numpy.array(scale)[:, numpy.newaxis]
+        vectors = self.parser.next_float(n=(3, 3)) * numpy.array(scale)[:, numpy.newaxis]
         self.parser.pop()
 
         self.__tosection__('atoms')
-        n_sp = self.parser.nextInt()
-        self.parser.nextLine()
+        n_sp = self.parser.next_int()
+        self.parser.next_line()
 
         coordinates = []
         values = []
 
         for s in range(n_sp):
             self.parser.skip('\'')
-            name = self.parser.nextMatch(cre_word)
-            self.parser.nextLine()
+            name = self.parser.next_match(cre_word)
+            self.parser.next_line()
 
-            n_at = self.parser.nextInt()
-            self.parser.nextLine()
+            n_at = self.parser.next_int()
+            self.parser.next_line()
 
-            coordinates.append(self.parser.nextFloat(n=(n_at, 6))[:, :3])
+            coordinates.append(self.parser.next_float(n=(n_at, 6))[:, :3])
             values = values + [name] * n_at
 
         return CrystalCell(
@@ -108,7 +108,7 @@ class UnitCellsParser(AbstractParser):
         return result
 
 
-class Input(UnitCellsParser):
+class Input(UnitCellsParser, IdentifiableParser):
     """
     Class for parsing elk.in input file.
     
@@ -157,10 +157,10 @@ class Input(UnitCellsParser):
 
         # Read data from input
         self.parser.skip('plot1d\n')
-        nodes = self.parser.nextInt()
-        points = self.parser.nextInt()
-        self.parser.nextLine()
-        nodes = self.parser.nextFloat(n=(nodes, 3))
+        nodes = self.parser.next_int()
+        points = self.parser.next_int()
+        self.parser.next_line()
+        nodes = self.parser.next_float(n=(nodes, 3))
 
         # Calculate path lengths
         nodes_c = basis.transform_to_cartesian(nodes)
@@ -185,7 +185,7 @@ class Input(UnitCellsParser):
         return numpy.array(coordinates)
 
 
-class Output(AbstractParser):
+class Output(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing INFO.OUT of elk output.
     
@@ -215,9 +215,9 @@ class Output(AbstractParser):
 
         self.parser.skip('Lattice vectors :')
 
-        vecs = self.parser.nextFloat(n=(3, 3)) * numericalunits.aBohr
+        vecs = self.parser.next_float(n=(3, 3)) * numericalunits.aBohr
 
-        n = self.parser.intAfter('Total number of atoms per unit cell :')
+        n = self.parser.int_after('Total number of atoms per unit cell :')
         n_read = 0
 
         coordinates = []
@@ -225,12 +225,12 @@ class Output(AbstractParser):
 
         while n_read < n:
             self.parser.skip('Species :')
-            self.parser.nextInt()
-            name = self.parser.nextMatch(cre_nonspace)[1:-1]
+            self.parser.next_int()
+            name = self.parser.next_match(cre_non_space)[1:-1]
 
             self.parser.skip('atomic positions (lattice)')
-            self.parser.nextLine()
-            coords = self.parser.nextFloat(n='\n \n').reshape((-1, 7))[:, (1, 2, 3)]
+            self.parser.next_line()
+            coords = self.parser.next_float(n='\n \n').reshape((-1, 7))[:, (1, 2, 3)]
 
             n_read += coords.shape[0]
             coordinates.append(coords)
@@ -255,11 +255,11 @@ class Output(AbstractParser):
 
         self.parser.skip('Reciprocal lattice vectors :')
 
-        vecs = self.parser.nextFloat(n=(3, 3)) * 2 * math.pi / numericalunits.aBohr
+        vecs = self.parser.next_float(n=(3, 3)) * 2 * math.pi / numericalunits.aBohr
         return Basis(array(vecs, units="1/angstrom"))
 
 
-class Bands(AbstractParser):
+class Bands(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing band structure from BAND.OUT file.
     
@@ -272,10 +272,14 @@ class Bands(AbstractParser):
     def valid_filename(name):
         return name == "BAND.OUT"
 
+    @staticmethod
+    def valid_header(header):
+        raise NotImplementedError
+
     @band_structure
     def bands(self):
         """
-        Retrieves the band structure and strores it into a flattened UnitCell.
+        Retrieves the band structure and stores it into a flattened UnitCell.
         
         Returns:
         
@@ -285,8 +289,8 @@ class Bands(AbstractParser):
 
         values = []
         while self.parser.present(cre_float):
-            a = self.parser.nextFloat(n='\n     \n')
-            self.parser.nextLine(2)
+            a = self.parser.next_float(n='\n     \n')
+            self.parser.next_line(2)
             values.append(a[1::2] * numericalunits.Hartree)
             coordinates = a[::2]
 

@@ -3,7 +3,7 @@ Parsing Local JSON file format.
 """
 import importlib
 
-from .generic import AbstractJSONParser, ParseError
+from .generic import AbstractJSONParser, IdentifiableParser, ParseError
 from ..util import loads
 from ..simple import unit_cell, band_structure
 
@@ -25,7 +25,7 @@ for i in valid_containers:
     lookup_type_string[lookup_container[i]] = i
 
 
-class JSONStorage(AbstractJSONParser):
+class JSONStorage(AbstractJSONParser, IdentifiableParser):
     """
     Handles parsing of all json-serialized data from this package.
     """

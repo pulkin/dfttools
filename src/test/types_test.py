@@ -167,7 +167,7 @@ class BasisTest(unittest.TestCase):
         testing.assert_allclose(r.vectors, nv)
 
     def test_repeated_fail(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             rp = self.b.repeated(2.0, 2.0, 1.0)
 
     def test_reorder(self):

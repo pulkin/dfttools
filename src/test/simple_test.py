@@ -2,7 +2,7 @@ import os
 import unittest
 
 from dfttools.parsers import qe, openmx, elk, structure, tools
-from dfttools.parsers.generic import AbstractParser, ParseError
+from dfttools.parsers.generic import IdentifiableParser, ParseError
 from dfttools.simple import get_all_parsers, guess_parser, parse
 
 
@@ -43,7 +43,7 @@ class Test_methods(unittest.TestCase):
 
     def test_get_all_parsers(self):
         for i in get_all_parsers():
-            assert issubclass(i, AbstractParser)
+            assert issubclass(i, IdentifiableParser)
 
     def test_guess_parser(self):
         for f, p in self.data:

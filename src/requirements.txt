@@ -1,5 +1,7 @@
 scipy
+numpy
 numericalunits
 matplotlib
 svgwrite
+requests
 src/

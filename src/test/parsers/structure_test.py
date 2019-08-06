@@ -36,8 +36,7 @@ class Test_xsf0(unittest.TestCase):
             (1.355, -1.355, -1.355)
         )) * numericalunits.angstrom)
 
-        assert c.values[0] == "16"
-        assert c.values[1] == "30"
+        testing.assert_array_equal(c.values[:2], ("16", "30"))
 
 
 class Test_xsf1(unittest.TestCase):
@@ -63,8 +62,7 @@ class Test_xsf1(unittest.TestCase):
                 (2.71, 2.71, 0.),
             )) * numericalunits.angstrom)
 
-            assert cc.values[0] == "16"
-            assert cc.values[1] == "30"
+            testing.assert_array_equal(cc.values[:2], ("16", "30"))
 
         testing.assert_allclose(c[0].cartesian(), numpy.array((
             (0, 0, 0),
@@ -94,8 +92,7 @@ class Test_xsf2(unittest.TestCase):
 
         for cc in c:
             assert_standard_crystal_cell(cc)
-            assert cc.values[0] == "16"
-            assert cc.values[1] == "30"
+            testing.assert_array_equal(cc.values[:2], ("16", "30"))
 
         testing.assert_allclose(c[0].vectors, numpy.array((
             (2.71, 2.71, 0.),

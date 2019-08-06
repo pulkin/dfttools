@@ -120,6 +120,13 @@ class CellTest(unittest.TestCase):
         assert isinstance(c.values, ArrayWithUnits)
         testing.assert_equal(c.values.units, self.bs_cell.values.units)
 
+    def test_fermi(self):
+        assert self.bs_cell.fermi.units == "eV"
+        self.bs_cell.fermi = 3
+        assert self.bs_cell.fermi.units == "eV"
+        with self.assertRaises(ValueError):
+            self.bs_cell.fermi = 'x'
+
 
 class GridTest(unittest.TestCase):
 

@@ -4,4 +4,4 @@ numericalunits
 matplotlib
 svgwrite
 requests
-src/
+Cython

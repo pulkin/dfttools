@@ -572,12 +572,12 @@ class Proj(AbstractTextParser, IdentifiableParser):
             self.parser.skip("Calling projwave ....")
 
             dataType = numpy.dtype([
-                ('state', numpy.int64, 1),
-                ('atom', numpy.int64, 1),
-                ('name', numpy.str_, 2),
-                ('wfc', numpy.int64, 1),
-                ('l', numpy.float64, 1),
-                ('m', numpy.float64, 1)
+                ('state', numpy.int64),
+                ('atom', numpy.int64),
+                ('name', element_type),
+                ('wfc', numpy.int64),
+                ('l', numpy.float64),
+                ('m', numpy.float64)
             ])
 
             result = []
@@ -603,13 +603,13 @@ class Proj(AbstractTextParser, IdentifiableParser):
             self.parser.skip("Calling projwave_nc ....")
 
             dataType = numpy.dtype([
-                ('state', numpy.int64, 1),
-                ('atom', numpy.int64, 1),
-                ('name', numpy.str_, 2),
-                ('wfc', numpy.int64, 1),
-                ('j', numpy.float64, 1),
-                ('l', numpy.float64, 1),
-                ('m_j', numpy.float64, 1)
+                ('state', numpy.int64),
+                ('atom', numpy.int64),
+                ('name', element_type),
+                ('wfc', numpy.int64),
+                ('j', numpy.float64),
+                ('l', numpy.float64),
+                ('m_j', numpy.float64)
             ])
 
             result = []
@@ -750,34 +750,34 @@ class Cond(AbstractTextParser, IdentifiableParser):
 
         if kind == "resolved":
             dataType = numpy.dtype([
-                ('energy', numpy.float64, 1),
-                ('kx', numpy.float64, 1),
-                ('ky', numpy.float64, 1),
-                ('incoming', numpy.complex64, 1),
-                ('outgoing', numpy.complex64, 1),
-                ('transmission', numpy.float64, 1),
+                ('energy', numpy.float64),
+                ('kx', numpy.float64),
+                ('ky', numpy.float64),
+                ('incoming', numpy.complex64),
+                ('outgoing', numpy.complex64),
+                ('transmission', numpy.float64),
             ])
         elif kind == "total":
             dataType = numpy.dtype([
-                ('energy', numpy.float64, 1),
-                ('kx', numpy.float64, 1),
-                ('ky', numpy.float64, 1),
-                ('incoming', numpy.complex64, 1),
-                ('transmission', numpy.float64, 1),
+                ('energy', numpy.float64),
+                ('kx', numpy.float64),
+                ('ky', numpy.float64),
+                ('incoming', numpy.complex64),
+                ('transmission', numpy.float64),
             ])
         elif kind == "states_in":
             dataType = numpy.dtype([
-                ('energy', numpy.float64, 1),
-                ('kx', numpy.float64, 1),
-                ('ky', numpy.float64, 1),
-                ('incoming', numpy.complex64, 1),
+                ('energy', numpy.float64),
+                ('kx', numpy.float64),
+                ('ky', numpy.float64),
+                ('incoming', numpy.complex64),
             ])
         elif kind == "states_out":
             dataType = numpy.dtype([
-                ('energy', numpy.float64, 1),
-                ('kx', numpy.float64, 1),
-                ('ky', numpy.float64, 1),
-                ('outgoing', numpy.complex64, 1),
+                ('energy', numpy.float64),
+                ('kx', numpy.float64),
+                ('ky', numpy.float64),
+                ('outgoing', numpy.complex64),
             ])
         else:
             raise ParseError(

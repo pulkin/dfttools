@@ -305,7 +305,7 @@ class Test_cif0(unittest.TestCase):
             (a*a, 0, a*c*g),
             (0, b*b, 0),
             (a*c*g, 0, c*c),
-        ), atol=1e-6)
+        ), atol=2e-6)
 
         testing.assert_allclose(cell.coordinates, (
             (0.00000, 0.91060, 0.25000),

@@ -95,14 +95,13 @@ class Basis(object):
 
         if isinstance(vectors, Basis):
             self.vectors = numpy.asanyarray(vectors.vectors)
-            if meta is None:
-                meta = vectors.meta.copy()
-            else:
-                meta = meta.copy()
-                meta.update(vectors.meta)
+            _meta = vectors.meta.copy()
+            if meta is not None:
+                _meta.update(meta)
 
         else:
             vectors = numpy.asanyarray(vectors, dtype=numpy.float64)
+            _meta = meta.copy() if meta is not None else {}
 
             if kind == 'default':
                 self.vectors = vectors
@@ -114,9 +113,7 @@ class Basis(object):
                 lengths = vectors[0:3]
                 cosines = vectors[3:]
                 volume = lengths[0] * lengths[1] * lengths[2] * (
-                        1 + \
-                        2 * cosines[0] * cosines[1] * cosines[2] - \
-                        cosines[0] ** 2 - cosines[1] ** 2 - cosines[2] ** 2
+                    1 + 2 * cosines[0] * cosines[1] * cosines[2] - cosines[0] ** 2 - cosines[1] ** 2 - cosines[2] ** 2
                 ) ** .5
                 sines = (1 - cosines ** 2) ** .5
                 height = volume / lengths[0] / lengths[1] / sines[2]
@@ -129,10 +126,7 @@ class Basis(object):
             else:
                 raise ArgumentError("Unknown kind='{}'".format(kind))
 
-        if meta is not None:
-            self.meta = meta.copy()
-        else:
-            self.meta = {}
+        self.meta = _meta
 
     def __getstate__(self):
         return dict(
@@ -186,7 +180,7 @@ class Basis(object):
         """
         j = dict(j)
         if "type" not in j or j["type"] != cls.class_id():
-            raise ValueError("Invalid JSON, expected type {}".format(cls.class_id()))
+            raise TypeError("Invalid JSON, expected type {}".format(cls.class_id()))
         del j["type"]
         result = cls(**j)
         return result
@@ -367,16 +361,6 @@ class Basis(object):
                     (self.vectors * numpy.asanyarray(v2)[:, numpy.newaxis]).sum(axis=0),
                 ))
         return numpy.asanyarray(result)
-
-    def faces(self):
-        """
-        Computes faces and returns corresponding cartesian coordinates.
-
-        Returns:
-
-            A list of lists of coordinates defining face polygon coordinates.
-        """
-        raise NotImplementedError
 
     def copy(self):
         """

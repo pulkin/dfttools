@@ -48,9 +48,11 @@ class BasisInitializationTest(unittest.TestCase):
         a = numpy.array(((1, 0), (0, 1)))
         meta = {"a": "b"}
         b = Basis(a, meta=meta)
-        assert not b.vectors is a
-        assert not b.meta is meta
+        assert b.vectors is not a
+        assert b.meta is not meta
         testing.assert_equal(b.meta, meta)
+        c = Basis(b, meta=dict(a="c"))
+        assert c.meta["a"] == "c"
 
     def test_init_raises(self):
         with self.assertRaises(ArgumentError):
@@ -140,8 +142,8 @@ class BasisTest(unittest.TestCase):
         b2 = self.b.copy()
         testing.assert_equal(self.b.vectors, b2.vectors)
         testing.assert_equal(self.b.meta, b2.meta)
-        assert not self.b.vectors is b2.vectors
-        assert not self.b.meta is b2.meta
+        assert self.b.vectors is not b2.vectors
+        assert self.b.meta is not b2.meta
 
     def test_stack(self):
         nv = self.b.vectors.copy()
@@ -768,6 +770,8 @@ class CellTest(unittest.TestCase):
             values=self.cell.values.tolist(),
         ))
         assert self.cell == UnitCell.from_json(serialized)
+        with self.assertRaises(TypeError):
+            Basis.from_json(serialized)
 
 
 class FCCCellTest(unittest.TestCase):

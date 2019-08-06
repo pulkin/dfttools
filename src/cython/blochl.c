@@ -4,12 +4,12 @@
 {
     "distutils": {
         "depends": [], 
-        "name": "blochl", 
+        "name": "dfttools.blochl", 
         "sources": [
             "cython/blochl.pyx"
         ]
     }, 
-    "module_name": "blochl"
+    "module_name": "dfttools.blochl"
 }
 END: Cython Metadata */
 
@@ -598,8 +598,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__blochl
-#define __PYX_HAVE_API__blochl
+#define __PYX_HAVE__dfttools__blochl
+#define __PYX_HAVE_API__dfttools__blochl
 /* Early includes */
 #include <string.h>
 #include <stdio.h>
@@ -1719,13 +1719,13 @@ static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, cha
 
 /* Module declarations from 'cython' */
 
-/* Module declarations from 'blochl' */
+/* Module declarations from 'dfttools.blochl' */
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_double_t = { "double_t", NULL, sizeof(__pyx_t_5numpy_double_t), { 0 }, 0, 'R', 0, 0 };
-#define __Pyx_MODULE_NAME "blochl"
-extern int __pyx_module_is_main_blochl;
-int __pyx_module_is_main_blochl = 0;
+#define __Pyx_MODULE_NAME "dfttools.blochl"
+extern int __pyx_module_is_main_dfttools__blochl;
+int __pyx_module_is_main_dfttools__blochl = 0;
 
-/* Implementation of 'blochl' */
+/* Implementation of 'dfttools.blochl' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -1764,7 +1764,6 @@ static const char __pyx_k_numpy[] = "numpy";
 static const char __pyx_k_range[] = "range";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_zeros[] = "zeros";
-static const char __pyx_k_blochl[] = "blochl";
 static const char __pyx_k_double[] = "double";
 static const char __pyx_k_format[] = "format";
 static const char __pyx_k_import[] = "__import__";
@@ -1781,6 +1780,7 @@ static const char __pyx_k_ValueError[] = "ValueError";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_tetrahedron[] = "tetrahedron";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
+static const char __pyx_k_dfttools_blochl[] = "dfttools.blochl";
 static const char __pyx_k_cython_blochl_pyx[] = "cython/blochl.pyx";
 static const char __pyx_k_tetrahedron_plain[] = "tetrahedron_plain";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
@@ -1801,7 +1801,6 @@ static PyObject *__pyx_n_s_RuntimeError;
 static PyObject *__pyx_n_s_ValueError;
 static PyObject *__pyx_kp_s_Weights_array_dimension_d_mismat;
 static PyObject *__pyx_n_s_b;
-static PyObject *__pyx_n_s_blochl;
 static PyObject *__pyx_n_s_cartesian;
 static PyObject *__pyx_n_s_cc;
 static PyObject *__pyx_n_s_cell;
@@ -1809,6 +1808,7 @@ static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_crds;
 static PyObject *__pyx_kp_s_cython_blochl_pyx;
 static PyObject *__pyx_n_s_det;
+static PyObject *__pyx_n_s_dfttools_blochl;
 static PyObject *__pyx_n_s_double;
 static PyObject *__pyx_n_s_dtype;
 static PyObject *__pyx_n_s_e;
@@ -1856,8 +1856,8 @@ static PyObject *__pyx_n_s_volume;
 static PyObject *__pyx_n_s_vv;
 static PyObject *__pyx_n_s_weights;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at); /* proto */
-static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at, PyArrayObject *__pyx_v_weights); /* proto */
+static PyObject *__pyx_pf_8dfttools_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at); /* proto */
+static PyObject *__pyx_pf_8dfttools_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at, PyArrayObject *__pyx_v_weights); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static PyObject *__pyx_int_0;
@@ -1896,7 +1896,7 @@ static PyObject *__pyx_codeobj__23;
 static PyObject *__pyx_codeobj__25;
 /* Late includes */
 
-/* "blochl.pyx":5
+/* "cython/blochl.pyx":5
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):             # <<<<<<<<<<<<<<
@@ -1905,9 +1905,9 @@ static PyObject *__pyx_codeobj__25;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6blochl_1tetrahedron(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6blochl_1tetrahedron = {"tetrahedron", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6blochl_1tetrahedron, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6blochl_1tetrahedron(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8dfttools_6blochl_1tetrahedron(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8dfttools_6blochl_1tetrahedron = {"tetrahedron", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8dfttools_6blochl_1tetrahedron, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8dfttools_6blochl_1tetrahedron(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_cell = 0;
   PyArrayObject *__pyx_v_pts_at = 0;
   PyObject *__pyx_r = 0;
@@ -1955,12 +1955,12 @@ static PyObject *__pyx_pw_6blochl_1tetrahedron(PyObject *__pyx_self, PyObject *_
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("tetrahedron", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 5, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("blochl.tetrahedron", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("dfttools.blochl.tetrahedron", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pts_at), __pyx_ptype_5numpy_ndarray, 1, "pts_at", 0))) __PYX_ERR(0, 5, __pyx_L1_error)
-  __pyx_r = __pyx_pf_6blochl_tetrahedron(__pyx_self, __pyx_v_cell, __pyx_v_pts_at);
+  __pyx_r = __pyx_pf_8dfttools_6blochl_tetrahedron(__pyx_self, __pyx_v_cell, __pyx_v_pts_at);
 
   /* function exit code */
   goto __pyx_L0;
@@ -1971,7 +1971,7 @@ static PyObject *__pyx_pw_6blochl_1tetrahedron(PyObject *__pyx_self, PyObject *_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at) {
+static PyObject *__pyx_pf_8dfttools_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at) {
   double __pyx_v_vol;
   int __pyx_v_i;
   int __pyx_v_j;
@@ -2103,7 +2103,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   }
   __pyx_pybuffernd_pts_at.diminfo[0].strides = __pyx_pybuffernd_pts_at.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_pts_at.diminfo[0].shape = __pyx_pybuffernd_pts_at.rcbuffer->pybuffer.shape[0];
 
-  /* "blochl.pyx":7
+  /* "cython/blochl.pyx":7
  * def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
  * 
  *     cdef double vol = cell.volume()             # <<<<<<<<<<<<<<
@@ -2131,7 +2131,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_vol = __pyx_t_4;
 
-  /* "blochl.pyx":11
+  /* "cython/blochl.pyx":11
  *     cdef double v_t, e1, e2, e3, e4, e, _t
  * 
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()             # <<<<<<<<<<<<<<
@@ -2169,7 +2169,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_v_crds = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "blochl.pyx":12
+  /* "cython/blochl.pyx":12
  * 
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values             # <<<<<<<<<<<<<<
@@ -2192,7 +2192,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_v_vals = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "blochl.pyx":13
+  /* "cython/blochl.pyx":13
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] cc = numpy.zeros((8,3), dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -2231,7 +2231,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_v_cc = ((PyArrayObject *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "blochl.pyx":14
+  /* "cython/blochl.pyx":14
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] cc = numpy.zeros((8,3), dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] vv = numpy.zeros((8,cell.values.shape[-1]), dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -2292,7 +2292,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_v_vv = ((PyArrayObject *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "blochl.pyx":17
+  /* "cython/blochl.pyx":17
  * 
  *     #cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=5] result = numpy.zeros((             # <<<<<<<<<<<<<<
@@ -2305,7 +2305,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "blochl.pyx":18
+  /* "cython/blochl.pyx":18
  *     #cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=5] result = numpy.zeros((
  *             vals.shape[0],             # <<<<<<<<<<<<<<
@@ -2315,7 +2315,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_t_9 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_vals->dimensions[0])); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
 
-  /* "blochl.pyx":19
+  /* "cython/blochl.pyx":19
  *     cdef numpy.ndarray[numpy.double_t, ndim=5] result = numpy.zeros((
  *             vals.shape[0],
  *             vals.shape[1],             # <<<<<<<<<<<<<<
@@ -2325,7 +2325,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_t_7 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_vals->dimensions[1])); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
 
-  /* "blochl.pyx":20
+  /* "cython/blochl.pyx":20
  *             vals.shape[0],
  *             vals.shape[1],
  *             vals.shape[2],             # <<<<<<<<<<<<<<
@@ -2335,7 +2335,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_t_1 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_vals->dimensions[2])); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 20, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
-  /* "blochl.pyx":21
+  /* "cython/blochl.pyx":21
  *             vals.shape[1],
  *             vals.shape[2],
  *             vals.shape[3],             # <<<<<<<<<<<<<<
@@ -2345,7 +2345,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_t_3 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_vals->dimensions[3])); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "blochl.pyx":22
+  /* "cython/blochl.pyx":22
  *             vals.shape[2],
  *             vals.shape[3],
  *             pts_at.shape[0],             # <<<<<<<<<<<<<<
@@ -2355,7 +2355,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_t_11 = __Pyx_PyInt_From_Py_intptr_t((__pyx_v_pts_at->dimensions[0])); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 22, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
 
-  /* "blochl.pyx":18
+  /* "cython/blochl.pyx":18
  *     #cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=5] result = numpy.zeros((
  *             vals.shape[0],             # <<<<<<<<<<<<<<
@@ -2380,7 +2380,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_t_3 = 0;
   __pyx_t_11 = 0;
 
-  /* "blochl.pyx":17
+  /* "cython/blochl.pyx":17
  * 
  *     #cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=5] result = numpy.zeros((             # <<<<<<<<<<<<<<
@@ -2393,7 +2393,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_12);
   __pyx_t_12 = 0;
 
-  /* "blochl.pyx":23
+  /* "cython/blochl.pyx":23
  *             vals.shape[3],
  *             pts_at.shape[0],
  *         ), dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -2410,7 +2410,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   if (PyDict_SetItem(__pyx_t_12, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "blochl.pyx":17
+  /* "cython/blochl.pyx":17
  * 
  *     #cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=5] result = numpy.zeros((             # <<<<<<<<<<<<<<
@@ -2436,7 +2436,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_v_result = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "blochl.pyx":26
+  /* "cython/blochl.pyx":26
  * 
  *     # Parallelipiped loop
  *     for i in range(crds.shape[0]):             # <<<<<<<<<<<<<<
@@ -2448,7 +2448,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   for (__pyx_t_16 = 0; __pyx_t_16 < __pyx_t_15; __pyx_t_16+=1) {
     __pyx_v_i = __pyx_t_16;
 
-    /* "blochl.pyx":27
+    /* "cython/blochl.pyx":27
  *     # Parallelipiped loop
  *     for i in range(crds.shape[0]):
  *         i1 = (i+1) % crds.shape[0]             # <<<<<<<<<<<<<<
@@ -2462,7 +2462,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
     }
     __pyx_v_i1 = __Pyx_mod_long(__pyx_t_17, (__pyx_v_crds->dimensions[0]));
 
-    /* "blochl.pyx":28
+    /* "cython/blochl.pyx":28
  *     for i in range(crds.shape[0]):
  *         i1 = (i+1) % crds.shape[0]
  *         for j in range(crds.shape[1]):             # <<<<<<<<<<<<<<
@@ -2474,7 +2474,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
     for (__pyx_t_20 = 0; __pyx_t_20 < __pyx_t_19; __pyx_t_20+=1) {
       __pyx_v_j = __pyx_t_20;
 
-      /* "blochl.pyx":29
+      /* "cython/blochl.pyx":29
  *         i1 = (i+1) % crds.shape[0]
  *         for j in range(crds.shape[1]):
  *             j1 = (j+1) % crds.shape[1]             # <<<<<<<<<<<<<<
@@ -2488,7 +2488,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
       }
       __pyx_v_j1 = __Pyx_mod_long(__pyx_t_17, (__pyx_v_crds->dimensions[1]));
 
-      /* "blochl.pyx":30
+      /* "cython/blochl.pyx":30
  *         for j in range(crds.shape[1]):
  *             j1 = (j+1) % crds.shape[1]
  *             for k in range(crds.shape[2]):             # <<<<<<<<<<<<<<
@@ -2500,7 +2500,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
       for (__pyx_t_23 = 0; __pyx_t_23 < __pyx_t_22; __pyx_t_23+=1) {
         __pyx_v_k = __pyx_t_23;
 
-        /* "blochl.pyx":31
+        /* "cython/blochl.pyx":31
  *             j1 = (j+1) % crds.shape[1]
  *             for k in range(crds.shape[2]):
  *                 k1 = (k+1) % crds.shape[2]             # <<<<<<<<<<<<<<
@@ -2514,7 +2514,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         }
         __pyx_v_k1 = __Pyx_mod_long(__pyx_t_17, (__pyx_v_crds->dimensions[2]));
 
-        /* "blochl.pyx":34
+        /* "cython/blochl.pyx":34
  * 
  *                 cc = crds[
  *                     ( i, i, i, i,i1,i1,i1,i1),             # <<<<<<<<<<<<<<
@@ -2564,7 +2564,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_9 = 0;
         __pyx_t_24 = 0;
 
-        /* "blochl.pyx":35
+        /* "cython/blochl.pyx":35
  *                 cc = crds[
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),             # <<<<<<<<<<<<<<
@@ -2614,7 +2614,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_12 = 0;
         __pyx_t_1 = 0;
 
-        /* "blochl.pyx":36
+        /* "cython/blochl.pyx":36
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),
  *                     ( k,k1, k,k1, k,k1, k,k1),             # <<<<<<<<<<<<<<
@@ -2664,7 +2664,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_9 = 0;
         __pyx_t_24 = 0;
 
-        /* "blochl.pyx":33
+        /* "cython/blochl.pyx":33
  *                 k1 = (k+1) % crds.shape[2]
  * 
  *                 cc = crds[             # <<<<<<<<<<<<<<
@@ -2708,7 +2708,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __Pyx_DECREF_SET(__pyx_v_cc, ((PyArrayObject *)__pyx_t_27));
         __pyx_t_27 = 0;
 
-        /* "blochl.pyx":39
+        /* "cython/blochl.pyx":39
  *                 ]
  * 
  *                 if i1 == 0:             # <<<<<<<<<<<<<<
@@ -2718,7 +2718,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_32 = ((__pyx_v_i1 == 0) != 0);
         if (__pyx_t_32) {
 
-          /* "blochl.pyx":40
+          /* "cython/blochl.pyx":40
  * 
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -2759,7 +2759,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":39
+          /* "cython/blochl.pyx":39
  *                 ]
  * 
  *                 if i1 == 0:             # <<<<<<<<<<<<<<
@@ -2768,7 +2768,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
  */
         }
 
-        /* "blochl.pyx":41
+        /* "cython/blochl.pyx":41
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:             # <<<<<<<<<<<<<<
@@ -2778,7 +2778,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_32 = ((__pyx_v_j1 == 0) != 0);
         if (__pyx_t_32) {
 
-          /* "blochl.pyx":42
+          /* "cython/blochl.pyx":42
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -2819,7 +2819,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":43
+          /* "cython/blochl.pyx":43
  *                 if j1 == 0:
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -2860,7 +2860,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           __Pyx_DECREF(__pyx_t_26); __pyx_t_26 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":41
+          /* "cython/blochl.pyx":41
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:             # <<<<<<<<<<<<<<
@@ -2869,7 +2869,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
  */
         }
 
-        /* "blochl.pyx":44
+        /* "cython/blochl.pyx":44
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:             # <<<<<<<<<<<<<<
@@ -2879,7 +2879,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_32 = ((__pyx_v_k1 == 0) != 0);
         if (__pyx_t_32) {
 
-          /* "blochl.pyx":45
+          /* "cython/blochl.pyx":45
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:
  *                     cc[1::2] += cell.vectors[2,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -2920,7 +2920,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":44
+          /* "cython/blochl.pyx":44
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:             # <<<<<<<<<<<<<<
@@ -2929,7 +2929,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
  */
         }
 
-        /* "blochl.pyx":48
+        /* "cython/blochl.pyx":48
  * 
  *                 vv = vals[
  *                     ( i, i, i, i,i1,i1,i1,i1),             # <<<<<<<<<<<<<<
@@ -2979,7 +2979,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_3 = 0;
         __pyx_t_2 = 0;
 
-        /* "blochl.pyx":49
+        /* "cython/blochl.pyx":49
  *                 vv = vals[
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),             # <<<<<<<<<<<<<<
@@ -3029,7 +3029,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_24 = 0;
         __pyx_t_27 = 0;
 
-        /* "blochl.pyx":50
+        /* "cython/blochl.pyx":50
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),
  *                     ( k,k1, k,k1, k,k1, k,k1),             # <<<<<<<<<<<<<<
@@ -3079,7 +3079,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __pyx_t_3 = 0;
         __pyx_t_2 = 0;
 
-        /* "blochl.pyx":47
+        /* "cython/blochl.pyx":47
  *                     cc[1::2] += cell.vectors[2,numpy.newaxis,:]
  * 
  *                 vv = vals[             # <<<<<<<<<<<<<<
@@ -3123,7 +3123,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
         __Pyx_DECREF_SET(__pyx_v_vv, ((PyArrayObject *)__pyx_t_1));
         __pyx_t_1 = 0;
 
-        /* "blochl.pyx":54
+        /* "cython/blochl.pyx":54
  * 
  *                 # Tetrahedron loop
  *                 for v1,v2,v3,v4 in (             # <<<<<<<<<<<<<<
@@ -3184,7 +3184,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           __pyx_v_v3 = __pyx_t_36;
           __pyx_v_v4 = __pyx_t_37;
 
-          /* "blochl.pyx":63
+          /* "cython/blochl.pyx":63
  *                 ):
  * 
  *                     v_t = abs(numpy.linalg.det((cc[v1]-cc[v4],cc[v2]-cc[v4],cc[v3]-cc[v4])))/vol/6             # <<<<<<<<<<<<<<
@@ -3266,7 +3266,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
           __pyx_v_v_t = __pyx_t_4;
 
-          /* "blochl.pyx":66
+          /* "cython/blochl.pyx":66
  * 
  *                     # Band loop
  *                     for b in range(vals.shape[3]):             # <<<<<<<<<<<<<<
@@ -3278,7 +3278,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
           for (__pyx_t_37 = 0; __pyx_t_37 < __pyx_t_39; __pyx_t_37+=1) {
             __pyx_v_b = __pyx_t_37;
 
-            /* "blochl.pyx":68
+            /* "cython/blochl.pyx":68
  *                     for b in range(vals.shape[3]):
  * 
  *                         e1, e2, e3, e4 = sorted((vv[v1,b],vv[v2,b],vv[v3,b],vv[v4,b]))             # <<<<<<<<<<<<<<
@@ -3415,7 +3415,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
             __pyx_v_e3 = __pyx_t_50;
             __pyx_v_e4 = __pyx_t_51;
 
-            /* "blochl.pyx":70
+            /* "cython/blochl.pyx":70
  *                         e1, e2, e3, e4 = sorted((vv[v1,b],vv[v2,b],vv[v3,b],vv[v4,b]))
  * 
  *                         for n in range(pts_at.shape[0]):             # <<<<<<<<<<<<<<
@@ -3427,7 +3427,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
             for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_53; __pyx_t_36+=1) {
               __pyx_v_n = __pyx_t_36;
 
-              /* "blochl.pyx":71
+              /* "cython/blochl.pyx":71
  * 
  *                         for n in range(pts_at.shape[0]):
  *                             e = pts_at[n]             # <<<<<<<<<<<<<<
@@ -3446,7 +3446,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
               }
               __pyx_v_e = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_double_t *, __pyx_pybuffernd_pts_at.rcbuffer->pybuffer.buf, __pyx_t_54, __pyx_pybuffernd_pts_at.diminfo[0].strides));
 
-              /* "blochl.pyx":73
+              /* "cython/blochl.pyx":73
  *                             e = pts_at[n]
  * 
  *                             if e>e1 and e<=e2:             # <<<<<<<<<<<<<<
@@ -3464,7 +3464,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
               __pyx_L19_bool_binop_done:;
               if (__pyx_t_32) {
 
-                /* "blochl.pyx":74
+                /* "cython/blochl.pyx":74
  * 
  *                             if e>e1 and e<=e2:
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)             # <<<<<<<<<<<<<<
@@ -3491,7 +3491,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                 }
                 __pyx_v__t = (__pyx_t_51 / __pyx_t_50);
 
-                /* "blochl.pyx":73
+                /* "cython/blochl.pyx":73
  *                             e = pts_at[n]
  * 
  *                             if e>e1 and e<=e2:             # <<<<<<<<<<<<<<
@@ -3501,7 +3501,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                 goto __pyx_L18;
               }
 
-              /* "blochl.pyx":75
+              /* "cython/blochl.pyx":75
  *                             if e>e1 and e<=e2:
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:             # <<<<<<<<<<<<<<
@@ -3519,7 +3519,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
               __pyx_L21_bool_binop_done:;
               if (__pyx_t_32) {
 
-                /* "blochl.pyx":76
+                /* "cython/blochl.pyx":76
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:
  *                                 _t = v_t / (e3-e1) / (e4-e1) * (             # <<<<<<<<<<<<<<
@@ -3538,7 +3538,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                   __PYX_ERR(0, 76, __pyx_L1_error)
                 }
 
-                /* "blochl.pyx":77
+                /* "cython/blochl.pyx":77
  *                             elif e>e2 and e<=e3:
  *                                 _t = v_t / (e3-e1) / (e4-e1) * (
  *                                     3 * (e2-e1) + 6 * (e-e2) - 3 * (e4 + e3 - e2 - e1) * (e - e2)**2 / (e3 - e2) / (e4 - e2)             # <<<<<<<<<<<<<<
@@ -3558,7 +3558,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                   __PYX_ERR(0, 77, __pyx_L1_error)
                 }
 
-                /* "blochl.pyx":76
+                /* "cython/blochl.pyx":76
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:
  *                                 _t = v_t / (e3-e1) / (e4-e1) * (             # <<<<<<<<<<<<<<
@@ -3567,7 +3567,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
  */
                 __pyx_v__t = ((__pyx_t_51 / __pyx_t_50) * (((3.0 * (__pyx_v_e2 - __pyx_v_e1)) + (6.0 * (__pyx_v_e - __pyx_v_e2))) - (__pyx_t_56 / __pyx_t_4)));
 
-                /* "blochl.pyx":75
+                /* "cython/blochl.pyx":75
  *                             if e>e1 and e<=e2:
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:             # <<<<<<<<<<<<<<
@@ -3577,7 +3577,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                 goto __pyx_L18;
               }
 
-              /* "blochl.pyx":79
+              /* "cython/blochl.pyx":79
  *                                     3 * (e2-e1) + 6 * (e-e2) - 3 * (e4 + e3 - e2 - e1) * (e - e2)**2 / (e3 - e2) / (e4 - e2)
  *                                 )
  *                             elif e>e3 and e<e4:             # <<<<<<<<<<<<<<
@@ -3595,7 +3595,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
               __pyx_L23_bool_binop_done:;
               if (__pyx_t_32) {
 
-                /* "blochl.pyx":80
+                /* "cython/blochl.pyx":80
  *                                 )
  *                             elif e>e3 and e<e4:
  *                                 _t = v_t * 3 * (e4-e)**2 / (e4-e1) / (e4-e2) / (e4-e3)             # <<<<<<<<<<<<<<
@@ -3622,7 +3622,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                 }
                 __pyx_v__t = (__pyx_t_4 / __pyx_t_56);
 
-                /* "blochl.pyx":79
+                /* "cython/blochl.pyx":79
  *                                     3 * (e2-e1) + 6 * (e-e2) - 3 * (e4 + e3 - e2 - e1) * (e - e2)**2 / (e3 - e2) / (e4 - e2)
  *                                 )
  *                             elif e>e3 and e<e4:             # <<<<<<<<<<<<<<
@@ -3632,7 +3632,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
                 goto __pyx_L18;
               }
 
-              /* "blochl.pyx":82
+              /* "cython/blochl.pyx":82
  *                                 _t = v_t * 3 * (e4-e)**2 / (e4-e1) / (e4-e2) / (e4-e3)
  *                             else:
  *                                 _t = 0             # <<<<<<<<<<<<<<
@@ -3644,7 +3644,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
               }
               __pyx_L18:;
 
-              /* "blochl.pyx":84
+              /* "cython/blochl.pyx":84
  *                                 _t = 0
  * 
  *                             result[i,j,k,b,n] += _t             # <<<<<<<<<<<<<<
@@ -3685,7 +3685,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
             }
           }
 
-          /* "blochl.pyx":54
+          /* "cython/blochl.pyx":54
  * 
  *                 # Tetrahedron loop
  *                 for v1,v2,v3,v4 in (             # <<<<<<<<<<<<<<
@@ -3698,7 +3698,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
     }
   }
 
-  /* "blochl.pyx":85
+  /* "cython/blochl.pyx":85
  * 
  *                             result[i,j,k,b,n] += _t
  *     return result             # <<<<<<<<<<<<<<
@@ -3710,7 +3710,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "blochl.pyx":5
+  /* "cython/blochl.pyx":5
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):             # <<<<<<<<<<<<<<
@@ -3743,7 +3743,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_vals.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_vv.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("blochl.tetrahedron", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("dfttools.blochl.tetrahedron", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -3764,7 +3764,7 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
   return __pyx_r;
 }
 
-/* "blochl.pyx":88
+/* "cython/blochl.pyx":88
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):             # <<<<<<<<<<<<<<
@@ -3773,9 +3773,9 @@ static PyObject *__pyx_pf_6blochl_tetrahedron(CYTHON_UNUSED PyObject *__pyx_self
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6blochl_3tetrahedron_plain(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6blochl_3tetrahedron_plain = {"tetrahedron_plain", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6blochl_3tetrahedron_plain, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6blochl_3tetrahedron_plain(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_8dfttools_6blochl_3tetrahedron_plain(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_8dfttools_6blochl_3tetrahedron_plain = {"tetrahedron_plain", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_8dfttools_6blochl_3tetrahedron_plain, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_8dfttools_6blochl_3tetrahedron_plain(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_cell = 0;
   PyArrayObject *__pyx_v_pts_at = 0;
   PyArrayObject *__pyx_v_weights = 0;
@@ -3834,13 +3834,13 @@ static PyObject *__pyx_pw_6blochl_3tetrahedron_plain(PyObject *__pyx_self, PyObj
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("tetrahedron_plain", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 88, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("blochl.tetrahedron_plain", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("dfttools.blochl.tetrahedron_plain", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pts_at), __pyx_ptype_5numpy_ndarray, 1, "pts_at", 0))) __PYX_ERR(0, 88, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_weights), __pyx_ptype_5numpy_ndarray, 1, "weights", 0))) __PYX_ERR(0, 88, __pyx_L1_error)
-  __pyx_r = __pyx_pf_6blochl_2tetrahedron_plain(__pyx_self, __pyx_v_cell, __pyx_v_pts_at, __pyx_v_weights);
+  __pyx_r = __pyx_pf_8dfttools_6blochl_2tetrahedron_plain(__pyx_self, __pyx_v_cell, __pyx_v_pts_at, __pyx_v_weights);
 
   /* function exit code */
   goto __pyx_L0;
@@ -3851,7 +3851,7 @@ static PyObject *__pyx_pw_6blochl_3tetrahedron_plain(PyObject *__pyx_self, PyObj
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at, PyArrayObject *__pyx_v_weights) {
+static PyObject *__pyx_pf_8dfttools_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_cell, PyArrayObject *__pyx_v_pts_at, PyArrayObject *__pyx_v_weights) {
   double __pyx_v_vol;
   int __pyx_v_i;
   int __pyx_v_j;
@@ -3994,7 +3994,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   }
   __pyx_pybuffernd_weights.diminfo[0].strides = __pyx_pybuffernd_weights.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_weights.diminfo[0].shape = __pyx_pybuffernd_weights.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_weights.diminfo[1].strides = __pyx_pybuffernd_weights.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_weights.diminfo[1].shape = __pyx_pybuffernd_weights.rcbuffer->pybuffer.shape[1]; __pyx_pybuffernd_weights.diminfo[2].strides = __pyx_pybuffernd_weights.rcbuffer->pybuffer.strides[2]; __pyx_pybuffernd_weights.diminfo[2].shape = __pyx_pybuffernd_weights.rcbuffer->pybuffer.shape[2]; __pyx_pybuffernd_weights.diminfo[3].strides = __pyx_pybuffernd_weights.rcbuffer->pybuffer.strides[3]; __pyx_pybuffernd_weights.diminfo[3].shape = __pyx_pybuffernd_weights.rcbuffer->pybuffer.shape[3];
 
-  /* "blochl.pyx":90
+  /* "cython/blochl.pyx":90
  * def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):
  * 
  *     cdef double vol = cell.volume()             # <<<<<<<<<<<<<<
@@ -4022,7 +4022,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_vol = __pyx_t_4;
 
-  /* "blochl.pyx":94
+  /* "cython/blochl.pyx":94
  *     cdef double v_t, e1, e2, e3, e4, e, _t
  * 
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()             # <<<<<<<<<<<<<<
@@ -4060,7 +4060,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __pyx_v_crds = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "blochl.pyx":95
+  /* "cython/blochl.pyx":95
  * 
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values             # <<<<<<<<<<<<<<
@@ -4083,7 +4083,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __pyx_v_vals = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "blochl.pyx":96
+  /* "cython/blochl.pyx":96
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] cc = numpy.zeros((8,3), dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -4122,7 +4122,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __pyx_v_cc = ((PyArrayObject *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "blochl.pyx":97
+  /* "cython/blochl.pyx":97
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] cc = numpy.zeros((8,3), dtype = numpy.double)
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] vv = numpy.zeros((8,cell.values.shape[-1]), dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -4183,7 +4183,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __pyx_v_vv = ((PyArrayObject *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "blochl.pyx":99
+  /* "cython/blochl.pyx":99
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] vv = numpy.zeros((8,cell.values.shape[-1]), dtype = numpy.double)
  * 
  *     cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -4230,7 +4230,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __pyx_v_result = ((PyArrayObject *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "blochl.pyx":101
+  /* "cython/blochl.pyx":101
  *     cdef numpy.ndarray[numpy.double_t, ndim=1] result = numpy.zeros(pts_at.shape[0], dtype = numpy.double)
  * 
  *     for i in range(4):             # <<<<<<<<<<<<<<
@@ -4240,7 +4240,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   for (__pyx_t_12 = 0; __pyx_t_12 < 4; __pyx_t_12+=1) {
     __pyx_v_i = __pyx_t_12;
 
-    /* "blochl.pyx":102
+    /* "cython/blochl.pyx":102
  * 
  *     for i in range(4):
  *         if not vals.shape[i] == weights.shape[i]:             # <<<<<<<<<<<<<<
@@ -4250,7 +4250,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
     __pyx_t_13 = ((!(((__pyx_v_vals->dimensions[__pyx_v_i]) == (__pyx_v_weights->dimensions[__pyx_v_i])) != 0)) != 0);
     if (unlikely(__pyx_t_13)) {
 
-      /* "blochl.pyx":103
+      /* "cython/blochl.pyx":103
  *     for i in range(4):
  *         if not vals.shape[i] == weights.shape[i]:
  *             raise ValueError("Weights array dimension {:d} mismatch: {:d}, expected {:d}".format(i,weights.shape[i],vals.shape[i]))             # <<<<<<<<<<<<<<
@@ -4326,7 +4326,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
       __PYX_ERR(0, 103, __pyx_L1_error)
 
-      /* "blochl.pyx":102
+      /* "cython/blochl.pyx":102
  * 
  *     for i in range(4):
  *         if not vals.shape[i] == weights.shape[i]:             # <<<<<<<<<<<<<<
@@ -4336,7 +4336,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
     }
   }
 
-  /* "blochl.pyx":106
+  /* "cython/blochl.pyx":106
  * 
  *     # Parallelipiped loop
  *     for i in range(crds.shape[0]):             # <<<<<<<<<<<<<<
@@ -4348,7 +4348,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   for (__pyx_t_12 = 0; __pyx_t_12 < __pyx_t_18; __pyx_t_12+=1) {
     __pyx_v_i = __pyx_t_12;
 
-    /* "blochl.pyx":107
+    /* "cython/blochl.pyx":107
  *     # Parallelipiped loop
  *     for i in range(crds.shape[0]):
  *         i1 = (i+1) % crds.shape[0]             # <<<<<<<<<<<<<<
@@ -4362,7 +4362,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
     }
     __pyx_v_i1 = __Pyx_mod_long(__pyx_t_19, (__pyx_v_crds->dimensions[0]));
 
-    /* "blochl.pyx":108
+    /* "cython/blochl.pyx":108
  *     for i in range(crds.shape[0]):
  *         i1 = (i+1) % crds.shape[0]
  *         for j in range(crds.shape[1]):             # <<<<<<<<<<<<<<
@@ -4374,7 +4374,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
     for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_21; __pyx_t_15+=1) {
       __pyx_v_j = __pyx_t_15;
 
-      /* "blochl.pyx":109
+      /* "cython/blochl.pyx":109
  *         i1 = (i+1) % crds.shape[0]
  *         for j in range(crds.shape[1]):
  *             j1 = (j+1) % crds.shape[1]             # <<<<<<<<<<<<<<
@@ -4388,7 +4388,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
       }
       __pyx_v_j1 = __Pyx_mod_long(__pyx_t_19, (__pyx_v_crds->dimensions[1]));
 
-      /* "blochl.pyx":110
+      /* "cython/blochl.pyx":110
  *         for j in range(crds.shape[1]):
  *             j1 = (j+1) % crds.shape[1]
  *             for k in range(crds.shape[2]):             # <<<<<<<<<<<<<<
@@ -4400,7 +4400,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
       for (__pyx_t_24 = 0; __pyx_t_24 < __pyx_t_23; __pyx_t_24+=1) {
         __pyx_v_k = __pyx_t_24;
 
-        /* "blochl.pyx":111
+        /* "cython/blochl.pyx":111
  *             j1 = (j+1) % crds.shape[1]
  *             for k in range(crds.shape[2]):
  *                 k1 = (k+1) % crds.shape[2]             # <<<<<<<<<<<<<<
@@ -4414,7 +4414,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         }
         __pyx_v_k1 = __Pyx_mod_long(__pyx_t_19, (__pyx_v_crds->dimensions[2]));
 
-        /* "blochl.pyx":114
+        /* "cython/blochl.pyx":114
  * 
  *                 cc = crds[
  *                     ( i, i, i, i,i1,i1,i1,i1),             # <<<<<<<<<<<<<<
@@ -4464,7 +4464,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_14 = 0;
         __pyx_t_25 = 0;
 
-        /* "blochl.pyx":115
+        /* "cython/blochl.pyx":115
  *                 cc = crds[
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),             # <<<<<<<<<<<<<<
@@ -4514,7 +4514,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_3 = 0;
         __pyx_t_9 = 0;
 
-        /* "blochl.pyx":116
+        /* "cython/blochl.pyx":116
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),
  *                     ( k,k1, k,k1, k,k1, k,k1),             # <<<<<<<<<<<<<<
@@ -4564,7 +4564,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_14 = 0;
         __pyx_t_25 = 0;
 
-        /* "blochl.pyx":113
+        /* "cython/blochl.pyx":113
  *                 k1 = (k+1) % crds.shape[2]
  * 
  *                 cc = crds[             # <<<<<<<<<<<<<<
@@ -4608,7 +4608,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __Pyx_DECREF_SET(__pyx_v_cc, ((PyArrayObject *)__pyx_t_28));
         __pyx_t_28 = 0;
 
-        /* "blochl.pyx":119
+        /* "cython/blochl.pyx":119
  *                 ]
  * 
  *                 if i1 == 0:             # <<<<<<<<<<<<<<
@@ -4618,7 +4618,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_13 = ((__pyx_v_i1 == 0) != 0);
         if (__pyx_t_13) {
 
-          /* "blochl.pyx":120
+          /* "cython/blochl.pyx":120
  * 
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -4659,7 +4659,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":119
+          /* "cython/blochl.pyx":119
  *                 ]
  * 
  *                 if i1 == 0:             # <<<<<<<<<<<<<<
@@ -4668,7 +4668,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
  */
         }
 
-        /* "blochl.pyx":121
+        /* "cython/blochl.pyx":121
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:             # <<<<<<<<<<<<<<
@@ -4678,7 +4678,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_13 = ((__pyx_v_j1 == 0) != 0);
         if (__pyx_t_13) {
 
-          /* "blochl.pyx":122
+          /* "cython/blochl.pyx":122
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -4719,7 +4719,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           __Pyx_DECREF(__pyx_t_28); __pyx_t_28 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":123
+          /* "cython/blochl.pyx":123
  *                 if j1 == 0:
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -4760,7 +4760,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           __Pyx_DECREF(__pyx_t_27); __pyx_t_27 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":121
+          /* "cython/blochl.pyx":121
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:             # <<<<<<<<<<<<<<
@@ -4769,7 +4769,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
  */
         }
 
-        /* "blochl.pyx":124
+        /* "cython/blochl.pyx":124
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:             # <<<<<<<<<<<<<<
@@ -4779,7 +4779,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_13 = ((__pyx_v_k1 == 0) != 0);
         if (__pyx_t_13) {
 
-          /* "blochl.pyx":125
+          /* "cython/blochl.pyx":125
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:
  *                     cc[1::2] += cell.vectors[2,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -4820,7 +4820,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           __Pyx_DECREF(__pyx_t_28); __pyx_t_28 = 0;
           __Pyx_DECREF(__pyx_t_33); __pyx_t_33 = 0;
 
-          /* "blochl.pyx":124
+          /* "cython/blochl.pyx":124
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:             # <<<<<<<<<<<<<<
@@ -4829,7 +4829,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
  */
         }
 
-        /* "blochl.pyx":128
+        /* "cython/blochl.pyx":128
  * 
  *                 vv = vals[
  *                     ( i, i, i, i,i1,i1,i1,i1),             # <<<<<<<<<<<<<<
@@ -4879,7 +4879,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_2 = 0;
         __pyx_t_1 = 0;
 
-        /* "blochl.pyx":129
+        /* "cython/blochl.pyx":129
  *                 vv = vals[
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),             # <<<<<<<<<<<<<<
@@ -4929,7 +4929,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_25 = 0;
         __pyx_t_28 = 0;
 
-        /* "blochl.pyx":130
+        /* "cython/blochl.pyx":130
  *                     ( i, i, i, i,i1,i1,i1,i1),
  *                     ( j, j,j1,j1, j, j,j1,j1),
  *                     ( k,k1, k,k1, k,k1, k,k1),             # <<<<<<<<<<<<<<
@@ -4979,7 +4979,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __pyx_t_2 = 0;
         __pyx_t_1 = 0;
 
-        /* "blochl.pyx":127
+        /* "cython/blochl.pyx":127
  *                     cc[1::2] += cell.vectors[2,numpy.newaxis,:]
  * 
  *                 vv = vals[             # <<<<<<<<<<<<<<
@@ -5023,7 +5023,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
         __Pyx_DECREF_SET(__pyx_v_vv, ((PyArrayObject *)__pyx_t_9));
         __pyx_t_9 = 0;
 
-        /* "blochl.pyx":134
+        /* "cython/blochl.pyx":134
  * 
  *                 # Tetrahedron loop
  *                 for v1,v2,v3,v4 in (             # <<<<<<<<<<<<<<
@@ -5084,7 +5084,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           __pyx_v_v3 = __pyx_t_36;
           __pyx_v_v4 = __pyx_t_37;
 
-          /* "blochl.pyx":143
+          /* "cython/blochl.pyx":143
  *                 ):
  * 
  *                     v_t = abs(numpy.linalg.det((cc[v1]-cc[v4],cc[v2]-cc[v4],cc[v3]-cc[v4])))/vol/6             # <<<<<<<<<<<<<<
@@ -5166,7 +5166,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
           __pyx_v_v_t = __pyx_t_4;
 
-          /* "blochl.pyx":146
+          /* "cython/blochl.pyx":146
  * 
  *                     # Band loop
  *                     for b in range(vals.shape[3]):             # <<<<<<<<<<<<<<
@@ -5178,7 +5178,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
           for (__pyx_t_37 = 0; __pyx_t_37 < __pyx_t_39; __pyx_t_37+=1) {
             __pyx_v_b = __pyx_t_37;
 
-            /* "blochl.pyx":148
+            /* "cython/blochl.pyx":148
  *                     for b in range(vals.shape[3]):
  * 
  *                         e1, e2, e3, e4 = sorted((vv[v1,b],vv[v2,b],vv[v3,b],vv[v4,b]))             # <<<<<<<<<<<<<<
@@ -5315,7 +5315,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
             __pyx_v_e3 = __pyx_t_50;
             __pyx_v_e4 = __pyx_t_51;
 
-            /* "blochl.pyx":150
+            /* "cython/blochl.pyx":150
  *                         e1, e2, e3, e4 = sorted((vv[v1,b],vv[v2,b],vv[v3,b],vv[v4,b]))
  * 
  *                         for n in range(pts_at.shape[0]):             # <<<<<<<<<<<<<<
@@ -5327,7 +5327,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
             for (__pyx_t_36 = 0; __pyx_t_36 < __pyx_t_53; __pyx_t_36+=1) {
               __pyx_v_n = __pyx_t_36;
 
-              /* "blochl.pyx":151
+              /* "cython/blochl.pyx":151
  * 
  *                         for n in range(pts_at.shape[0]):
  *                             e = pts_at[n]             # <<<<<<<<<<<<<<
@@ -5346,7 +5346,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
               }
               __pyx_v_e = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_double_t *, __pyx_pybuffernd_pts_at.rcbuffer->pybuffer.buf, __pyx_t_54, __pyx_pybuffernd_pts_at.diminfo[0].strides));
 
-              /* "blochl.pyx":153
+              /* "cython/blochl.pyx":153
  *                             e = pts_at[n]
  * 
  *                             if e>e1 and e<=e2:             # <<<<<<<<<<<<<<
@@ -5364,7 +5364,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
               __pyx_L22_bool_binop_done:;
               if (__pyx_t_13) {
 
-                /* "blochl.pyx":154
+                /* "cython/blochl.pyx":154
  * 
  *                             if e>e1 and e<=e2:
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)             # <<<<<<<<<<<<<<
@@ -5391,7 +5391,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                 }
                 __pyx_v__t = (__pyx_t_51 / __pyx_t_50);
 
-                /* "blochl.pyx":153
+                /* "cython/blochl.pyx":153
  *                             e = pts_at[n]
  * 
  *                             if e>e1 and e<=e2:             # <<<<<<<<<<<<<<
@@ -5401,7 +5401,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                 goto __pyx_L21;
               }
 
-              /* "blochl.pyx":155
+              /* "cython/blochl.pyx":155
  *                             if e>e1 and e<=e2:
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:             # <<<<<<<<<<<<<<
@@ -5419,7 +5419,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
               __pyx_L24_bool_binop_done:;
               if (__pyx_t_13) {
 
-                /* "blochl.pyx":156
+                /* "cython/blochl.pyx":156
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:
  *                                 _t = v_t / (e3-e1) / (e4-e1) * (             # <<<<<<<<<<<<<<
@@ -5438,7 +5438,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                   __PYX_ERR(0, 156, __pyx_L1_error)
                 }
 
-                /* "blochl.pyx":157
+                /* "cython/blochl.pyx":157
  *                             elif e>e2 and e<=e3:
  *                                 _t = v_t / (e3-e1) / (e4-e1) * (
  *                                     3 * (e2-e1) + 6 * (e-e2) - 3 * (e4 + e3 - e2 - e1) * (e - e2)**2 / (e3 - e2) / (e4 - e2)             # <<<<<<<<<<<<<<
@@ -5458,7 +5458,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                   __PYX_ERR(0, 157, __pyx_L1_error)
                 }
 
-                /* "blochl.pyx":156
+                /* "cython/blochl.pyx":156
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:
  *                                 _t = v_t / (e3-e1) / (e4-e1) * (             # <<<<<<<<<<<<<<
@@ -5467,7 +5467,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
  */
                 __pyx_v__t = ((__pyx_t_51 / __pyx_t_50) * (((3.0 * (__pyx_v_e2 - __pyx_v_e1)) + (6.0 * (__pyx_v_e - __pyx_v_e2))) - (__pyx_t_56 / __pyx_t_4)));
 
-                /* "blochl.pyx":155
+                /* "cython/blochl.pyx":155
  *                             if e>e1 and e<=e2:
  *                                 _t = v_t * 3 * (e-e1)**2 / (e2-e1) / (e3-e1) / (e4-e1)
  *                             elif e>e2 and e<=e3:             # <<<<<<<<<<<<<<
@@ -5477,7 +5477,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                 goto __pyx_L21;
               }
 
-              /* "blochl.pyx":159
+              /* "cython/blochl.pyx":159
  *                                     3 * (e2-e1) + 6 * (e-e2) - 3 * (e4 + e3 - e2 - e1) * (e - e2)**2 / (e3 - e2) / (e4 - e2)
  *                                 )
  *                             elif e>e3 and e<e4:             # <<<<<<<<<<<<<<
@@ -5495,7 +5495,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
               __pyx_L26_bool_binop_done:;
               if (__pyx_t_13) {
 
-                /* "blochl.pyx":160
+                /* "cython/blochl.pyx":160
  *                                 )
  *                             elif e>e3 and e<e4:
  *                                 _t = v_t * 3 * (e4-e)**2 / (e4-e1) / (e4-e2) / (e4-e3)             # <<<<<<<<<<<<<<
@@ -5522,7 +5522,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                 }
                 __pyx_v__t = (__pyx_t_4 / __pyx_t_56);
 
-                /* "blochl.pyx":159
+                /* "cython/blochl.pyx":159
  *                                     3 * (e2-e1) + 6 * (e-e2) - 3 * (e4 + e3 - e2 - e1) * (e - e2)**2 / (e3 - e2) / (e4 - e2)
  *                                 )
  *                             elif e>e3 and e<e4:             # <<<<<<<<<<<<<<
@@ -5532,7 +5532,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
                 goto __pyx_L21;
               }
 
-              /* "blochl.pyx":162
+              /* "cython/blochl.pyx":162
  *                                 _t = v_t * 3 * (e4-e)**2 / (e4-e1) / (e4-e2) / (e4-e3)
  *                             else:
  *                                 _t = 0             # <<<<<<<<<<<<<<
@@ -5544,7 +5544,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
               }
               __pyx_L21:;
 
-              /* "blochl.pyx":164
+              /* "cython/blochl.pyx":164
  *                                 _t = 0
  * 
  *                             result[n] += _t * weights[i,j,k,b]             # <<<<<<<<<<<<<<
@@ -5589,7 +5589,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
             }
           }
 
-          /* "blochl.pyx":134
+          /* "cython/blochl.pyx":134
  * 
  *                 # Tetrahedron loop
  *                 for v1,v2,v3,v4 in (             # <<<<<<<<<<<<<<
@@ -5602,7 +5602,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
     }
   }
 
-  /* "blochl.pyx":165
+  /* "cython/blochl.pyx":165
  * 
  *                             result[n] += _t * weights[i,j,k,b]
  *     return result             # <<<<<<<<<<<<<<
@@ -5612,7 +5612,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
   __pyx_r = ((PyObject *)__pyx_v_result);
   goto __pyx_L0;
 
-  /* "blochl.pyx":88
+  /* "cython/blochl.pyx":88
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):             # <<<<<<<<<<<<<<
@@ -5646,7 +5646,7 @@ static PyObject *__pyx_pf_6blochl_2tetrahedron_plain(CYTHON_UNUSED PyObject *__p
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_vv.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_weights.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("blochl.tetrahedron_plain", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("dfttools.blochl.tetrahedron_plain", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -8140,7 +8140,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_ValueError, __pyx_k_ValueError, sizeof(__pyx_k_ValueError), 0, 0, 1, 1},
   {&__pyx_kp_s_Weights_array_dimension_d_mismat, __pyx_k_Weights_array_dimension_d_mismat, sizeof(__pyx_k_Weights_array_dimension_d_mismat), 0, 0, 1, 0},
   {&__pyx_n_s_b, __pyx_k_b, sizeof(__pyx_k_b), 0, 0, 1, 1},
-  {&__pyx_n_s_blochl, __pyx_k_blochl, sizeof(__pyx_k_blochl), 0, 0, 1, 1},
   {&__pyx_n_s_cartesian, __pyx_k_cartesian, sizeof(__pyx_k_cartesian), 0, 0, 1, 1},
   {&__pyx_n_s_cc, __pyx_k_cc, sizeof(__pyx_k_cc), 0, 0, 1, 1},
   {&__pyx_n_s_cell, __pyx_k_cell, sizeof(__pyx_k_cell), 0, 0, 1, 1},
@@ -8148,6 +8147,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_crds, __pyx_k_crds, sizeof(__pyx_k_crds), 0, 0, 1, 1},
   {&__pyx_kp_s_cython_blochl_pyx, __pyx_k_cython_blochl_pyx, sizeof(__pyx_k_cython_blochl_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_det, __pyx_k_det, sizeof(__pyx_k_det), 0, 0, 1, 1},
+  {&__pyx_n_s_dfttools_blochl, __pyx_k_dfttools_blochl, sizeof(__pyx_k_dfttools_blochl), 0, 0, 1, 1},
   {&__pyx_n_s_double, __pyx_k_double, sizeof(__pyx_k_double), 0, 0, 1, 1},
   {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
   {&__pyx_n_s_e, __pyx_k_e, sizeof(__pyx_k_e), 0, 0, 1, 1},
@@ -8211,7 +8211,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "blochl.pyx":13
+  /* "cython/blochl.pyx":13
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] crds = cell.cartesian()
  *     cdef numpy.ndarray[numpy.double_t, ndim=4] vals = cell.values
  *     cdef numpy.ndarray[numpy.double_t, ndim=2] cc = numpy.zeros((8,3), dtype = numpy.double)             # <<<<<<<<<<<<<<
@@ -8225,7 +8225,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "blochl.pyx":40
+  /* "cython/blochl.pyx":40
  * 
  *                 if i1 == 0:
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -8239,7 +8239,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__4);
   __Pyx_GIVEREF(__pyx_slice__4);
 
-  /* "blochl.pyx":42
+  /* "cython/blochl.pyx":42
  *                     cc[4:] += cell.vectors[0,numpy.newaxis,:]
  *                 if j1 == 0:
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -8250,7 +8250,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__5);
   __Pyx_GIVEREF(__pyx_slice__5);
 
-  /* "blochl.pyx":43
+  /* "cython/blochl.pyx":43
  *                 if j1 == 0:
  *                     cc[2:4] += cell.vectors[1,numpy.newaxis,:]
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -8261,7 +8261,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__6);
   __Pyx_GIVEREF(__pyx_slice__6);
 
-  /* "blochl.pyx":45
+  /* "cython/blochl.pyx":45
  *                     cc[6:] += cell.vectors[1,numpy.newaxis,:]
  *                 if k1 == 0:
  *                     cc[1::2] += cell.vectors[2,numpy.newaxis,:]             # <<<<<<<<<<<<<<
@@ -8272,7 +8272,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__7);
   __Pyx_GIVEREF(__pyx_slice__7);
 
-  /* "blochl.pyx":55
+  /* "cython/blochl.pyx":55
  *                 # Tetrahedron loop
  *                 for v1,v2,v3,v4 in (
  *                     (0,1,2,5),             # <<<<<<<<<<<<<<
@@ -8283,7 +8283,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "blochl.pyx":56
+  /* "cython/blochl.pyx":56
  *                 for v1,v2,v3,v4 in (
  *                     (0,1,2,5),
  *                     (1,2,3,5),             # <<<<<<<<<<<<<<
@@ -8294,7 +8294,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "blochl.pyx":57
+  /* "cython/blochl.pyx":57
  *                     (0,1,2,5),
  *                     (1,2,3,5),
  *                     (0,2,4,5),             # <<<<<<<<<<<<<<
@@ -8305,7 +8305,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "blochl.pyx":58
+  /* "cython/blochl.pyx":58
  *                     (1,2,3,5),
  *                     (0,2,4,5),
  *                     (2,4,5,6),             # <<<<<<<<<<<<<<
@@ -8316,7 +8316,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
 
-  /* "blochl.pyx":59
+  /* "cython/blochl.pyx":59
  *                     (0,2,4,5),
  *                     (2,4,5,6),
  *                     (2,3,5,7),             # <<<<<<<<<<<<<<
@@ -8327,7 +8327,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
 
-  /* "blochl.pyx":60
+  /* "cython/blochl.pyx":60
  *                     (2,4,5,6),
  *                     (2,3,5,7),
  *                     (2,5,6,7),             # <<<<<<<<<<<<<<
@@ -8338,7 +8338,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "blochl.pyx":55
+  /* "cython/blochl.pyx":55
  *                 # Tetrahedron loop
  *                 for v1,v2,v3,v4 in (
  *                     (0,1,2,5),             # <<<<<<<<<<<<<<
@@ -8426,7 +8426,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
 
-  /* "blochl.pyx":5
+  /* "cython/blochl.pyx":5
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):             # <<<<<<<<<<<<<<
@@ -8438,7 +8438,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__22);
   __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(2, 0, 27, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cython_blochl_pyx, __pyx_n_s_tetrahedron, 5, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 5, __pyx_L1_error)
 
-  /* "blochl.pyx":88
+  /* "cython/blochl.pyx":88
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):             # <<<<<<<<<<<<<<
@@ -8734,14 +8734,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_blochl) {
+  if (__pyx_module_is_main_dfttools__blochl) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name, __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "blochl")) {
-      if (unlikely(PyDict_SetItemString(modules, "blochl", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "dfttools.blochl")) {
+      if (unlikely(PyDict_SetItemString(modules, "dfttools.blochl", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -8762,7 +8762,7 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "blochl.pyx":1
+  /* "cython/blochl.pyx":1
  * import numpy             # <<<<<<<<<<<<<<
  * cimport numpy, cython
  * 
@@ -8772,31 +8772,31 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_numpy, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "blochl.pyx":5
+  /* "cython/blochl.pyx":5
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):             # <<<<<<<<<<<<<<
  * 
  *     cdef double vol = cell.volume()
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6blochl_1tetrahedron, NULL, __pyx_n_s_blochl); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 5, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8dfttools_6blochl_1tetrahedron, NULL, __pyx_n_s_dfttools_blochl); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_tetrahedron, __pyx_t_1) < 0) __PYX_ERR(0, 5, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "blochl.pyx":88
+  /* "cython/blochl.pyx":88
  * 
  * #@cython.boundscheck(True)
  * def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):             # <<<<<<<<<<<<<<
  * 
  *     cdef double vol = cell.volume()
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_6blochl_3tetrahedron_plain, NULL, __pyx_n_s_blochl); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 88, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_8dfttools_6blochl_3tetrahedron_plain, NULL, __pyx_n_s_dfttools_blochl); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_tetrahedron_plain, __pyx_t_1) < 0) __PYX_ERR(0, 88, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "blochl.pyx":1
+  /* "cython/blochl.pyx":1
  * import numpy             # <<<<<<<<<<<<<<
  * cimport numpy, cython
  * 
@@ -8821,11 +8821,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init blochl", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init dfttools.blochl", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_CLEAR(__pyx_m);
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init blochl");
+    PyErr_SetString(PyExc_ImportError, "init dfttools.blochl");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

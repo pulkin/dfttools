@@ -1,23 +1,22 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 from setuptools import setup
 from setuptools.extension import Extension
 from Cython.Build import cythonize
 
-ext_modules = [ ]
+ext_modules = []
 
 ext_modules += cythonize([
     Extension("dfttools.blochl", ["cython/blochl.pyx"]),
 ])
 
 ext_modules += [
-    #Extension("dfttools.blochl", ["cython/blochl.pyx"]),
-    Extension("dfttools.parsers.native_openmx", [ "c/generic-parser.c", "c/native_openmx.c" ]),
-    Extension("dfttools.parsers.native_qe", [ "c/generic-parser.c", "c/native_qe.c" ]),
+    Extension("dfttools.parsers.native_openmx", ["c/generic-parser.c", "c/native_openmx.c"]),
+    Extension("dfttools.parsers.native_qe", ["c/generic-parser.c", "c/native_qe.c"]),
 ]
 
 setup(
-    name='DFT Parsing Tools',
-    version='0.0.0',
+    name='dfttools',
+    version='0.1.0',
     author='Artem Pulkin',
     author_email='gpulkin@gmail.com',
     packages=['dfttools', 'dfttools.parsers'],
@@ -44,4 +43,3 @@ setup(
         'scripts/dft-materialsproject',
     ],
 )
-

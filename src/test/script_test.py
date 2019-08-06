@@ -33,8 +33,10 @@ class Test_dft_plot_bands(unittest.TestCase):
             fname,
         ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         output, error = p.communicate("")
-        print(output)
-        print(error)
+        if len(output) > 0:
+            print(output)
+        if len(error) > 0:
+            print(error)
         assert p.returncode == 0
         assert os.path.exists(fname)
 
@@ -63,7 +65,9 @@ class Test_dft_svg_struct(unittest.TestCase):
             fname,
         ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
         output, error = p.communicate("")
-        print(output)
-        print(error)
+        if len(output) > 0:
+            print(output)
+        if len(error) > 0:
+            print(error)
         assert p.returncode == 0
         assert os.path.exists(fname)

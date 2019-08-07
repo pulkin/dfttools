@@ -28,13 +28,13 @@ def assert_standard_bands_path(c):
 class CommonTests(unittest.TestCase):
 
     def test_units_remain_unchanged(self):
-        b = RealSpaceBasis((1, 1), kind="orthorombic")
+        b = RealSpaceBasis((1, 1), kind="orthorhombic")
         testing.assert_equal(b.vectors.units, "angstrom")
 
         b = RealSpaceBasis(ArrayWithUnits(([1, 0], [0, 1]), units="nm"))
         testing.assert_equal(b.vectors.units, "nm")
 
-        b = RealSpaceBasis(ArrayWithUnits([1, 1], units="nm"), kind="orthorombic")
+        b = RealSpaceBasis(ArrayWithUnits([1, 1], units="nm"), kind="orthorhombic")
         testing.assert_equal(b.vectors.units, "nm")
         c = RealSpaceBasis(b)
         testing.assert_equal(c.vectors.units, "nm")
@@ -137,7 +137,7 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = (xx ** 2 + yy ** 2 + zz ** 2) * numericalunits.eV
         self.bs_grid = BandsGrid(
-            ReciprocalSpaceBasis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorombic'),
+            ReciprocalSpaceBasis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorhombic'),
             (x, y, z),
             data,
             fermi=1.5 * numericalunits.eV,
@@ -176,7 +176,7 @@ class GridTest(unittest.TestCase):
     def test_save_load_json_with_conversion(self):
         grid = self.bs_grid
 
-        data = dumps(grid.as_unitCell().to_json())
+        data = dumps(grid.as_cell().to_json())
         numericalunits.reset_units()
         x = BandsPath.from_json(loads(data)).as_grid()
 

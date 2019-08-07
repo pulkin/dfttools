@@ -356,10 +356,10 @@ class Input(AbstractTextParser, IdentifiableParser):
                 coordinatesl *= numericalunits.aBohr
                 coordinatesr *= numericalunits.aBohr
 
-            dl = (l.cartesian() - coordinatesl).sum(axis=0) / l.size()
+            dl = (l.cartesian() - coordinatesl).sum(axis=0) / l.size
             delta_l = abs(l.cartesian() - coordinatesl - dl).max()
 
-            dr = (r.cartesian() - coordinatesr).sum(axis=0) / r.size()
+            dr = (r.cartesian() - coordinatesr).sum(axis=0) / r.size
             delta_r = abs(r.cartesian() - coordinatesr - dr).max()
 
             if delta_l / numericalunits.aBohr > tolerance:
@@ -521,7 +521,7 @@ class Output(AbstractTextParser, IdentifiableParser):
                     if Input in guess_parser(f):
                         try:
                             c = Input(f.read()).unitCell()
-                            if c.size() == self.nat():
+                            if c.size == self.nat():
                                 return self.unitCells(c, noraise=True)
                         except:
                             pass

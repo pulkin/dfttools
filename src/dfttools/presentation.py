@@ -319,10 +319,10 @@ def svgwrite_unit_cell(
     font_props_small = dict(font_family=font_family, font_size="{:.1f}pt".format(font_size_small))
 
     if invisible is None:
-        visible = numpy.ones(cell.size(), dtype=bool)
+        visible = numpy.ones(cell.size, dtype=bool)
 
     elif invisible == 'auto':
-        N = cell.size()
+        N = cell.size
         initial_cell = cell
         cell = cell.repeated(3, 3, 3)
         visible = numpy.array([False] * 13 * N + [True] * N + [False] * 13 * N, dtype=bool)
@@ -469,7 +469,7 @@ def svgwrite_unit_cell(
 
     # Calculate base colors
     colors_base = tuple(__fadeout_z__(e_color[i], projected[i, 2], b_max[2], b_min[2], fadeout_strength, bg if bg is not None else (0xFF, 0xFF, 0xFF)) for i in
-                        range(cell.size()))
+                        range(cell.size))
     if hook_atomic_color:
         if invisible != "auto":
             colors_base = tuple(hook_atomic_color(i, c) for i, c in enumerate(colors_base))
@@ -524,7 +524,7 @@ def svgwrite_unit_cell(
     if show_atoms:
 
         # Draw circles
-        for i in range(cell.size()):
+        for i in range(cell.size):
 
             if visible[i]:
 
@@ -1009,7 +1009,7 @@ def matplotlib_bands(
     if not "colors" in kwargs:
         kwargs.update(next(axes._get_lines.prop_cycler))
 
-    if cell.size() > 1:
+    if cell.size > 1:
 
         # Fold K points to 0- > 1 line or project
         if not project is None:
@@ -1035,7 +1035,7 @@ def matplotlib_bands(
         else:
             x_label = None
 
-            kpoints = cell.distances((0,) + tuple(range(cell.size())))
+            kpoints = cell.distances((0,) + tuple(range(cell.size)))
             for i in range(1, kpoints.shape[0]):
                 kpoints[i] += kpoints[i - 1]
 
@@ -1054,8 +1054,8 @@ def matplotlib_bands(
                 x_label += " (" + coordinate_units_name + ")"
 
         # Find location of edges on the K axis
-        if cell.size() > 2:
-            makes_turn = numpy.abs(1. + cell.angles(range(cell.size()))) > threshold
+        if cell.size > 2:
+            makes_turn = numpy.abs(1. + cell.angles(range(cell.size))) > threshold
             makes_turn = numpy.concatenate([[True], makes_turn, [True]])
         else:
             makes_turn = numpy.array([True, True])
@@ -1265,7 +1265,7 @@ def matplotlib_bands_density(
             method = "tetrahedron"
         elif isinstance(cell, UnitCell):
             grid = cell.as_grid()
-            if grid.size() == cell.size():
+            if grid.size == cell.size:
                 cell = grid
                 method = "tetrahedron"
                 weights = numpy.reshape(weights, grid.values.shape)
@@ -1297,8 +1297,8 @@ def matplotlib_bands_density(
         _on_top_of = on_top_of.reshape(-1)[numpy.newaxis, :]
         _energies = energies[:, numpy.newaxis] * units
 
-        data = (_weights * method(_values - _energies)).sum(axis=-1) / cell.size()
-        data_baseline = (_on_top_of * method(_values - _energies)).sum(axis=-1) / cell.size()
+        data = (_weights * method(_values - _energies)).sum(axis=-1) / cell.size
+        data_baseline = (_on_top_of * method(_values - _energies)).sum(axis=-1) / cell.size
 
     data += data_baseline
     data *= units
@@ -1455,7 +1455,7 @@ def matplotlib_scalar(
     mn, mx = mn * (1 + margins) + mx * (-margins), mn * (-margins) + mx * (1 + margins)
 
     if ppu is None:
-        ppu = (grid.size() / grid.volume()) ** (1. / 3)
+        ppu = (grid.size / grid.volume) ** (1. / 3)
 
     else:
         ppu /= units

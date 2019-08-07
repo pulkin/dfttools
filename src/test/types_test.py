@@ -29,7 +29,7 @@ class BasisInitializationTest(unittest.TestCase):
     def test_init_2(self):
         b = Basis(
             (1, 2, 3),
-            kind='orthorombic'
+            kind='orthorhombic'
         )
         testing.assert_equal(b.vectors, numpy.array(
             ((1, 0, 0), (0, 2, 0), (0, 0, 3))
@@ -69,7 +69,7 @@ class BasisTest(unittest.TestCase):
         )
         self.c = Basis(
             (1, 1, 1),
-            kind='orthorombic',
+            kind='orthorhombic',
         )
 
     def test_pickle(self):
@@ -100,7 +100,7 @@ class BasisTest(unittest.TestCase):
         testing.assert_allclose(transformed, ((1.5, 3. ** .5 / 2, 3),), atol=1e-7)
 
     def test_volume(self):
-        assert abs(self.b.volume() - 1.5 * 3. ** .5) < 1e-7
+        assert abs(self.b.volume - 1.5 * 3. ** .5) < 1e-7
 
     def test_reciprocal(self):
         testing.assert_allclose(numpy.dot(numpy.swapaxes(self.b.reciprocal().vectors, 0, 1), self.b.vectors),
@@ -175,20 +175,20 @@ class BasisTest(unittest.TestCase):
     def test_reorder(self):
         c = self.b.copy()
 
-        c.reorder_vectors(0, 1, 2)
+        c.transpose_vectors(0, 1, 2)
         testing.assert_equal(self.b.vectors, c.vectors)
 
-        c.reorder_vectors(2, 1, 0)
+        c.transpose_vectors(2, 1, 0)
         testing.assert_equal(self.b.vectors[::-1], c.vectors)
 
         with self.assertRaises(ArgumentError):
-            c.reorder_vectors(2, 1)
+            c.transpose_vectors(2, 1)
 
         with self.assertRaises(ArgumentError):
-            c.reorder_vectors(2, 1, 0, 3)
+            c.transpose_vectors(2, 1, 0, 3)
 
         with self.assertRaises(ArgumentError):
-            c.reorder_vectors(2, 1, 2)
+            c.transpose_vectors(2, 1, 2)
 
     def test_genpath(self):
         keys = ((0, 0, 0), (1, 0, 0), (1, 1, 0), (1, 1, 1))
@@ -307,7 +307,7 @@ class BasisMacroTests(unittest.TestCase):
 
     def test_diamond(self):
         a = diamond_basis(3.14)
-        testing.assert_allclose(a.volume(), 3.14 ** 3 / 4)
+        testing.assert_allclose(a.volume, 3.14 ** 3 / 4)
 
 
 class CellInitializationTest(unittest.TestCase):
@@ -338,7 +338,7 @@ class CellInitializationTest(unittest.TestCase):
 
     def test_init_2(self):
         n = UnitCell(
-            Basis((1e-10, 1e-10, 1e-10), kind='orthorombic'),
+            Basis((1e-10, 1e-10, 1e-10), kind='orthorhombic'),
             ((.25, .5, .5), (.5, .25, .5), (.5, .5, .25), (.25, .25, .25)),
             ((1,), (2,))
         )
@@ -347,7 +347,7 @@ class CellInitializationTest(unittest.TestCase):
 
     def test_init_3(self):
         n = UnitCell(
-            Basis((1e-10, 1e-10, 1e-10), kind='orthorombic'),
+            Basis((1e-10, 1e-10, 1e-10), kind='orthorhombic'),
             (.5, .5, .5),
             'N',
             c_basis=Basis(((2e-10, 0, 0), (0, 1e-10, 0), (0, 0, 3e-10)))
@@ -356,7 +356,7 @@ class CellInitializationTest(unittest.TestCase):
 
     def test_init_4(self):
         n = UnitCell(
-            Basis((1, 2, 3), kind='orthorombic'),
+            Basis((1, 2, 3), kind='orthorhombic'),
             (.5, .5, .5),
             'N',
             c_basis='cartesian'
@@ -366,7 +366,7 @@ class CellInitializationTest(unittest.TestCase):
     def test_init_fail_broadcast(self):
         with self.assertRaises(ArgumentError):
             UnitCell(
-                Basis((1, 1, 1), kind='orthorombic'),
+                Basis((1, 1, 1), kind='orthorhombic'),
                 ((.25, .5, .5), (.5, .25, .5), (.5, .5, .25), (.25, .25, .25)),
                 (1, 2, 3)
             )
@@ -374,7 +374,7 @@ class CellInitializationTest(unittest.TestCase):
     def test_init_fail_size_0(self):
         with self.assertRaises(ArgumentError):
             UnitCell(
-                Basis((1, 1, 1), kind='orthorombic'),
+                Basis((1, 1, 1), kind='orthorhombic'),
                 (.25, .5, .5, .5),
                 'C',
             )
@@ -382,7 +382,7 @@ class CellInitializationTest(unittest.TestCase):
     def test_init_fail_size_1(self):
         with self.assertRaises(ArgumentError):
             UnitCell(
-                Basis((1, 1, 1), kind='orthorombic'),
+                Basis((1, 1, 1), kind='orthorhombic'),
                 (
                     (.25, .5, .5, .5),
                     (.25, .5, .5, .5),
@@ -433,13 +433,13 @@ class CellTest(unittest.TestCase):
         assert not self.cell == c
 
     def test_volume_0(self):
-        assert abs(self.cell.volume() / (.5 * 3. ** .5 * self.a ** 2 * self.h) - 1) < 1e-7
+        assert abs(self.cell.volume / (.5 * 3. ** .5 * self.a ** 2 * self.h) - 1) < 1e-7
 
     def test_volume_1(self):
-        assert abs(self.cell.volume() / (2 * self.cell2.volume()) - 1) < 1e-7
+        assert abs(self.cell.volume / (2 * self.cell2.volume) - 1) < 1e-7
 
     def test_size(self):
-        assert self.cell.size() == 2 * self.cell2.size() == 2
+        assert self.cell.size == 2 * self.cell2.size == 2
 
     def test_copy_0(self):
         cp = self.cell.copy()
@@ -636,7 +636,7 @@ class CellTest(unittest.TestCase):
             Basis(self.cell.vectors),
             coordinates=((0.1, 0.1, 0), (0.9, 0.1, 0), (0.1, 0.9, 0), (0.9, 0.9, 0)),
             values="A",
-        ).packed()
+        ).ws_packed()
         testing.assert_allclose(cell.coordinates, (
             (0.1, 0.1, 0),
             (-0.1, 0.1, 0),
@@ -671,14 +671,14 @@ class CellTest(unittest.TestCase):
     def test_add(self):
         c = self.cell.copy()
         c.coordinates = .95 - c.coordinates
-        s = self.cell.add(c)
+        s = self.cell.merge(c)
         testing.assert_allclose(s.coordinates, (
         (0., 0., 0.), (1. / 3, 1. / 3, .5), (.95, .95, .95), (.95 - 1. / 3, .95 - 1. / 3, .45)))
         testing.assert_equal(s.values, ('Co',) * 4)
 
     def test_add_fail(self):
         with self.assertRaises(ArgumentError):
-            self.cell.add(self.cell2)
+            self.cell.merge(self.cell2)
 
     def test_species_0(self):
         sp = self.cell.species()
@@ -688,7 +688,7 @@ class CellTest(unittest.TestCase):
     def test_species_1(self):
         c = self.cell.copy()
         c.values[0] = 'C'
-        c = c.add(self.cell)
+        c = c.merge(self.cell)
         sp = c.species()
         assert len(sp) == 2
         assert sp['Co'] == 3
@@ -696,7 +696,7 @@ class CellTest(unittest.TestCase):
 
     def test_reorder_0(self):
         c = self.cell.copy()
-        c.reorder_vectors(0, 2, 1)
+        c.transpose_vectors(0, 2, 1)
         nv = self.cell.vectors.copy()
         nv = nv[(0, 2, 1), :]
         testing.assert_equal(c.vectors, nv)
@@ -705,7 +705,7 @@ class CellTest(unittest.TestCase):
 
     def test_reorder_1(self):
         c = self.cell.copy()
-        c.reorder_vectors('x', 'y', 'z')
+        c.transpose_vectors('x', 'y', 'z')
         nv = self.cell.vectors.copy()
         testing.assert_equal(c.vectors, nv)
         testing.assert_allclose(c.coordinates, ((0., 0., 0.), (1. / 3, 1. / 3, .5)))
@@ -742,7 +742,7 @@ class CellTest(unittest.TestCase):
 
     def test_interpolate(self):
         c = UnitCell(
-            Basis((1, 1), kind='orthorombic', meta={'key': 'value'}),
+            Basis((1, 1), kind='orthorhombic', meta={'key': 'value'}),
             (
                 (.5, .5),
                 (0, 0),
@@ -785,8 +785,8 @@ class FCCCellTest(unittest.TestCase):
             (-1, 1, 1),
         )
         testing.assert_allclose(
-            cubic_cell.size() / cubic_cell.volume(),
-            si_cell.size() / si_cell.volume(),
+            cubic_cell.size / cubic_cell.volume,
+            si_cell.size / si_cell.volume,
         )
 
 
@@ -810,14 +810,14 @@ class MultidimCellTest(unittest.TestCase):
         )
 
     def test_size(self):
-        assert self.c.size() == 4
+        assert self.c.size == 4
 
 
 class Cell2Grid(unittest.TestCase):
 
     def test_as_grid(self):
         c = UnitCell(
-            Basis((1, 1), kind='orthorombic', meta={'key': 'value'}),
+            Basis((1, 1), kind='orthorhombic', meta={'key': 'value'}),
             (
                 (.5, .5),
                 (0, 0),
@@ -840,7 +840,7 @@ class Cell2Grid(unittest.TestCase):
 
     def test_as_grid_missing(self):
         c = UnitCell(
-            Basis((1, 1), kind='orthorombic'),
+            Basis((1, 1), kind='orthorhombic'),
             (
                 (.5, .5),
                 (0, 0),
@@ -939,11 +939,11 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = xx ** 2 + yy ** 2 + zz ** 2
         self.grid = Grid(
-            Basis((1, 2, 3), kind='orthorombic'),
+            Basis((1, 2, 3), kind='orthorhombic'),
             (x, y, z),
             data,
         )
-        self.empty = Basis((1, 2, 3), kind='orthorombic')
+        self.empty = Basis((1, 2, 3), kind='orthorhombic')
 
     def test_pickle(self):
         c = pickle.loads(pickle.dumps(self.grid))
@@ -962,7 +962,7 @@ class GridTest(unittest.TestCase):
         assert not self.grid == g
 
     def test_size(self):
-        assert self.grid.size() == 24
+        assert self.grid.size == 24
 
     def test_explicit_coordinates(self):
         c = self.grid.explicit_coordinates()
@@ -1049,7 +1049,7 @@ class GridTest(unittest.TestCase):
             (x, y, z),
             data,
         )
-        grid_merged = grid.add(self.grid)
+        grid_merged = grid.merge(self.grid)
 
         z = numpy.sort(numpy.concatenate((z, self.grid.coordinates[2])))
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
@@ -1118,7 +1118,7 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = xx ** 2 + yy ** 2 + zz ** 2
         another = Grid(
-            Basis((1, 2, 6), kind='orthorombic'),
+            Basis((1, 2, 6), kind='orthorhombic'),
             (x, y, z),
             data,
         )
@@ -1179,7 +1179,7 @@ class GridTest(unittest.TestCase):
 
     def test_rv(self):
         c = self.grid.copy()
-        c.reorder_vectors(2, 1, 0)
+        c.transpose_vectors(2, 1, 0)
 
         testing.assert_allclose(c.coordinates[0], self.grid.coordinates[2])
         testing.assert_allclose(c.coordinates[1], self.grid.coordinates[1])
@@ -1187,7 +1187,7 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(c.values, self.grid.values.swapaxes(0, 2))
 
     def test_as_unitCell(self):
-        reg = self.grid.as_unitCell()
+        reg = self.grid.as_cell()
 
         testing.assert_equal(reg.coordinates.shape, (24, 3))
         testing.assert_equal(reg.values.shape, (24,))
@@ -1208,7 +1208,7 @@ class GridTest(unittest.TestCase):
                         raise AssertionError("Coordinate {} {} {} not found".format(x, y, z))
 
     def test_back_forth(self):
-        c = self.grid.as_unitCell().as_grid()
+        c = self.grid.as_cell().as_grid()
 
         testing.assert_equal(c.coordinates, self.grid.coordinates)
         testing.assert_equal(c.values, self.grid.values)
@@ -1259,7 +1259,7 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = xx
         grid = Grid(
-            Basis((1, 2, 3), kind='orthorombic'),
+            Basis((1, 2, 3), kind='orthorhombic'),
             (x, y, z),
             data,
         )
@@ -1272,7 +1272,7 @@ class GridTest(unittest.TestCase):
         xx, yy = numpy.meshgrid(x, y, indexing='ij')
         data = (xx - .5) ** 2 + (yy - .5) ** 2
         grid = Grid(
-            Basis((1, 1), kind='orthorombic'),
+            Basis((1, 1), kind='orthorhombic'),
             (x, y),
             data,
         )
@@ -1294,11 +1294,11 @@ class GridTest(unittest.TestCase):
         testing.assert_equal(numpy.any(area < 1e-14, axis=1), True)
 
         # Check if sum of spacings is equal to total path length
-        assert abs(cell.distances(numpy.arange(cell.size())).sum() - 1 - 2. ** .5) < 1e-14
+        assert abs(cell.distances(numpy.arange(cell.size)).sum() - 1 - 2. ** .5) < 1e-14
 
         # Check if spacings are uniform
-        testing.assert_allclose(cell.distances(numpy.arange(cell.size())), (1 + 2. ** .5) / (cell.size() - 1),
-                                rtol=2. / cell.size())
+        testing.assert_allclose(cell.distances(numpy.arange(cell.size)), (1 + 2. ** .5) / (cell.size - 1),
+                                rtol=2. / cell.size)
 
     def test_uniform(self):
         c = Grid.uniform((1, 2, 3))
@@ -1336,7 +1336,7 @@ class TetrahedronDensityTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = (xx ** 2 + yy ** 2 + zz ** 2) ** .5
         self.grid = Grid(
-            Basis((1, 1, 1), kind='orthorombic'),
+            Basis((1, 1, 1), kind='orthorhombic'),
             (x, y, z),
             data,
         )

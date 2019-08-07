@@ -34,7 +34,7 @@ class BackForthTests(unittest.TestCase):
         cells = structure.xsf(xsf_structure(c1)).unitCells()
         assert len(cells) == 1
         c2 = cells[0]
-        assert c1.size() == c2.size()
+        assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates)
         testing.assert_equal(c1.values, c2.values)
@@ -48,7 +48,7 @@ class BackForthTests(unittest.TestCase):
         c2 = structure.xsf(xsf_structure(*c1)).unitCells()
 
         for i, j in zip(c1, c2):
-            assert i.size() == j.size()
+            assert i.size == j.size
             testing.assert_allclose(i.vectors / angstrom, j.vectors / angstrom, atol=1e-6)
             testing.assert_allclose(i.coordinates, j.coordinates)
             testing.assert_equal(i.values, j.values)
@@ -64,7 +64,7 @@ class BackForthTests(unittest.TestCase):
             cell=c1,
             pseudopotentials={"C": "C.UPF"},
         )).unitCell()
-        assert c1.size() == c2.size()
+        assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates)
         testing.assert_equal(c1.values, c2.values)
@@ -78,7 +78,7 @@ class BackForthTests(unittest.TestCase):
             c1,
             populations={"C": "2 2"},
         )).unitCell()
-        assert c1.size() == c2.size()
+        assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)
         testing.assert_equal(c1.values, c2.values)
@@ -91,7 +91,7 @@ class BackForthTests(unittest.TestCase):
             r=c1,
             populations={"C": "2 2"},
         )).unitCell(l=c1, r=c1)
-        assert c1.size() == c2.size()
+        assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)
         testing.assert_equal(c1.values, c2.values)
@@ -106,7 +106,7 @@ class BackForthTests(unittest.TestCase):
             r=r,
             populations={"C": "2 2"},
         )).unitCell(l=l, r=r)
-        assert c1.size() == c2.size()
+        assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)
         testing.assert_equal(c1.values, c2.values)

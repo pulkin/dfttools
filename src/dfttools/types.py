@@ -12,8 +12,7 @@ from scipy.spatial import cKDTree
 from .blochl import tetrahedron, tetrahedron_plain
 from .util import cast_units
 
-# This is here to determine the default string data type.
-# It is expected to be 'S2' in python2 and 'U2' in python3.
+# This is here to determine the default string data type in numpy.
 element_type = numpy.array("Ca").dtype
 
 
@@ -41,16 +40,10 @@ def __angle__(v1, v2, axis=-1):
     Calculates angles between sets of vectors.
 
     Args:
-
-        v1,v2 (array): arrays of the same size with vectors'
-        coordinates.
-
-    Kwargs:
-
+        v1, v2 (ndarray): arrays of the same size with vectors' coordinates;
         axis (int): dimension to sum over.
 
     Returns:
-
         A numpy array containing cosines between the vectors.
     """
     return (v1 * v2).sum(axis=axis) / ((v1 ** 2).sum(axis=axis) * (v2 ** 2).sum(axis=axis)) ** .5
@@ -72,25 +65,17 @@ class Basis(object):
     A class describing a set of vectors representing a basis.
 
     Args:
-
-        vectors (array): a 2D or a 1D array of floats representing
-        vectors of the basis set.
-
-    Kwargs:
-
-        kind (str): a shortcut keyword for several most common basis
-        sets:
-
-        * 'default': expects ``vectors`` to be a 2D array with basis
-          vectors in cartesian coordinates;
-        * 'orthorombic': expects ``vectors`` to be a 1D array with
-          dimensions of an orthorombic basis set;
-        * 'triclinic': expects ``vectors`` to be a 1D array with 3
-          lengths of edges and 3 cosines of face angles.
-
-        meta (dict): a metadata for this Basis.
+        vectors (Iterable, ndarray, Basis): another Basis or a 2D matrix of basis
+        vectors;
+        kind (str): shortcut keyword for several most common basis sets
+            * 'default': expects `vectors` to be a 2D array with basis
+              vectors in cartesian coordinates;
+            * 'orthorhombic': expects `vectors` to be a 1D array with
+              dimensions of an orthorhombic basis set;
+            * 'triclinic': expects `vectors` to be a 1D array with 3
+              lengths of edges and 3 cosines of face angles;
+        meta (dict): metadata for this Basis.
     """
-
     def __init__(self, vectors, kind='default', meta=None):
 
         if isinstance(vectors, Basis):
@@ -106,7 +91,7 @@ class Basis(object):
             if kind == 'default':
                 self.vectors = vectors
 
-            elif kind == 'orthorombic':
+            elif kind == 'orthorhombic':
                 self.vectors = cast_units(numpy.diag(vectors), vectors)
 
             elif kind == 'triclinic':
@@ -148,6 +133,7 @@ class Basis(object):
     def class_id(cls):
         """
         Retrieves a unique ID of the class.
+
         Returns:
             A string ID of the class based on class and module names.
         """
@@ -158,7 +144,6 @@ class Basis(object):
         Prepares a JSON-compatible object representing this Basis.
 
         Returns:
-
             A JSON-compatible dict.
         """
         result = self.__getstate__()
@@ -168,14 +153,12 @@ class Basis(object):
     @classmethod
     def from_json(cls, j):
         """
-        Restores a Basis from JSON data.
+        Restores the Basis from JSON data.
 
         Args:
-
-            j (dict): JSON data.
+            j (dict): JSON data;
 
         Returns:
-
             A Basis object.
         """
         j = dict(j)
@@ -190,14 +173,11 @@ class Basis(object):
         Transforms coordinates to another basis set.
 
         Args:
-
-            basis (Basis): a new basis to transform to.
-
-            coordinates (array): an array of coordinates to be
-            transformed.
+            basis (Basis): new basis to transform to;
+            coordinates (Iterable, ndarray): array of coordinates to be
+            transformed;
 
         Returns:
-
             An array with transformed coordinates.
         """
         coordinates = numpy.asanyarray(coordinates, dtype=numpy.float64)
@@ -216,11 +196,9 @@ class Basis(object):
         Transforms coordinates from another basis set.
 
         Args:
-
-            basis (Basis): a basis to transform from.
-
-            coordinates (array): an array of coordinates to be
-            transformed.
+            basis (Basis): basis to transform from;
+            coordinates (Iterable, ndarray): array of coordinates to be
+            transformed;
 
         Returns:
 
@@ -233,12 +211,10 @@ class Basis(object):
         Transforms coordinates to cartesian.
 
         Args:
-
-            coordinates (array): an array of coordinates to be
-            transformed.
+            coordinates (Iterable, ndarray): array of coordinates to be
+            transformed;
 
         Returns:
-
             An array with transformed coordinates.
         """
         return self.transform_to(
@@ -251,12 +227,10 @@ class Basis(object):
         Transforms coordinates from cartesian.
 
         Args:
-
-            coordinates (array): an array of coordinates to be
-            transformed.
+            coordinates (Iterable, ndarray): array of coordinates to be
+            transformed;
 
         Returns:
-
             An array with transformed coordinates.
         """
         return self.transform_from(
@@ -269,17 +243,11 @@ class Basis(object):
         Rotates this basis.
 
         Args:
-
-            axis (array): axis to rotate around;
-
+            axis (Iterable, ndarray): axis to rotate around;
             angle (float): angle to rotate;
-
-        Kwargs:
-
-            units (str): units of the angle: 'rad', 'deg' or 'frac'.
+            units (str): units of the angle: 'rad', 'deg' or 'frac';
 
         Returns:
-
             A rotated copy of this basis.
         """
         units = {
@@ -297,19 +265,16 @@ class Basis(object):
             (axis[2], 0, -axis[0]),
             (-axis[1], axis[0], 0),
         ))
-        M = c * numpy.eye(self.vectors.shape[0]) + s * axis_x + (1 - c) * numpy.dot(axis[:, numpy.newaxis],
-                                                                                    axis[numpy.newaxis, :])
+        rot_matrix = c * numpy.eye(self.vectors.shape[0]) + s * axis_x + (1 - c) * numpy.dot(axis[:, numpy.newaxis],
+                                                                                             axis[numpy.newaxis, :])
         result = self.copy()
-        result.vectors = numpy.dot(result.vectors, M)
+        result.vectors = numpy.dot(result.vectors, rot_matrix)
         return result
 
+    @property
     def volume(self):
         """
-        Computes the volume of a triclinic cell represented by the basis.
-
-        Returns:
-
-            Volume of the cell in **m^3**.
+        The volume of the unit cell formed by this basis.
         """
         return abs(numpy.linalg.det(self.vectors))
 
@@ -318,13 +283,10 @@ class Basis(object):
         Computes a reciprocal basis.
 
         Returns:
-
-            A reciprocal basis.
+            Reciprocal basis.
 
         .. note::
-
-            The :math:`2 \pi` multiplier is not present.
-
+            The :math:`2 \\pi` prefactor is not included.
         """
         return Basis(cast_units(numpy.swapaxes(numpy.linalg.inv(self.vectors), 0, 1), self.vectors, inv=True))
 
@@ -333,7 +295,6 @@ class Basis(object):
         Computes cartesian coordinates of all vertices of the basis cell.
 
         Returns:
-
             Cartesian coordinates of all vertices.
         """
         result = []
@@ -347,7 +308,6 @@ class Basis(object):
         basis cell.
 
         Returns:
-
             A list of pairs with cartesian coordinates of vertices
             forming edges.
         """
@@ -367,102 +327,101 @@ class Basis(object):
         Calculates a copy.
 
         Returns:
-
             A deep copy of self.
         """
         return self.from_json(self.to_json())
 
     @input_as_list
-    def stack(self, basises, vector='x', tolerance=1e-10, restrict_collinear=False):
+    def stack(self, other, vector='x', tolerance=1e-10, restrict_collinear=False):
         """
-        Stacks several basises along one of the vectors.
+        Stacks several instances along one of the vectors.
 
         Args:
-
-            basises (list): basises to stack. Corresponding
-            vectors of all basises being stacked should match.
-            vector (str, int): a vector along which to stack, either 'x',
+            other (Iterable): other instances to stack. The corresponding vectors
+            of all instances being stacked should match against each other;
+            vector (str, int): the vector along which to stack, either 'x',
             'y', 'z' or an int specifying the vector;
-            tolerance (float): a largest possible error in input basises'
-            vectors;
-            restrict_collinear (bool): if True will raise an exception
-            if the vectors to stack along are not collinear
+            tolerance (float): the error threshold when determining equality of
+            other (non-stacking) vectors;
+            restrict_collinear (bool): if True will perform a check whether stacking
+            vectors are collinear and raise ValueError if they are not;
 
         Raises:
-
-            ArgumentError: in the case of vector mismatch.
+            ValueError: In case of non-collinear or non-matching vectors;
 
         Returns:
-
-            A larger basis containing all argument cell stacked.
+            A stacked composition of instances (Basis, UnitCell, Grid or other)..
         """
-        basises = [self] + basises
+        other = [self] + other
         d = __xyz2i__(vector)
 
-        otherVectors = list(range(basises[0].vectors.shape[0]))
-        del otherVectors[d]
+        other_vectors = list(range(other[0].vectors.shape[0]))
+        del other_vectors[d]
 
         # 3d array with lattice vectors: shapes[i,j,k] i=cell, j=lattice vector, k = component
         shapes = numpy.concatenate(tuple(
-            i.vectors[numpy.newaxis, ...] for i in basises
+            i.vectors[numpy.newaxis, ...] for i in other
         ), axis=0)
 
         # Check if non-stacking lattice vectors coincide
-        stackingVectorsSum = shapes[:, d, :].sum(axis=0)
-        vecLengths = (shapes ** 2).sum(axis=2) ** 0.5
-        otherVectors_d = shapes[:, otherVectors, :] - shapes[0, otherVectors, :][numpy.newaxis, ...]
-        otherVectors_ds = (otherVectors_d ** 2).sum(axis=-1) ** .5
+        stacking_vectors_sum = shapes[:, d, :].sum(axis=0)
+        vec_lengths = (shapes ** 2).sum(axis=2) ** 0.5
+        other_vectors_d = shapes[:, other_vectors, :] - shapes[0, other_vectors, :][numpy.newaxis, ...]
+        other_vectors_ds = (other_vectors_d ** 2).sum(axis=-1) ** .5
 
-        if numpy.any(otherVectors_ds > tolerance * vecLengths[:, otherVectors]):
+        if numpy.any(other_vectors_ds > tolerance * vec_lengths[:, other_vectors]):
             raise ArgumentError(
-                'Dimension mismatch for stacking:\n{}\nCheck your input basis vectors or set tolerance to at least {} to skip this error'.format(
+                'Dimension mismatch for stacking:\n{}\nCheck your input basis vectors or set tolerance to at least {} '
+                'to silence this exception'.format(
                     shapes,
-                    numpy.amax(otherVectors_ds / vecLengths[:, otherVectors]),
+                    numpy.amax(other_vectors_ds / vec_lengths[:, other_vectors]),
                 ))
 
         if restrict_collinear and numpy.any(
-                numpy.abs(__angle__(shapes[:, d, :], stackingVectorsSum[numpy.newaxis, :]) - 1) > tolerance):
+                numpy.abs(__angle__(shapes[:, d, :], stacking_vectors_sum[numpy.newaxis, :]) - 1) > tolerance):
             raise ArgumentError(
-                'Vectors to stack along are not collinear:\n{}\nCheck your input basis vectors or set tolerance to at least {} to skip this error'.format(
+                'Vectors to stack along are not collinear:\n{}\nCheck your input basis vectors or set tolerance to at '
+                'least {} to silence this exception'.format(
                     shapes,
-                    numpy.amax(numpy.abs(__angle__(shapes[:, d, :], stackingVectorsSum[numpy.newaxis, :]) - 1)),
+                    numpy.amax(numpy.abs(__angle__(shapes[:, d, :], stacking_vectors_sum[numpy.newaxis, :]) - 1)),
                 ))
 
         shape = self.vectors.copy()
-        shape[d, :] = stackingVectorsSum
+        shape[d, :] = stacking_vectors_sum
 
         return Basis(shape, meta=self.meta)
 
     @input_as_list
     def repeated(self, times):
         """
-        Produces a new basis from a given by repeating it in all
-        directions.
+        Produces a new instance from a given one by repeating it along
+        all vectors the given numbers of times.
 
         Args:
+            times (Iterable, ndarray): array of ints specifying
+            repetition counts;
 
-            times (array): array of ints specifying how much the basis
-            should be repeated along each of the vectors.
+        Returns:
+            An instance (Basis, UnitCell, Grid or other) repeated along
+            all dimensions.
         """
         c = self
         for i, t in enumerate(times):
             c = c.stack(*((c,) * (t - 1)), vector=i)
-
         return c
 
     @input_as_list
-    def reorder_vectors(self, new):
+    def transpose_vectors(self, new):
         """
-        Reorders vectors.
+        Transposes basis vectors inplace.
 
         Args:
-
-            new (array): new mapping of vectors.
+            new (Iterable, ndarray): the new order of vectors;
 
         Example:
-
-            >>> basis.reorder_vectors(0, 1, 2) # does nothing
-            >>> basis.reorder_vectors(1, 0, 2) # swaps first and second vectors.
+            >>> basis = Basis((1, 2, 3), kind='orthorhombic')
+            >>> basis.transpose_vectors(0, 1, 2) # does nothing
+            >>> basis.transpose_vectors(1, 0, 2) # swaps first and second vectors.
         """
         new = tuple(__xyz2i__(i) for i in new)
 
@@ -477,25 +436,27 @@ class Basis(object):
 
     def generate_path(self, points, n, skip_segments=None):
         """
-        Generates a path given key points and the total number of points
-        on the path.
+        Generates a piecewise-linear path through points specified.
+        Useful for constructing band-structure paths.
 
         Args:
-
-            points (array): key points of the path expressed in this basis;
+            points (Iterable, ndarray): path milestones;
             n (int): the total number of points on the path;
-            skip_segments (list): a list of segments to skip;
+            skip_segments (Iterable): optional segments to skip;
 
         Returns:
-
             Path coordinates expressed in this basis.
+
+        .. note::
+            Milestone points are always present in the path
+            returned.
         """
 
-        def interpolate(p1, p2, n, e):
-            x = numpy.linspace(0, 1, n + 2)[:, numpy.newaxis]
-            if not e:
+        def interpolate(_p1, _p2, _n, _e):
+            x = numpy.linspace(0, 1, _n + 2)[:, numpy.newaxis]
+            if not _e:
                 x = x[:-1]
-            return p1[numpy.newaxis, :] * (1-x) + p2[numpy.newaxis] * x
+            return _p1[numpy.newaxis, :] * (1 - x) + _p2[numpy.newaxis] * x
 
         if skip_segments is None:
             skip_segments = tuple()
@@ -535,15 +496,13 @@ class Basis(object):
 
 def diamond_basis(a):
     """
-    Creates a diamond basis with a given lattice constant.
+    Generates crystal basis of diamond.
 
     Args:
-
         a (float): the lattice constant;
 
     Returns:
-
-        A diamond Basis.
+        The diamond basis.
     """
     a = 0.5 * a
     return Basis([[0, a, a], [a, 0, a], [a, a, 0]])
@@ -551,21 +510,18 @@ def diamond_basis(a):
 
 class UnitCell(Basis):
     """
-    A class describing a crystal unit cell in a periodic environment.
+    A class describing an arbitrary set of points in a periodic environment.
+    Useful for constructing crystal structures, band paths, etc.
 
     Args:
-        vectors (Basis, array): crystal basis;
-        coordinates (array): 2D array of coordinates of atoms (or any
-        other instances);
-        values (array): array of atoms (or any other instances) with
-        the leading dimension being the same as the one of
-        ``coordinates`` array;
+        vectors (Basis, Iterable, ndarray): basis vectors;
+        coordinates (Iterable, ndarray): 2D array of points' coordinates;
+        values (Iterable, ndarray): values for each point specified;
         meta (dict): metadata for this UnitCell;
-        c_basis (str,Basis): a Basis for input coordinates or 'cartesian'
+        c_basis (str, Basis): Basis for the input coordinates or 'cartesian'
         if coordinates are passed in the cartesian basis;
-        dtype (type): enforcing data type for `values`;
+        dtype (type): enforcing data type for `values` array;
     """
-
     def __init__(self, vectors, coordinates, values, meta=None, c_basis=None, dtype=None):
 
         if isinstance(vectors, Basis):
@@ -593,10 +549,10 @@ class UnitCell(Basis):
         elif len(self.coordinates.shape) == 2:
             if self.coordinates.shape[1] != dims:
                 raise ArgumentError(
-                    'Coordinates array is 2D but the last dimension {:d} is not equal to space dimensionality {:d}'.format(
-                        self.coordinates.shape[1], dims))
+                    'Coordinates array is 2D but the last dimension {:d} is not equal to the space '
+                    'dimensionality {:d}'.format(self.coordinates.shape[1], dims))
 
-        # Coordinates are now prepeared, proceed to values
+        # Coordinates are now prepared, proceed to values
         self.values = numpy.asanyarray(values, dtype=dtype)
         if len(self.values.shape) == 0:
             self.values = self.values[numpy.newaxis, ...]
@@ -613,7 +569,7 @@ class UnitCell(Basis):
             ))
 
         # Process basis information
-        if c_basis == None:
+        if c_basis is None:
             pass
 
         elif c_basis == 'cartesian':
@@ -641,30 +597,25 @@ class UnitCell(Basis):
     @input_as_list
     def angles(self, ids):
         """
-        Computes angles between cell specimens.
+        Computes angles between points in this cell.
 
         Args:
-
-            ids (array): a set of specimen IDs to compute angles between.
+            ids (Iterable, ndarray): point IDs to compute angles between.
             Several shapes are accepted:
-
-            * nx3 array: computes n cosines of angles [n,0]-[n,1]-[n,2];
-            * 1D array of length n: computes n-2 cosines of angles
-              [n-1]-[n]-[n+1];
+                * nx3 array: computes n cosines of angles [i, 0]-[i, 1]-[i, 2];
+                * 1D array of length n: computes n-2 cosines of angles along
+                  the path ...-[i-1]-[i]-[i+1]-...;
 
         Returns:
-
-            A numpy array containing cosines of angles specified.
+            An array with cosines.
 
         Example:
-
-            Following are the valid calls:
-
-            >>> cell.angles((0,1,2)) # angle between vectors connecting {second and first} and {second and third} species
-            >>> cell.angles(0,1,2) # a simplified version of above
-            >>> cell.angles(0,1,3,2) # two angles along path: 0-1-3 and 1-3-2
-            >>> cell.angles(tuple(0,1,3,2)) # same as above
-            >>> cell.angles((0,1,3),(1,3,2)) # same as above
+            >>> cell = UnitCell(Basis((1, 2, 3), kind="orthorhombic"), numpy.random.rand((4, 3)), numpy.arange(4))
+            >>> cell.angles((0, 1, 2)) # angle between vectors connecting {second and first} and {second and third} pts
+            >>> cell.angles(0, 1, 2) # a simplified version of the above
+            >>> cell.angles(0, 1, 3, 2) # two angles along path: 0-1-3 and 1-3-2
+            >>> cell.angles(tuple(0, 1, 3, 2)) # same as the above
+            >>> cell.angles((0, 1, 3),(1, 3, 2)) # same as the above
         """
 
         v = self.cartesian()
@@ -701,26 +652,22 @@ class UnitCell(Basis):
     @input_as_list
     def distances(self, ids, threshold=None):
         """
-        Computes distances between species and specified points.
+        Computes distances between points in this cell.
 
         Args:
-
-            ids (array): a list of specimen IDs to compute distances
+            ids (Iterable, ndarray): specimen IDs to compute distances
             between. Several shapes are accepted:
-
-            * empty: returns a 2D matrix of all possible distances
-            * nx2 array of ints: returns n distances between each pair
-              of [n,0]-[n,1] species;
-            * 1D array of ints of length n: returns n-1 distances
-              between each pair of [n-1]-[n] species;
-
+                * *empty*: returns a 2D matrix of all possible distances
+                * nx2 array of ints: returns n distances between each pair
+                  of [i, 0]-[i, 1] species;
+                * 1D array of ints of length n: returns n-1 distances
+                  between each pair of [i-1]-[i] species;
             threshold (float): if specified, returns a sparse distance
-            matrix with entries less that the threshold. Only for empty
+            matrix with entries less than the threshold. Only for empty
             `ids`;
 
         Returns:
-
-            A numpy array containing list of distances.
+            A numpy array with distances.
         """
 
         v = self.cartesian()
@@ -747,40 +694,34 @@ class UnitCell(Basis):
         else:
             raise ArgumentError("The input array has unsupported dimensionality %i" % len(ids.shape))
 
+    @property
     def size(self):
         """
-        Retrieves the number of points or species in this unit cell.
-
-        Returns:
-
-            Number of points or species in cell.
+        The number of points in this cell.
         """
         return self.coordinates.shape[0]
 
     def cartesian(self):
         """
-        Computes cartesian coordinates.
+        Computes cartesian coordinates of points in this cell.
 
         Returns:
-
-            A numpy array with cartesian coordinates
+            A numpy array with cartesian coordinates.
         """
         return self.transform_to_cartesian(self.coordinates)
 
     def normalized(self, sort=None):
         """
-        Moves all species respecting periodicity so that each
-        coordinate becomes in the unit range 0<=x<1 in the cell basis.
-        Sorts the data if ``sort`` provided.
+        Moves all points to their periodic images in the 0-1 coordinate range.
+        Sorts the data if `sort` provided.
 
-        Kwargs:
-
-            sort: coordinates to sort with: either 'x', 'y', 'z' or 0,1,2
-            or a vector in crystal coordiantes to project onto before sorting.
+        Args:
+            sort (str, int, Iterable, ndarray): the axis to sort along: either
+            'x', 'y', 'z', or 0, 1, 2, or an arbitrary vector in crystal
+            coordinates to project onto for sorting;
 
         Returns:
-
-            A new grid with normalized data.
+            A new cell with the normalized data.
         """
         sort = __xyz2i__(sort)
         if isinstance(sort, int):
@@ -790,18 +731,18 @@ class UnitCell(Basis):
 
         result = self.copy()
         result.coordinates = result.coordinates % 1
-        if not sort is None:
+        if sort is not None:
             result.apply(numpy.argsort(result.coordinates.dot(sort)))
 
         return result
 
-    def packed(self):
+    def ws_packed(self):
         """
-        Moves all species as close to the origin as it is possible. Does
-        not perform translation.
+        Generates a new cell where all points are replaced by
+        their periodic images closest to the origin (i.e. appear
+        inside Wigner-Seitz cell).
 
         Returns:
-
             A new unit cell with packed coordinates.
         """
         result = self.normalized()
@@ -825,24 +766,18 @@ class UnitCell(Basis):
     @input_as_list
     def isolated(self, gaps, units="crystal"):
         """
-        Generates an isolated representation of this cell.
-
-        Symmetrically adds vacuum along all unit cell vectors such that
-        resulting unit cell vectors are parallel to the initial ones.
+        Isolates points from their images in this cell or grid by
+        elongating basis vectors while keeping distances between the
+        points fixed.
 
         Args:
-
-            gaps (array): size of the vacuum layer in each direction
-            either in cartesian or in crystal units.
-
-        Kwargs:
-
-            units (str): units of the vacuum size, 'cartesian' or
-            'crystal'
+            gaps (Iterable, ndarray): the elongation amount in cartesian
+            or in crystal units;
+            units (str): units of `gaps`: 'cartesian' or 'crystal';
 
         Returns:
-
-            A new unit cell with spacially isolated species.
+            A bigger cell where points are spatially isolated from their
+            images.
         """
         gaps = numpy.asanyarray(gaps, dtype=numpy.float64)
         if units == "cartesian":
@@ -863,18 +798,14 @@ class UnitCell(Basis):
 
     def isolated2(self, gap):
         """
-        Generates an isolated representation of this cell.
-
-        The resulting cell is rectangular and contains space gaps of at
-        least "gap" size.
-
+        Isolates points from their images in this cell by constructing a new
+        larger orthorhombic cell.
         Args:
-
-            gap (float): size of the space gap along all ``self.vectors``.
+            gap (float): the minimal gap size between the cloud of points and
+            its periodic images;
 
         Returns:
-
-            A new unit cell with spacially isolated species.
+            An orthorhombic unit cell with the points.
         """
         c = self.normalized()
         coordinates = c.cartesian() + gap
@@ -882,7 +813,7 @@ class UnitCell(Basis):
         return UnitCell(
             Basis(
                 shape,
-                kind='orthorombic',
+                kind='orthorhombic',
                 meta=self.meta,
             ),
             coordinates,
@@ -892,20 +823,19 @@ class UnitCell(Basis):
     @input_as_list
     def select(self, piece):
         """
-        Selects a piece of this cell.
+        Selects points in this cell or grid inside a box in crystal basis.
+        Images are not included.
 
         Args:
-
-            piece (array): fraction of the cell to be selected, see
-            examples. The order of coordinates in ``piece`` is ``x_from, y_from, ..., z_from, x_to, y_to, ..., z_to``.
+            piece (Iterable, ndarray): box dimensions
+            `[x_from, y_from, ..., z_from, x_to, y_to, ..., z_to]`,
+            where `x`, `y`, `z` are basis vectors;
 
         Returns:
-
-            A numpy array with bools defining whether particular specimen
-            is selected or not.
+            A numpy array with the selection mask.
 
         Example:
-
+            >>> cell = UnitCell(Basis((1, 2, 3), kind="orthorhombic"), numpy.random.rand((4, 3)), numpy.arange(4))
             >>> cell.select((0,0,0,1,1,1)) # select all species with coordinates within (0,1) range
             >>> cell.select(0,0,0,1,1,1) # a simplified version of above
             >>> cell.select(0,0,0,0.5,1,1) # select the 'left' part
@@ -919,22 +849,22 @@ class UnitCell(Basis):
         piece = numpy.reshape(piece, (2, -1))
         p1 = numpy.amin(piece, axis=0)
         p2 = numpy.amax(piece, axis=0)
-        return numpy.all(self.coordinates < p2[numpy.newaxis, :], axis=1) & \
-               numpy.all(self.coordinates >= p1[numpy.newaxis, :], axis=1)
+        return numpy.all(
+            self.coordinates < p2[numpy.newaxis, :], axis=1,
+        ) & numpy.all(
+            self.coordinates >= p1[numpy.newaxis, :], axis=1,
+        )
 
     @input_as_list
     def apply(self, selection):
         """
-        Applies selection to this cell.
-
-        Inverse of ``UnitCell.discard``.
+        Applies a mask to this cell or grid to keep a subset of points.
 
         Args:
-
-            selection (array): seleted species.
+            selection (ndarray): a bool mask with selected species;
 
         Example:
-
+            >>> cell = UnitCell(Basis((1, 2, 3), kind="orthorhombic"), numpy.random.rand((4, 3)), numpy.arange(4))
             >>> selection = cell.select((0,0,0,0.5,1,1)) # Selects species in the 'left' part of the unit cell.
             >>> cell.apply(selection) # Applies selection. Species outside the 'left' part are discarded.
         """
@@ -945,16 +875,15 @@ class UnitCell(Basis):
     @input_as_list
     def discard(self, selection):
         """
-        Removes specified species from cell.
-
-        Inverse of ``Cell.apply``.
+        Discards points from this cell or grid according to
+        the mask specified.
+        Inverse of `self.apply`.
 
         Args:
-
-            selection (array): species to remove.
+            selection (ndarray): species to discard;
 
         Example:
-
+            >>> cell = UnitCell(Basis((1, 2, 3), kind="orthorhombic"), numpy.random.rand((4, 3)), numpy.arange(4))
             >>> selection = cell.select((0,0,0,0.5,1,1)) # Selects species in the 'left' part of the unit cell.
             >>> cell.discard(selection) # Discards selection. Species inside the 'left' part are removed.
         """
@@ -963,17 +892,20 @@ class UnitCell(Basis):
     @input_as_list
     def cut(self, piece, select='auto'):
         """
-        Selects a piece of this unit cell and returns it as a smaller unit cell.
+        Selects a box inside this cell or grid and returns it as a
+        smaller cell.
+        Basis vectors of the resulting instance are collinear to
+        those of `self`.
 
         Args:
-            piece (array): fraction of the cell to be selected. The order
-            of coordinates in ``piece`` is ``x_from, y_from, ..., z_from, x_to, y_to, ..., z_to``.
-            select (array): manual selection of points insisde the
-            unit cell. By default, selects only those pieces which drop
-            into the box defined by `piece`.
+            piece (Iterable, ndarray): box dimensions
+            `[x_from, y_from, ..., z_from, x_to, y_to, ..., z_to]`,
+            where `x`, `y`, `z` are basis vectors;
+            select (ndarray, str): a custom selection mask or "auto"
+            if all points in the box are to be selected;
 
         Returns:
-            A smaller unit cell selected.
+            A smaller instance with a subset of points.
         """
         if select == 'auto':
             select = self.select(piece)
@@ -991,17 +923,15 @@ class UnitCell(Basis):
         return result
 
     @input_as_list
-    def add(self, cells):
+    def merge(self, cells):
         """
-        Adds species from another unit cells to this one.
+        Merges points from several unit cells with the same basis.
 
         Args:
-
-            cells (arguments): unit cells to be merged with.
+            cells (Iterable): cells to be merged;
 
         Returns:
-
-            A new unit cell with merged data.
+            A new unit cell with all points merged.
         """
         c = [self.coordinates]
         v = [self.values]
@@ -1019,29 +949,6 @@ class UnitCell(Basis):
 
     @input_as_list
     def stack(self, cells, vector='x', **kwargs):
-        """
-        Stacks several cells along one of the vectors.
-
-        Args:
-
-            cells (list): cells to stack. Corresponding vectors of
-            all cells being stacked should match.
-
-        Kwargs:
-
-            vector (str,int): a vector along which to stack, either 'x',
-            'y', 'z' or an int specifying the vector.
-
-        The rest of kwargs are redirected to ``Basis.stack``.
-
-        Raises:
-
-            ArgumentError: in the case of vector mismatch.
-
-        Returns:
-
-            A bigger unit cell containing all argument cell stacked.
-        """
         cells = [self] + cells
         d = __xyz2i__(vector)
         not_d = list(range(self.vectors.shape[0]))
@@ -1060,7 +967,7 @@ class UnitCell(Basis):
         shift = numpy.zeros(dims)
         for c in cells:
             if isinstance(c, UnitCell):
-                # Fix for not-excatly-the-same vectors
+                # Fix for not-exactly-the-same vectors
                 original = c.vectors[not_d].copy()
                 c.vectors[not_d] = self.vectors[not_d]
                 coordinates.append(c.cartesian() + shift[numpy.newaxis, :])
@@ -1069,6 +976,7 @@ class UnitCell(Basis):
         coordinates = numpy.concatenate(coordinates, axis=0)
 
         return UnitCell(basis, coordinates, values, c_basis="cartesian")
+    stack.__doc__ = Basis.stack.__doc__
 
     @input_as_list
     def supercell(self, vec):
@@ -1076,13 +984,16 @@ class UnitCell(Basis):
         Produces a supercell from a given unit cell.
 
         Args:
-
-            vec (array): the supercell vectors in units of current unit
-            cell vectors
+            vec (Iterable, ndarray): new vectors expressed
+            in this basis;
 
         Returns:
+            A supercell.
 
-            A new supercell.
+        Example:
+            >>> cell = UnitCell(Basis((1, 2, 3), kind="orthorhombic"), numpy.random.rand((4, 3)), numpy.arange(4))
+            >>> s_cell = cell.supercell(numpy.eye(cell.size)) # returns an exact copy
+            >>> r_cell = cell.supercell(numpy.diag((1, 2, 3))) # same as cell.repeated(1, 2, 3)
         """
         vec = numpy.asanyarray(vec, dtype=numpy.float64)
 
@@ -1103,7 +1014,7 @@ class UnitCell(Basis):
             else:
                 sc_max = numpy.maximum(sc_max, vertex)
 
-        # Fix roundoff
+        # Fix round-off
         random_displacement = random.rand(self.coordinates.shape[-1])[numpy.newaxis, :]
         u = self.copy()
         u.coordinates += random_displacement
@@ -1127,58 +1038,39 @@ class UnitCell(Basis):
 
     def species(self):
         """
-        Collects number of species of each kind in this cell.
-
-        Particularly useful for counting the number of atoms.
+        Reduces point values in this unit cell.
+        Particularly useful for counting atomic species.
 
         Returns:
-
-            A dictionary containing species as keys and number of atoms
-            as values.
+            A dictionary containing unique point values as keys
+            and numbers of their occurrences as values.
         """
         answer = {}
         for s in self.values:
             try:
                 answer[s] += 1
-            except:
+            except KeyError:
                 answer[s] = 1
         return answer
 
     @input_as_list
-    def reorder_vectors(self, new):
+    def transpose_vectors(self, new):
+        new = tuple(__xyz2i__(i) for i in new)
+        Basis.transpose_vectors(self, new)
+        self.coordinates = self.coordinates[:, new]
+    transpose_vectors.__doc__ = Basis.transpose_vectors.__doc__
+
+    def as_grid(self, fill=numpy.nan):
         """
-        Reorders vectors.
+        Converts this unit cell into a grid.
 
         Args:
-
-            new (array): new mapping of vectors.
-
-        Example:
-
-            >>> cell.reorder_vectors(0, 1, 2) # does nothing
-            >>> cell.reorder_vectors(1, 0, 2) # swaps first and second vectors.
-
-        .. note::
-
-            A call to this method does not modify the output of ``self.cartesian()``.
-        """
-        new = tuple(__xyz2i__(i) for i in new)
-        Basis.reorder_vectors(self, new)
-        self.coordinates = self.coordinates[:, new]
-
-    def as_grid(self, fill=float("nan")):
-        """
-        Converts this unit cell to grid.
-
-        Kwargs:
-
-            fill: default value to fill with;
+            fill (object): the value to fill with undefined
+            grid points' values;
 
         Returns:
-
-            A new grid with data from initial cell.
+            A grid with the data from this cell.
         """
-
         # Convert coordinates
         coordinates = list(
             numpy.sort(
@@ -1207,25 +1099,17 @@ class UnitCell(Basis):
     @input_as_list
     def interpolate(self, points, driver=None, periodic=True, **kwargs):
         """
-        Interpolates values at specified points. By default uses
-        ``scipy.interpolate.griddata``.
+        Interpolates values between points in this cell.
 
         Args:
-
-            points (array): points to interpolate at.
-
-        Kwargs:
-
-            driver (func): interpolation driver.
-
-            periodic (bool): employs periodicity of a unit cell.
-
-            kwargs: keywords to the driver.
+            points (Iterable, ndarray): interpolation points in crystal basis;
+            driver (Callable): interpolation driver;
+            periodic (bool): if True, employs the periodicity of this cell when
+            interpolating;
+            kwargs: driver arguments;
 
         Returns:
-
-            A new unit cell with interpolated data.
-
+            A new unit cell with the interpolated data.
         """
         points = numpy.asanyarray(points, dtype=numpy.float64)
 
@@ -1260,16 +1144,15 @@ class UnitCell(Basis):
 
 class Grid(Basis):
     """
-    A class describing a data on a grid in a periodic environment.
+    A class describing data on a non-regular grid in a periodic environment.
 
     Args:
-        vectors (Basis,array): crystal basis;
-        coordinates (array): list of arrays of coordinates specifying the grid;
-        values (array): a multidimensional array with data on the grid.
+        vectors (Basis, ndarray): crystal basis;
+        coordinates (Iterable, ndarray): list of arrays of coordinates specifying the grid;
+        values (Iterable, ndarray): a multidimensional array with data on the grid;
         meta (dict): a metadata for this Grid;
-        dtype (type): enforcing data type for `values`;
+        dtype (type): enforcing data type for `values`.
     """
-
     def __init__(self, vectors, coordinates, values, meta=None, dtype=None):
 
         if isinstance(vectors, Basis):
@@ -1296,13 +1179,14 @@ class Grid(Basis):
                 raise ArgumentError("Coordinates[{:d}] is not a 1D array".format(i))
 
         if len(self.values.shape) < dims:
-            raise ArgumentError("The dimensionality of a 'values' array is less ({:d}) than expected ({:d})".format(
+            raise ArgumentError("The dimensionality of 'values' array is less ({:d}) than expected ({:d})".format(
                 len(self.values.shape), dims))
 
         for i in range(dims):
             if not self.values.shape[i] == self.coordinates[i].shape[0]:
                 raise ArgumentError(
-                    "The {:d} dimension of 'values' array is equal to {:d} which is different from the size of a corresponding 'coordinates' array {:d}".format(
+                    "The dimension {:d} of 'values' array is equal to {:d} which is different from the size of the "
+                    "corresponding 'coordinates' array {:d}".format(
                         i, self.values.shape[i], self.coordinates[i].shape[0]))
 
     def __getstate__(self):
@@ -1324,33 +1208,23 @@ class Grid(Basis):
             result = result and numpy.all(i == j)
         return result
 
+    @property
     def size(self):
         """
-        Retrieves the total size of points on the grid.
-
-        Returns:
-
-            Number of species in cell as an integer.
+        The number of grid points in this grid.
         """
-        r = 1
-        for a in self.coordinates:
-            r *= a.size
-        return r
+        return numpy.prod(tuple(a.size for a in self.coordinates))
 
     @staticmethod
     def combine_arrays(arrays):
         """
-        Transforms input 1D arrays of coordinates into (N+1)D mesh array
-        where first N dimensions correspond to a particular grid point
-        and the last dimension specifies all coordinates of this grid point.
+        Transforms N 1D arrays of coordinates into (N+1)D mesh array.
 
         Args:
-
-            arrays (list): a list of 1D arrays;
+            arrays (Iterable): 1D arrays;
 
         Returns:
-
-            A meshgrid array with coordinates.
+            A mesh tensor with coordinates.
         """
         mg = numpy.meshgrid(*arrays, indexing='ij')
         return numpy.concatenate(tuple(i[..., numpy.newaxis] for i in mg), axis=len(mg))
@@ -1358,21 +1232,15 @@ class Grid(Basis):
     @staticmethod
     def uniform(size, endpoint=False):
         """
-        Transform positive integers `size` into a meshgrid array
-        representing a grid where grid points span uniformly zero to one
-        intervals.
+        Samples the multidimensional 0-1 interval.
 
         Args:
-
-            size (array): an array with positive integers;
-
-        Kwargs:
-
-            endpoint (bool): indicates whether to include x=1 into grids.
+            size (Iterable): positive integers specifying the number of
+            sampling points per dimension;
+            endpoint (bool): if True, the right boundary is included;
 
         Returns:
-
-            A meshgrid array with coordinates.
+            A mesh tensor with coordinates.
         """
         return Grid.combine_arrays(tuple(
             numpy.linspace(0, 1, i, endpoint=endpoint) for i in size
@@ -1380,35 +1248,28 @@ class Grid(Basis):
 
     def explicit_coordinates(self):
         """
-        Creates an (N+1)D array with explicit coordinates at each grid
-        point.
+        Forms an (N+1)D array with grid points' coordinates.
 
         Returns:
-
-            An (N+1)D array with coordinates.
+            A mesh tensor with coordinates.
         """
         return Grid.combine_arrays(self.coordinates)
 
     def cartesian(self):
         """
-        Computes cartesian coordinates.
+        Computes cartesian coordinates of points in this grid.
 
         Returns:
-
-            A multidimensional numpy array with cartesian coordinates at
-            each grid point.
+            A mesh tensor with cartesian coordinates.
         """
         return self.transform_to_cartesian(self.explicit_coordinates())
 
     def normalized(self):
         """
-        Moves all grid points respecting periodicity so that each
-        coordinate becomes in the unit range 0<=x<1 in the cell basis.
-        Sorts the data.
+        Moves all points to their periodic images in the 0-1 coordinate range.
 
         Returns:
-
-            A new grid with normalized data.
+            A new grid with the normalized data.
         """
         result = self.copy()
 
@@ -1421,26 +1282,6 @@ class Grid(Basis):
 
     @input_as_list
     def isolated(self, gaps, units="cartesian"):
-        """
-        Generates an isolated representation of this grid.
-
-        Symmetrically adds vacuum along all basis vectors such that
-        resulting grid basis vectors are parallel to the initial ones.
-
-        Args:
-
-            gaps (array): size of the vacuum layer in each direction
-            either in cartesian or in crystal units.
-
-        Kwargs:
-
-            units (str): units of the vacuum size, 'cartesian' or
-            'crystal'
-
-        Returns:
-
-            A new isolated grid.
-        """
         gaps = numpy.asanyarray(gaps, dtype=numpy.float64)
         if units == "cartesian":
             gaps /= ((self.vectors ** 2).sum(axis=1) ** .5)
@@ -1459,29 +1300,10 @@ class Grid(Basis):
             result.coordinates[i] += (0.5 * (gaps[i] - 1) / gaps[i])
 
         return result
+    isolated.__doc__ = UnitCell.isolated.__doc__
 
     @input_as_list
     def select(self, piece):
-        """
-        Selects a piece of this grid.
-
-        Args:
-
-            piece (array): fraction of the grid to be selected, see
-            examples. The order of coordinates in ``piece`` is ``x_from, y_from, ..., z_from, x_to, y_to, ..., z_to``.
-
-        Returns:
-
-            A list of numpy arrays with bools defining whether particular
-            grid point is selected or not.
-
-        Example:
-
-            >>> grid.select((0,0,0,1,1,1)) # select all grid points with coordinates within (0,1) range
-            >>> grid.select(0,0,0,1,1,1) # a simplified version of above
-            >>> grid.select(0,0,0,0.5,1,1) # select the 'left' part
-            >>> grid.select(0.5,0,0,1,1,1) # select the 'right' part
-        """
         if not len(piece) == 2 * self.vectors.shape[0]:
             raise ArgumentError("Wrong coordinates array: expecting {:d} elements, found {:d}".format(
                 2 * self.vectors.shape[0], len(piece)
@@ -1491,23 +1313,10 @@ class Grid(Basis):
         p1 = numpy.amin(piece, axis=0)
         p2 = numpy.amax(piece, axis=0)
         return list((c < mx) & (c >= mn) for c, mn, mx in zip(self.coordinates, p1, p2))
+    select.__doc__ = UnitCell.select.__doc__
 
     @input_as_list
     def apply(self, selection):
-        """
-        Applies selection to this grid.
-
-        Inverse of ``Grid.discard``.
-
-        Args:
-
-            selection (array): seleted grid points.
-
-        Example:
-
-            >>> selection = grid.select((0,0,0,0.5,1,1)) # Selects species in the 'left' part of the grid.
-            >>> grid.apply(selection) # Applies selection. Species outside the 'left' part are discarded.
-        """
         selection = list(selection)
         slices = [slice(None, None, None)] * len(self.coordinates)
 
@@ -1523,39 +1332,15 @@ class Grid(Basis):
             self.values = self.values[tuple(slices)]
             # Revert slice
             slices[i] = slice(None, None, None)
+    apply.__doc__ = UnitCell.apply.__doc__
 
     @input_as_list
     def discard(self, selection):
-        """
-        Removes specified points from this grid.
-
-        Inverse of ``Grid.apply``.
-
-        Args:
-
-            selection (array): points to remove.
-
-        Example:
-
-            >>> selection = grid.select((0,0,0,0.5,1,1)) # Selects points in the 'left' part of the grid.
-            >>> grid.discard(selection) # Discards selection. Points inside the 'left' part are removed.
-        """
         self.apply(tuple(~numpy.asanyarray(i) for i in selection))
+    discard.__doc__ = UnitCell.discard.__doc__
 
     @input_as_list
     def cut(self, piece):
-        """
-        Selects a piece of the grid and returns it as a smaller basis.
-
-        Kwargs:
-
-            piece (array): fraction of the grid to be selected. The order
-            of coordinates in ``piece`` is ``x_from, y_from, ..., z_from, x_to, y_to, ..., z_to``.
-
-        Returns:
-
-            A smaller grid selected.
-        """
         result = self.copy()
         result.apply(result.select(piece))
 
@@ -1568,19 +1353,20 @@ class Grid(Basis):
             result.coordinates[i] /= (p2 - p1)[i]
         result.vectors *= (p2 - p1)[numpy.newaxis, :]
         return result
+    cut.__doc__ = UnitCell.cut.__doc__
 
     @input_as_list
-    def add(self, grids, fill=float("nan")):
+    def merge(self, grids, fill=numpy.nan):
         """
-        Adds grid points from another grids to this one.
+        Merges points from several grids with the same basis.
 
         Args:
-
-            grids (arguments): grids to be merged with.
+            grids (Iterable): grids to be merged;
+            fill (object): the value to fill with undefined
+            grid points' values;
 
         Returns:
-
-            A new grid with merged data.
+            A new grid with all points merged.
         """
         dims = len(self.coordinates)
         grids = [self] + grids
@@ -1623,35 +1409,12 @@ class Grid(Basis):
 
     @input_as_list
     def stack(self, grids, vector='x', **kwargs):
-        """
-        Stacks several grids along one of the vectors.
-
-        Args:
-
-            grids (list): grids to stack. Corresponding vectors of
-            all grids being stacked should match.
-
-        Kwargs:
-
-            vector (str,int): a vector along which to stack, either 'x',
-            'y', 'z' or an int specifying the vector.
-
-        The rest of kwargs are redirected to ``Basis.stack``.
-
-        Raises:
-
-            ArgumentError: in the case of vector mismatch.
-
-        Returns:
-
-            A bigger grid containing all argument grids stacked.
-        """
         grids = [self] + grids
         d = __xyz2i__(vector)
         dims = self.vectors.shape[0]
 
-        otherVectors = list(range(grids[0].vectors.shape[0]))
-        del otherVectors[d]
+        other_vectors = list(range(grids[0].vectors.shape[0]))
+        del other_vectors[d]
 
         basis = Basis.stack(*grids, vector=vector, **kwargs)
 
@@ -1661,7 +1424,7 @@ class Grid(Basis):
 
         for i, g in enumerate(grids[1:]):
             if isinstance(g, Grid):
-                for dim in otherVectors:
+                for dim in other_vectors:
                     if not len(g.coordinates[dim]) == len(self.coordinates[dim]) or not numpy.all(
                             g.coordinates[dim] == self.coordinates[dim]):
                         raise ArgumentError(
@@ -1669,13 +1432,13 @@ class Grid(Basis):
 
         values = numpy.concatenate(tuple(grid.values for grid in grids if isinstance(grid, Grid)), axis=d)
 
-        stackingVectorsLen = numpy.asanyarray(tuple((grid.vectors[d] ** 2).sum(axis=-1) ** .5 for grid in grids))
-        shifts = numpy.cumsum(stackingVectorsLen)
+        stacking_vectors_len = numpy.asanyarray(tuple((grid.vectors[d] ** 2).sum(axis=-1) ** .5 for grid in grids))
+        shifts = numpy.cumsum(stacking_vectors_len)
         shifts = shifts / shifts[-1]
 
         # kx+b
         k = numpy.ones((len(grids), dims))
-        k[:, d] = stackingVectorsLen / stackingVectorsLen.sum()
+        k[:, d] = stacking_vectors_len / stacking_vectors_len.sum()
         b = numpy.zeros((len(grids), dims))
         b[:, d] = numpy.concatenate(((0,), shifts[:-1]))
 
@@ -1690,27 +1453,12 @@ class Grid(Basis):
                 coordinates.append(self.coordinates[dim])
 
         return Grid(basis, coordinates, values)
+    stack.__doc__ = Basis.stack.__doc__
 
     @input_as_list
-    def reorder_vectors(self, new):
-        """
-        Reorders vectors. Does not change output of ``Grid.cartesian()``.
-
-        Args:
-
-            new (array): new mapping of vectors.
-
-        Example:
-
-            >>> grid.reorder_vectors(0, 1, 2) # does nothing
-            >>> grid.reorder_vectors(1, 0, 2) # swaps first and second vectors.
-
-        .. note::
-
-            A call to this method does not modify the output of ``self.cartesian()``.
-        """
+    def transpose_vectors(self, new):
         new = list(__xyz2i__(i) for i in new)
-        Basis.reorder_vectors(self, new)
+        Basis.transpose_vectors(self, new)
         self.coordinates = list(self.coordinates[n] for n in new)
 
         # Change values using swapaxes
@@ -1718,43 +1466,34 @@ class Grid(Basis):
             if not new[i] == i:
                 self.values = self.values.swapaxes(i, new[i])
                 new[new[i]] = new[i]
+    transpose_vectors.__doc__ = Basis.transpose_vectors.__doc__
 
-    def as_unitCell(self):
+    def as_cell(self):
         """
-        Converts this cell into a ``UnitCell``.
+        Converts this grid into a unit cell.
 
         Returns:
-
-            A new ``UnitCell``.
+            A new `UnitCell` with all points from this grid.
         """
         c = self.explicit_coordinates()
         c = c.reshape((-1, c.shape[-1]))
         v = self.values.reshape((-1,) + self.values.shape[len(self.coordinates):])
-
         return UnitCell(self, c, v)
 
     def interpolate_to_array(self, points, driver=None, periodic=True, **kwargs):
         """
-        Interpolates values at specified points and returns an array of
-        interpolated values. By default uses ``scipy.interpolate.interpn``.
+        Interpolates values between points in this grid.
 
         Args:
-
-            points (array): points to interpolate at.
-
-        Kwargs:
-
-            driver (func): interpolation driver;
-
-            periodic (bool): employs periodicity of a unit cell;
-
-            The rest of keyword arguments are passed to the driver.
+            points (Iterable, ndarray): interpolation points in crystal basis;
+            driver (Callable): interpolation driver;
+            periodic (bool): if True, employs the periodicity of this cell when
+            interpolating;
+            kwargs: driver arguments;
 
         Returns:
-
-            An array with values of corresponding shape.
+            An array with the interpolated data.
         """
-
         if driver is None:
             from scipy import interpolate
             driver = interpolate.interpn
@@ -1791,77 +1530,62 @@ class Grid(Basis):
 
     def interpolate_to_grid(self, points, **kwargs):
         """
-        Interpolates values at specified points and returns a grid.
-        By default uses ``scipy.interpolate.interpn``.
+        Interpolates values between points in this grid.
 
         Args:
-
-            points (array): points to interpolate at.
-
-        Kwargs are passed to ``self.interpolate_to_array``.
+            points (Iterable): interpolation grid in crystal basis;
+            kwargs: passed to `self.interpolate_to_array`;
 
         Returns:
-
-            A grid with interpolated values.
+            A grid with the interpolated data.
         """
         return Grid(self, points, self.interpolate_to_array(Grid.combine_arrays(points), **kwargs))
 
     def interpolate_to_cell(self, points, **kwargs):
         """
-        Interpolates values at specified points and returns a unit cell.
-        By default uses ``scipy.interpolate.interpn``.
+        Interpolates values between points in this grid.
 
         Args:
-
-            points (array): points to interpolate at.
-
-        Kwargs are passed to ``self.interpolate_to_array``.
+            points (Iterable, ndarray): interpolation points in crystal basis;
+            kwargs: passed to `self.interpolate_to_array`;
 
         Returns:
-
-            A unit cell interpolated values.
+            A cell with the interpolated data.
         """
         return UnitCell(self, points, self.interpolate_to_array(points, **kwargs))
 
     def interpolate_to_path(self, points, n, **kwargs):
         """
-        Interpolates values to a path: performs path generation using
-        ``Basis.generate_path`` and interpolates values on it.
+        Interpolates values between points in this grid.
 
         Args:
-
-            points (array): key points of the path expressed in lattice coordinates;
-            n (int): the total number of points on the path.
-            kwargs: keywords to the 'interpolate_to_cell' routine.
+            points (Iterable, ndarray): path milestones;
+            n (int): the total number of points in the path;
+            kwargs: passed to `self.interpolate_to_array`;
 
         Returns:
-            A unit cell interpolated values.
+            A cell with the interpolated data.
         """
         return self.interpolate_to_cell(self.generate_path(points, n), **kwargs)
 
     def tetrahedron_density(self, points, resolved=False, weights=None):
         """
-        Convolves data to calculate density (of states). Uses the
-        tetrahedron method from PRB 49, 16223 by E. Blochl et al. Works
-        only in a 3D space.
+        Calculate the density of points' values (states).
+        Uses the tetrahedron method from PRB 49, 16223 by E. Blochl et al.
+        3D space only.
 
         Args:
-
-            points (array): values to calculate density at.
-
-        Kwargs:
-
-            resolved (bool): if True returns a spacially and index
-            resolved density. The dimensions of the returned array
-            are ``self.values.shape + points.shape``.
-
-            weights (array): if specified and ``resolved`` is False
-            convolves result with the specified weights.
+            points (Iterable, ndarray): values to calculate density at;
+            resolved (bool): if True, returns a higher-dimensional tensor
+            with spatially- and index-resolved density. The dimensions of
+            the returned array are `self.values.shape + points.shape`;
+            weights (Iterable, ndarray): assigns weights to points before
+            calculating the density. Only for `resolved == False`;
 
         Returns:
-
-            A numpy array containing density: 1D if ``resolved == False``
-            or a corresponding Grid if ``resolved == True``.
+            If `resolved == False`, returns a 1D array with the density.
+            If `resolved == True`, returns the corresponding grid with
+            values being the spatially-resolved density.
         """
         if not self.vectors.shape[0] == 3:
             raise ArgumentError("The tetrahedron density method is implemented only for 3D grids")
@@ -1869,16 +1593,15 @@ class Grid(Basis):
         initial = self.values
         points = numpy.asanyarray(points, dtype=numpy.float64)
         self.values = numpy.reshape(self.values, self.values.shape[:3] + (-1,))
-        minima = numpy.min(self.values, axis=(0, 1, 2))
-        maxima = numpy.max(self.values, axis=(0, 1, 2))
-        bottom = (maxima < points.min()).sum()
-        top = (minima < points.max()).sum()
+        val_min = numpy.min(self.values, axis=(0, 1, 2))
+        val_max = numpy.max(self.values, axis=(0, 1, 2))
+        bottom = (val_max < points.min()).sum()
+        top = (val_min < points.max()).sum()
 
         # Optimize size
         self.values = self.values[..., bottom:top]
 
         if resolved:
-
             # Sum over bands
             raw = tetrahedron(self, points).reshape(self.values.shape + points.shape)
             self.values = initial
@@ -1889,14 +1612,12 @@ class Grid(Basis):
             )
 
         else:
-
             if weights is None:
                 weights = numpy.ones(self.values.shape, dtype=numpy.float64)
 
             else:
                 weights = numpy.asanyarray(weights, dtype=numpy.float64)
                 weights = numpy.reshape(weights, weights.shape[:3] + (-1,))[..., bottom:top]
-
             raw = tetrahedron_plain(self, points, weights)
             self.values = initial
             return raw

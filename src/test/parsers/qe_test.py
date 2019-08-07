@@ -367,7 +367,7 @@ class Test_output3(unittest.TestCase):
              (1., 1., 1.),
              (-1., 1., -1.))
         ) * 2 * math.pi / 10.2 / numericalunits.aBohr)
-        assert b.size() == 28
+        assert b.size == 28
         crds = b.cartesian()
         testing.assert_allclose(crds[:, 0] / units, numpy.array(
             (0.,) * 22 + \

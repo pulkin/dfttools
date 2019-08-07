@@ -4,7 +4,7 @@ cimport numpy, cython
 #@cython.boundscheck(True)
 def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
     
-    cdef double vol = cell.volume()
+    cdef double vol = cell.volume
     cdef int i,j,k,i1,j1,k1,v1,v2,v3,v4,b,n
     cdef double v_t, e1, e2, e3, e4, e, _t
     
@@ -87,7 +87,7 @@ def tetrahedron(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at):
 #@cython.boundscheck(True)
 def tetrahedron_plain(cell, numpy.ndarray[numpy.double_t, ndim=1] pts_at, numpy.ndarray[numpy.double_t, ndim=4] weights):
     
-    cdef double vol = cell.volume()
+    cdef double vol = cell.volume
     cdef int i,j,k,i1,j1,k1,v1,v2,v3,v4,b,n
     cdef double v_t, e1, e2, e3, e4, e, _t
     

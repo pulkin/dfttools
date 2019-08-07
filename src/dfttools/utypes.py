@@ -129,14 +129,14 @@ class BandsGrid(FermiMixin, UnitsMixin, types.Grid):
 
     default_units = dict(vectors="1/angstrom", values="eV", fermi="eV")
 
-    def as_unitCell(self):
+    def as_cell(self):
         """
         Converts this BandsGrid into a BandsPath.
 
         Returns:
             A new ``BandsPath``.
         """
-        c = super(BandsGrid, self).as_unitCell()
+        c = super(BandsGrid, self).as_cell()
         return BandsPath(
             self,
             c.coordinates,

@@ -66,9 +66,9 @@ class CellSVGTest(unittest.TestCase):
                 assert e["stroke-width"] > 0
 
         if "show_atoms" in kwargs and kwargs["show_atoms"] == True:
-            assert circles == cell.size()
+            assert circles == cell.size
 
-        if cell.size() > 0 and "show_bonds" in kwargs and kwargs["show_bonds"] == True:
+        if cell.size > 0 and "show_bonds" in kwargs and kwargs["show_bonds"] == True:
             assert lines > 0
 
     def __test_0__(self, cell, **kwargs):

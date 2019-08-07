@@ -14,7 +14,7 @@ def __xsf_structure__(cell, tag=None, indent=4):
     coords = ''.join(
         (indent + '{:>2} {:14.10f} {:14.10f} {:14.10f}\n'.format(cell.values[i], cartesian[i, 0], cartesian[i, 1],
                                                                  cartesian[i, 2]))
-        for i in range(cell.size())
+        for i in range(cell.size)
     )
     if tag is None:
         tag = ''
@@ -22,7 +22,7 @@ def __xsf_structure__(cell, tag=None, indent=4):
         tag = ' ' + tag
     return (
                 'CRYSTAL\nPRIMVEC{}\n' + cell_vectors + 'CONVVEC{}\n' + cell_vectors + 'PRIMCOORD{}\n{:d} 1\n' + coords).format(
-        tag, tag, tag, cell.size()
+        tag, tag, tag, cell.size
     )
 
 
@@ -129,8 +129,8 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
 
         # Relax_triggers to array
         if isinstance(relax_triggers, int):
-            relax_triggers = ((relax_triggers,) * 3,) * cell.size()
-        elif len(relax_triggers) == cell.size() and isinstance(relax_triggers[0], int):
+            relax_triggers = ((relax_triggers,) * 3,) * cell.size
+        elif len(relax_triggers) == cell.size and isinstance(relax_triggers[0], int):
             relax_triggers = [(i, i, i) for i in relax_triggers]
 
         if not "&SYSTEM" in parameters:
@@ -139,7 +139,7 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
         parameters["&SYSTEM"].update({
             "ibrav": 0,
             "ntyp": len(cell.species()),
-            "nat": cell.size(),
+            "nat": cell.size,
         })
 
         if "&IONS" not in parameters and parameters.get("&CONTROL", {}).get("calculation", None) in (
@@ -269,7 +269,7 @@ def siesta_input(cell, indent=4):
             cell.coordinates[i, 2],
             species.index(cell.values[i]),
         )
-        for i in range(cell.size())
+        for i in range(cell.size)
     ))
 
     section_lv = "\n".join(tuple(
@@ -293,7 +293,7 @@ AtomicCoordinatesFormat Fractional
 %block AtomicCoordinatesAndAtomicSpecies
 {section_ac}
 %endblock AtomicCoordinatesAndAtomicSpecies""".format(
-        anum=cell.size(),
+        anum=cell.size,
         snum=len(species),
         section_lv=section_lv,
         section_csl=section_csl,
@@ -346,7 +346,7 @@ def openmx_input(cell, populations, l=None, r=None, tolerance=1e-10, indent=4):
 
     result = """Atoms.Number {anum:d}
 Species.Number {snum:d}
-""".format(anum=cell.size(), snum=len(target.species()))
+""".format(anum=cell.size, snum=len(target.species()))
 
     if frac:
         result += """
@@ -370,30 +370,30 @@ Atoms.UnitVectors>
             ) for i, n in enumerate(range(fr, fr + num))
         ))
 
-    offset = left.size() if not frac else 0
+    offset = left.size if not frac else 0
 
     result += """
 Atoms.SpeciesAndCoordinates.Unit {}
 <Atoms.SpeciesAndCoordinates
-""".format("frac" if frac else "ang") + __coords__(offset, cell.size(), frac=frac) + """
+""".format("frac" if frac else "ang") + __coords__(offset, cell.size, frac=frac) + """
 Atoms.SpeciesAndCoordinates>
 """
 
     if left is not None:
         result += """
-LeftLeadAtoms.Number {anum:d}""".format(anum=left.size()) + """
+LeftLeadAtoms.Number {anum:d}""".format(anum=left.size) + """
 <LeftLeadAtoms.SpeciesAndCoordinates
-""" + __coords__(0, left.size()) + """
+""" + __coords__(0, left.size) + """
 LeftLeadAtoms.SpeciesAndCoordinates>
 """
 
     if right is not None:
-        offset += cell.size()
+        offset += cell.size
 
         result += """
-RightLeadAtoms.Number {anum:d}""".format(anum=right.size()) + """
+RightLeadAtoms.Number {anum:d}""".format(anum=right.size) + """
 <RightLeadAtoms.SpeciesAndCoordinates
-""" + __coords__(offset, right.size()) + """
+""" + __coords__(offset, right.size) + """
 RightLeadAtoms.SpeciesAndCoordinates>
 """
 

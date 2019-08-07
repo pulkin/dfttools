@@ -298,7 +298,7 @@ class XYZ(AbstractTextParser, IdentifiableParser):
         mn = c.min(axis=0)
         shape = mx - mn + XYZ.vacuum_size
 
-        return CrystalCell(RealSpaceBasis(shape, kind='orthorombic'), c, v, c_basis="cartesian")
+        return CrystalCell(RealSpaceBasis(shape, kind='orthorhombic'), c, v, c_basis="cartesian")
 
 
 class CIF(AbstractTextParser, IdentifiableParser):

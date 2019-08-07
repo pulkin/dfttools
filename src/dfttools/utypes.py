@@ -61,6 +61,9 @@ class CrystalGrid(UnitsMixin, types.Grid):
 class FermiMixin(object):
     """
     A mixin to add the Fermi attribute.
+
+    Args:
+        fermi (float): the Fermi level value;
     """
     def __init__(self, *args, **kwargs):
         self.fermi = kwargs.pop("fermi", None)
@@ -94,21 +97,13 @@ class FermiMixin(object):
 
 class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
     """
-    A band structure in a crystal.
-    """
+     A class describing a band structure along a path.
+     See `dfttools.types.UnitCell` and `dfttools.utypes.FermiMixin` for arguments.
+     """
 
     default_units = dict(vectors="1/angstrom", values="eV", fermi="eV")
 
     def as_grid(self, fill=float("nan")):
-        """
-        Converts this BandsPath into a BandsGrid.
-
-        Kwargs:
-            fill: default value to fill with;
-
-        Returns:
-            A new ``BandsGrid``.
-        """
         g = super(BandsPath, self).as_grid(fill=fill)
         return BandsGrid(
             self,
@@ -116,26 +111,23 @@ class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
             g.values,
             fermi=self.fermi,
         )
+    as_grid.__doc__ = types.UnitCell.as_grid.__doc__
 
     def interpolate(self, *args, **kwargs):
         result = super(BandsPath, self).interpolate(*args, **kwargs)
         return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
+    interpolate.__doc__ = types.UnitCell.interpolate.__doc__
 
 
 class BandsGrid(FermiMixin, UnitsMixin, types.Grid):
     """
-    A band structure in a crystal.
+     A class describing a band structure on a grid.
+     See `dfttools.types.Grid` and `dfttools.utypes.FermiMixin` for arguments.
     """
 
     default_units = dict(vectors="1/angstrom", values="eV", fermi="eV")
 
     def as_cell(self):
-        """
-        Converts this BandsGrid into a BandsPath.
-
-        Returns:
-            A new ``BandsPath``.
-        """
         c = super(BandsGrid, self).as_cell()
         return BandsPath(
             self,
@@ -143,15 +135,19 @@ class BandsGrid(FermiMixin, UnitsMixin, types.Grid):
             c.values,
             fermi=self.fermi,
         )
+    as_cell.__doc__ = types.Grid.as_cell.__doc__
 
     def interpolate_to_cell(self, *args, **kwargs):
         result = super(BandsGrid, self).interpolate_to_cell(*args, **kwargs)
         return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
+    interpolate_to_cell.__doc__ = types.Grid.interpolate_to_cell.__doc__
 
     def interpolate_to_path(self, *args, **kwargs):
         result = super(BandsGrid, self).interpolate_to_path(*args, **kwargs)
         return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
+    interpolate_to_path.__doc__ = types.Grid.interpolate_to_path.__doc__
 
     def interpolate_to_grid(self, *args, **kwargs):
         result = super(BandsGrid, self).interpolate_to_grid(*args, **kwargs)
         return BandsGrid(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
+    interpolate_to_grid.__doc__ = types.Grid.interpolate_to_grid.__doc__

@@ -1141,7 +1141,7 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(c.coordinates[2], self.grid.coordinates[2] / 2)
         testing.assert_allclose(c.values, self.grid.values)
 
-    def test_stack_error_0(self):
+    def test_stack_fail_0(self):
         x = numpy.linspace(0, 1, 3)[:-1]
         y = numpy.linspace(0, 1, 3)[:-1]
         z = numpy.linspace(0, 1, 5)[:-1]
@@ -1154,6 +1154,10 @@ class GridTest(unittest.TestCase):
         )
         with self.assertRaises(ArgumentError):
             self.grid.stack(another, vector='x')
+
+    def test_stack_fail_1(self):
+        with self.assertRaises(ArgumentError):
+            self.grid.stack(object(), vector='z')
 
     def test_repeated_0(self):
         rp = self.grid.repeated(1, 1, 1)

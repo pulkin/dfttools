@@ -19,12 +19,13 @@ def __iter_nu__(s):
 
 def eval_nu(s):
     """
-    Evaluates numericalunits expression.
+    Evaluates a numericalunits expression.
+
     Args:
-        s (str): en expression to evaluate;
+        s (str): expression to evaluate;
 
     Returns:
-        The result of evaluation.
+        The result of the evaluation.
     """
     result = 1.
 
@@ -47,7 +48,7 @@ def eval_nu(s):
 
 def invert_nu(s):
     """
-    Inverts the numericalunits expression.
+    Inverts a numericalunits expression.
     Args:
         s (str): expression to invert;
 
@@ -66,8 +67,12 @@ def invert_nu(s):
 def array_to_json(a):
     """
     Creates a JSON-compatible representation of an array.
+
+    Args:
+        a (ndarray): a numpy array;
+
     Returns:
-        The JSON representation.
+        JSON representation of the array.
     """
     if not isinstance(a, array):
         a = numpy.asarray(a).view(array)
@@ -89,6 +94,9 @@ def array_to_json(a):
 
 
 class ArrayWithUnits(numpy.ndarray):
+    """
+    Enhances numpy array with units from `numericalunits`.
+    """
 
     def __new__(cls, *args, **kwargs):
         units = kwargs.pop("units", None)
@@ -106,19 +114,20 @@ class ArrayWithUnits(numpy.ndarray):
     @classmethod
     def from_json(cls, data):
         """
-        Builds an array from JSON representation.
+        Recovers the array from JSON representation.
+
         Args:
             data (dict): the JSON representation;
 
         Returns:
-            The array.
+            The array recovered.
         """
         if not isinstance(data, dict):
             raise TypeError("Dict expected, found: {}".format(repr(data)))
         if "_type" not in data:
-            raise TypeError("Missing the '_type' key in the reresentation")
+            raise TypeError("Missing the '_type' key in the representation")
         if data["_type"] != "numpy":
-            raise TypeError("The data tpye is wrong: found {}, expected 'numpy'".format(data["_type"]))
+            raise TypeError("The data type is wrong: found {}, expected 'numpy'".format(data["_type"]))
 
         a = numpy.asarray(data["data"])
         if data["complex"]:
@@ -149,13 +158,15 @@ array = ArrayWithUnits
 def cast_units(destination, source, inv=False):
     """
     Casts units from one array to another.
+
     Args:
         destination (ndarray): destination array;
         source (ndarray): array to cast units from;
         inv (bool): whether to cast inverse units;
 
     Returns:
-        If `a2` is `ArrayWithUnits` casts units from `a2` into `a1`, otherwise returns `a1`.
+        A new array with data from `destination`
+        and units from `source`.
     """
     if not isinstance(source, array):
         return destination
@@ -182,6 +193,7 @@ def object_hook(d):
         return d
 
 
+# Shortcuts for dumping/loading jsons with arrays
 def dump(*args, **kwargs):
     kwargs["cls"] = JSONEncoderWithArray
     return json.dump(*args, **kwargs)

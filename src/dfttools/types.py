@@ -353,6 +353,9 @@ class Basis(object):
             A stacked composition of instances (Basis, UnitCell, Grid or other)..
         """
         other = [self] + other
+        for i in other:
+            if not isinstance(i, Basis):
+                raise ArgumentError('The object {} is not an instance of a Basis'.format(i))
         d = __xyz2i__(vector)
 
         other_vectors = list(range(other[0].vectors.shape[0]))
@@ -955,10 +958,6 @@ class UnitCell(Basis):
         del not_d[d]
         dims = self.vectors.shape[0]
 
-        for c in cells:
-            if not isinstance(c, Basis):
-                raise ArgumentError('The object {} is not an instance of a Basis'.format(c))
-
         basis = Basis.stack(*cells, vector=vector, **kwargs)
 
         values = numpy.concatenate(tuple(cell.values for cell in cells if isinstance(cell, UnitCell)), axis=0)
@@ -1417,10 +1416,6 @@ class Grid(Basis):
         del other_vectors[d]
 
         basis = Basis.stack(*grids, vector=vector, **kwargs)
-
-        for g in grids:
-            if not isinstance(g, Basis):
-                raise ArgumentError('The object {} is not an instance of a Basis'.format(g))
 
         for i, g in enumerate(grids[1:]):
             if isinstance(g, Grid):

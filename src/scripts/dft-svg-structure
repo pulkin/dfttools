@@ -1,37 +1,40 @@
 #!/usr/bin/env python
 import argparse
 
-parser = argparse.ArgumentParser(description = "Prints atomic structure into SVG image file")
-parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose output")
-parser.add_argument("-c", "--unitcell", action = "store_true", help = "Plot unit cell")
-parser.add_argument("-p", "--projection", help = "Projection to plot: x,y,z or random")
-parser.add_argument("-s", "--size", help = "Size of the image in px, example: 600x600")
-parser.add_argument("-x", "--super", help = "Supercell size, example: 2x3x4")
-parser.add_argument("-a", "--accent", help = "Highlight specific atoms, for example: 1-5,6,8")
-parser.add_argument("-n", "--numbers", action = "store_true", help = "Show the order of atoms as they appear in the unit cell")
-parser.add_argument("-d", "--no-dangling", action = "store_true", help = "Hide dangling bonds")
-parser.add_argument("file", help = "file with the atomic structure", metavar = "FILENAME")
-parser.add_argument("output", help = "SVG file name for output", metavar = "FILENAME")
-
-options = parser.parse_args()
-
 from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
 from dfttools.presentation import svgwrite_unit_cell, __light__
 import random
 
 from numericalunits import angstrom
+import numpy
+
+parser = argparse.ArgumentParser(description="Prints atomic structure into SVG image file")
+parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+parser.add_argument("-c", "--unitcell", action="store_true", help="Plot unit cell")
+parser.add_argument("-p", "--projection", help="Projection to plot: x,y,z or random")
+parser.add_argument("-s", "--size", help="Size of the image in px, example: 600x600")
+parser.add_argument("-x", "--super", help="Supercell size, example: 2x3x4")
+parser.add_argument("-a", "--accent", help="Highlight specific atoms, for example: 1-5,6,8")
+parser.add_argument("-n", "--numbers", action="store_true",
+                    help="Show the order of atoms as they appear in the unit cell")
+parser.add_argument("-d", "--no-dangling", action="store_true", help="Hide dangling bonds")
+parser.add_argument("file", help="file with the atomic structure", metavar="FILENAME")
+parser.add_argument("output", help="SVG file name for output", metavar="FILENAME")
+
+options = parser.parse_args()
+
 
 def get_int_list(s):
     
-    here = lambda j: s[:j]+" > "+s[j]+" < "+s[j+1:]
+    def here(_j): return s[:_j]+" > "+s[_j]+" < "+s[_j+1:]
     result = []
     num = 0
     mode = 0
+    start = None
     numbers = "0123456789"
     
     for j, i in enumerate(s):
-        
         if mode == 0:
             if i in numbers:
                 num = int(i)
@@ -63,11 +66,13 @@ def get_int_list(s):
                 num = 10*num + int(i)
             elif i == ",":
                 if num < start:
-                    raise ValueError("The upper bound of range {:d} is smaller than the lower bound {:d}".format(num, start))
-                result += list(range(start,num))
+                    raise ValueError("The upper bound of range {:d} is smaller than the lower bound {:d}".format(
+                        num, start,
+                    ))
+                result += list(range(start, num))
                 mode = 0
             else:
-                raise ValueError("Unexpected symbol: "+here(j))
+                raise ValueError("Unexpected symbol: " + here(j))
     if mode == 1:
         result.append(num)
     elif mode == 2:
@@ -75,23 +80,28 @@ def get_int_list(s):
     elif mode == 3:
         if num < start:
             raise ValueError("The upper bound of range {:d} is smaller than the lower bound {:d}".format(num, start))
-        result += list(range(start,num))
+        result += list(range(start, num))
         
     return result
 
+
+def v(*_args, **_kwargs):
+    if options.verbose:
+        print(*_args, **_kwargs)
+
+
 try:
     
-    if options.verbose:
-        print("Parsing {} ...".format(options.file))
+    v("Parsing {} ...".format(options.file))
     
-    with open(options.file,'r') as f:
+    with open(options.file, 'r') as f:
         structure = parse(f, 'unit-cell')
         
     if isinstance(structure, list):
         structure = structure[-1]
         
-    if options.verbose:
-        print("Volume: {:.1f} A^3".format(structure.volume()/angstrom**3))
+    v("Volume: {:.1f} A^3".format(structure.volume() / angstrom ** 3))
+    v("Vectors: {:.3f} {:.3f} {:.3f} A".format(*numpy.linalg.norm(structure.vectors, axis=-1) / angstrom))
     
 except ParseError:
     print("Could not parse file '{}'\n".format(options.file))
@@ -102,39 +112,37 @@ except IOError:
     raise
 
 if options.verbose:
-    d = structure.repeated(2,2,2).distances()
-    d = d[d>0]
+    d = structure.repeated(2, 2, 2).distances()
+    d = d[d > 0]
     print("Minimum interatomic distance: {:.2f}A".format(d.min()/angstrom))
 
 kwargs = dict(
-    show_cell = options.unitcell,
-    camera = options.projection if options.projection != "random" else tuple(random.random() for i in range(3)),
-    camera_top = None if options.projection != "random" else tuple(random.random() for i in range(3)),
-    invisible = None if options.no_dangling else 'auto',
+    show_cell=options.unitcell,
+    camera=options.projection if options.projection != "random" else tuple(random.random() for i in range(3)),
+    camera_top=None if options.projection != "random" else tuple(random.random() for i in range(3)),
+    invisible=None if options.no_dangling else 'auto',
 )
 
-if not options.size is None:
+if options.size is not None:
     kwargs["size"] = tuple(int(i) for i in options.size.split("x"))
     
 if options.super:
     m = tuple(int(i) for i in options.super.split('x'))
     structure = structure.repeated(m)
-    if options.verbose:
-        print("A supercell "+repr(m)+" requested")
+    v("A supercell "+repr(m)+" requested")
 
 if options.accent:
     a = get_int_list(options.accent)
+
     def hac(i, color):
         return color if i in a else __light__(color, delta=0.9)
+
     kwargs["hook_atomic_color"] = hac
-    if options.verbose:
-        print("Highlighting atoms: "+str(a))
+    v("Highlighting atoms: "+str(a))
 
 if options.numbers:
     kwargs["show_numbers"] = True
     
-if options.verbose:
-    print("Arguments: "+str(kwargs))
+v("Arguments: "+str(kwargs))
     
 svgwrite_unit_cell(structure, options.output, **kwargs)
-    

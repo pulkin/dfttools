@@ -100,7 +100,7 @@ try:
     if isinstance(structure, list):
         structure = structure[-1]
         
-    v("Volume: {:.1f} A^3".format(structure.volume() / angstrom ** 3))
+    v("Volume: {:.1f} A^3".format(structure.volume / angstrom ** 3))
     v("Vectors: {:.3f} {:.3f} {:.3f} A".format(*numpy.linalg.norm(structure.vectors, axis=-1) / angstrom))
     
 except ParseError:

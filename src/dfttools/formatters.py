@@ -7,6 +7,8 @@ from dfttools.presentation import __elements_name_lookup_table__
 from dfttools.util import dumps
 import numericalunits
 
+from collections import defaultdict
+
 def __xsf_structure__(cell, tag=None, indent=4):
     indent = " " * indent
     cell_vectors = ((indent + " {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(cell.vectors / numericalunits.angstrom, -1))
@@ -90,57 +92,65 @@ def xsf_grid(grid, cell, npl=6):
     return result
 
 
-def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, pseudopotentials={}, indent=4):
+def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
+             pseudopotentials=None, masses=None, indent=4):
     """
     Generates Quantum Espresso input file.
-
-    Kwargs:
+    Args:
 
         cell (UnitCell): a unit cell with atomic coordinates;
-
-        relax_triggers (array,int): array with triggers for relaxation
+        relax_mask (array,int): array with triggers for relaxation
         written as additional columns in the input file;
-
         parameters (dict): parameters for the input file;
-
         inline_parameters (dict): a dict of inline parameters such as
         ``crystal_b``, etc;
-
         pseudopotentials (dict): a dict of pseudopotential file names;
-
+        masses (dict): a dict with elements' masses;
         indent (int): size of indent;
 
     Returns:
-
-        String contating Quantum Espresso input file contents.
+        A string with Quantum Espresso input.
     """
     indent = ' ' * indent
+    special = ("control", "system", "electrons", "ions", "cell", "inputpp")
 
-    # Parameters to an upper case
-    parameters = dict((k.upper(), parameters[k]) for k in parameters)
-    inline_parameters = dict((k.upper(), inline_parameters[k]) for k in inline_parameters)
+    if parameters is None:
+        parameters = {}
+    else:
+        parameters = {
+            "&" + k.upper() if k.lower() in special else k.upper(): v
+            for k, v in parameters.items()
+        }
 
-    alias = ("control", "system", "electrons", "ions", "cell", "inputpp")
-    alias = dict((i.upper(), "&"+i.upper()) for i in alias)
-    parameters = dict((alias.get(k, k), v) for k, v in parameters.items())
-    inline_parameters = dict((alias.get(k, k), v) for k, v in inline_parameters.items())
+    if inline_parameters is None:
+        inline_parameters = {}
+    else:
+        inline_parameters = {
+            "&" + k.upper() if k.lower() in special else k.upper(): v
+            for k, v in inline_parameters.items()
+        }
+
+    if pseudopotentials is None:
+        pseudopotentials = {}
+
+    if masses is None:
+        masses = defaultdict(lambda: 1)
 
     if cell is not None:
 
-        # Relax_triggers to array
-        if isinstance(relax_triggers, int):
-            relax_triggers = ((relax_triggers,) * 3,) * cell.size
-        elif len(relax_triggers) == cell.size and isinstance(relax_triggers[0], int):
-            relax_triggers = [(i, i, i) for i in relax_triggers]
+        if isinstance(relax_mask, (int, float)):
+            relax_mask = ((relax_mask,) * 3,) * cell.size
+        relax_mask = numpy.array(relax_mask, dtype=float)
+        if relax_mask.ndim == 1:
+            relax_mask = numpy.dstack((relax_mask,) * 3)
 
-        if not "&SYSTEM" in parameters:
+        if "&SYSTEM" not in parameters:
             parameters["&SYSTEM"] = {}
-
-        parameters["&SYSTEM"].update({
-            "ibrav": 0,
-            "ntyp": len(cell.species()),
-            "nat": cell.size,
-        })
+        parameters["&SYSTEM"].update(dict(
+            ibrav=0,
+            ntyp=len(cell.species()),
+            nat=cell.size,
+        ))
 
         if "&IONS" not in parameters and parameters.get("&CONTROL", {}).get("calculation", None) in (
         'relax', 'md', 'vc-relax', 'vc-md'):
@@ -153,15 +163,15 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
 
         # Atomic coordinates
         parameters["ATOMIC_POSITIONS"] = "\n".join(
-            "{indent}{name:>2s} {x:16.14f} {y:16.14f} {z:16.14f} {fx:d} {fy:d} {fz:d}".format(
+            "{indent}{name:>2s} {x:16.14f} {y:16.14f} {z:16.14f} {fx:f} {fy:f} {fz:f}".format(
                 indent=indent,
                 name=cell.values[i],
                 x=cell.coordinates[i, 0],
                 y=cell.coordinates[i, 1],
                 z=cell.coordinates[i, 2],
-                fx=relax_triggers[i][0],
-                fy=relax_triggers[i][1],
-                fz=relax_triggers[i][2],
+                fx=relax_mask[i][0],
+                fy=relax_mask[i][1],
+                fz=relax_mask[i][2],
             )
             for i in range(cell.values.shape[0])
         )
@@ -169,11 +179,12 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
 
         # Pseudopotentials
         parameters["ATOMIC_SPECIES"] = "\n".join(
-            "{indent}{name:2s} {data:s}".format(
+            "{indent}{name:2s} {mass:.3f} {data:s}".format(
                 indent=indent,
                 name=s,
+                mass=masses[s],
                 data=pseudopotentials[s],
-            ) for s in cell.species()
+            ) for s in sorted(cell.species())
         )
 
     # Ordering of sections
@@ -195,21 +206,17 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
         return order[a[0]] if a[0] in order else 1000
 
     # Compose everything
-    result = ""
+    result = []
     for section, data in sorted(parameters.items(), key=qe_order):
 
-        result += section
-
         if section in inline_parameters:
-            result += " " + inline_parameters[section]
+            result.append("{} {}".format(section, inline_parameters[section]))
             del inline_parameters[section]
-
-        result += "\n"
+        else:
+            result.append(section)
 
         if isinstance(data, dict):
-
             for key, value in sorted(data.items()):
-
                 if isinstance(value, bool):
                     value = ".true." if value else ".false."
                 elif isinstance(value, int):
@@ -220,22 +227,25 @@ def qe_input(cell=None, relax_triggers=0, parameters={}, inline_parameters={}, p
                     value = "'{}'".format(value)
                 else:
                     raise ValueError("Unknown data type {}".format(type(value)))
-
-                result += indent + key + " = " + value + "\n"
+                result.append("{indent}{key} = {value}".format(
+                    indent=indent,
+                    key=key,
+                    value=value,
+                ))
 
         elif isinstance(data, str):
+            result.append(data)
 
-            result += data
+        else:
+            raise ValueError("Unknown object to insert (not a dict or str): {}".format(data))
 
         if section[0] == "&":
-            result += "/\n"
-        else:
-            result += "\n"
+            result.append("/")
 
     if len(inline_parameters) > 0:
         raise ValueError("Keys {} are present in inline_parameters but not in parameters".format(
             ", ".join(inline_parameters.keys())))
-    return result
+    return "\n".join(result)
 
 
 def siesta_input(cell, indent=4):
@@ -414,9 +424,12 @@ def pyscf_cell(cell, **kwargs):
 
         A Pyscf Cell object.
     """
-    from pyscf.pbc.gto import Cell
+    try:
+        from pyscf.pbc.gto import Cell
+    except ImportError:
+        raise
 
-    if not "unit" in kwargs:
+    if "unit" not in kwargs:
         kwargs["unit"] = "Angstrom"
 
     if kwargs["unit"] == "Angstrom":
@@ -427,7 +440,7 @@ def pyscf_cell(cell, **kwargs):
         geometry = zip(cell.values, cell.cartesian() / numericalunits.aBohr)
         vectors = cell.vectors / numericalunits.aBohr
 
-    if not "dimension" in kwargs:
+    if "dimension" not in kwargs:
         kwargs['dimension'] = 3
 
     kwargs['atom'] = geometry

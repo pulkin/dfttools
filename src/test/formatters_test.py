@@ -58,6 +58,44 @@ class BackForthTests(unittest.TestCase):
         g = structure.xsf(data).grids()[0]
         testing.assert_allclose(self.grid.values, g.values, atol=1e-7)
 
+    def test_qe_input(self):
+        cell = UnitCell(Basis((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), kind='orthorhombic'),
+            (
+                (1. / 3, 1. / 3, .5),
+                (2. / 3, 2. / 3, .5),
+            ),
+            'C',
+        )
+        self.assertEqual(qe_input(
+            cell=cell,
+            relax_mask=0.1,
+            parameters={"system": {"a": 3}, "control": {"b": "c"}, "random": {"d": True}},
+            inline_parameters={"random": "hello"},
+            pseudopotentials={"C": "C.UPF"},
+            masses={"C": 3},
+        ), "\n".join((
+            "&CONTROL",
+            "    b = 'c'",
+            "/",
+            "&SYSTEM",
+            "    a = 3",
+            "    ibrav = 0",
+            "    nat = 2",
+            "    ntyp = 1",
+            "/",
+            "ATOMIC_SPECIES",
+            "    C  3.000 C.UPF",
+            "ATOMIC_POSITIONS crystal",
+            "     C 0.33333333333333 0.33333333333333 0.50000000000000 0.100000 0.100000 0.100000",
+            "     C 0.66666666666667 0.66666666666667 0.50000000000000 0.100000 0.100000 0.100000",
+            "CELL_PARAMETERS angstrom",
+            "    2.50000000000000e+00 0.00000000000000e+00 0.00000000000000e+00",
+            "    0.00000000000000e+00 2.50000000000000e+00 0.00000000000000e+00",
+            "    0.00000000000000e+00 0.00000000000000e+00 1.00000000000000e+01",
+            "RANDOM hello",
+            "    d = .true.",
+        )))
+
     def test_qe_back_forth(self):
         c1 = self.cell
         c2 = qe.input(qe_input(

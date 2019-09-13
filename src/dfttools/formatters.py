@@ -173,7 +173,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
                 fy=relax_mask[i][1],
                 fz=relax_mask[i][2],
             )
-            for i in range(cell.values.shape[0])
+            for i in range(cell.size)
         )
         inline_parameters["ATOMIC_POSITIONS"] = "crystal"
 

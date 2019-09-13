@@ -58,6 +58,18 @@ class CrystalGrid(UnitsMixin, types.Grid):
     default_units = dict(vectors="angstrom", values=None)
 
 
+class FermiUndefinedException(Exception):
+    pass
+
+
+class BandsMissingException(Exception):
+    pass
+
+
+class FermiCrossingException(Exception):
+    pass
+
+
 class FermiMixin(object):
     """
     A mixin to add the Fermi attribute.
@@ -93,6 +105,79 @@ class FermiMixin(object):
             self.__fermi__ = None
         else:
             raise ValueError("Only numeric values or None are accepted for the Fermi, found: {}".format(repr(v)))
+
+    @property
+    def nocc(self):
+        """The number of occupied bands."""
+        if self.fermi is None:
+            raise FermiUndefinedException("The Fermi level is not defined")
+        nocc = (self.values < self.fermi).sum(axis=-1).reshape(-1)
+        if not numpy.all(nocc == nocc[0]):
+            raise FermiCrossingException("Is a metal")
+        return nocc[0]
+
+    @property
+    def nvirt(self):
+        """Number of unoccupied (virtual) states."""
+        return self.values.shape[-1] - self.nocc
+
+    @property
+    def gapped(self):
+        """Checks if it is a gapped band structure."""
+        try:
+            self.nocc
+            return True
+        except FermiCrossingException as e:
+            return False
+
+    @property
+    def vbt(self):
+        """Valence band maximum (top) value."""
+        nocc = self.nocc
+        if nocc == 0:
+            raise BandsMissingException("No valence bands")
+        return self.values[..., nocc-1].max()
+
+    @property
+    def cbb(self):
+        """Conduction bands minimum (bottom) value."""
+        nocc = self.nocc
+        if nocc == self.values.shape[-1]:
+            raise BandsMissingException("No conduction bands")
+        return self.values[..., nocc].min()
+
+    @property
+    def gap(self):
+        """The band gap."""
+        return self.cbb - self.vbt
+
+    def stick_fermi(self, value=0, epsilon=1e-12):
+        """
+        Shifts the the Fermi level.
+        Args:
+            value (str): the new Fermi level position: one of
+            'midgap', 'cbb', 'vbt';
+            epsilon (float): infinitesimal term to separate
+            the Fermi level and bands in case `value`='cbb'
+            or 'vbt';
+        """
+        self.fermi = dict(
+            midgap=.5 * (self.cbb + self.vbt),
+            cbb=self.cbb - epsilon,
+            vbt=self.vbt + epsilon,
+        )[value]
+
+    def canonize_fermi(self):
+        """
+        Places the Fermi level in the middle of the band gap.
+        Shifts the energy scale zero to the Fermi level.
+        """
+        try:
+            self.stick_fermi("midgap")
+        except FermiCrossingException:
+            pass
+        self.values -= self.fermi
+        self.fermi = 0
 
 
 class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):

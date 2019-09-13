@@ -127,6 +127,36 @@ class CellTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.bs_cell.fermi = 'x'
 
+    def test_fermi2(self):
+        b = ReciprocalSpaceBasis((1./numericalunits.angstrom,) * 3, kind="orthorhombic")
+        coords = b.generate_path((
+            (0, 0, 0),
+            (0, 0, .5),
+            (.5, .5, .5),
+        ), 100)
+        bands = (numpy.linalg.norm(coords, axis=-1) ** 2 + 1)[:, numpy.newaxis] * [[-2, 1]]
+        bands = BandsPath(b, coords, bands, fermi=-1)
+        self.assertEqual(bands.nocc, 1)
+        self.assertEqual(bands.nvirt, 1)
+        self.assertEqual(bands.gapped, True)
+        self.assertEqual(bands.vbt, -2)
+        self.assertEqual(bands.cbb, 1)
+        self.assertEqual(bands.gap, 3)
+
+        bands.stick_fermi("vbt")
+        testing.assert_allclose(bands.vbt, bands.fermi)
+
+        bands.stick_fermi("cbb")
+        testing.assert_allclose(bands.cbb, bands.fermi)
+
+        bands.stick_fermi("midgap")
+        testing.assert_allclose(.5 * (bands.vbt + bands.cbb), bands.fermi)
+
+        bands.canonize_fermi()
+        testing.assert_allclose(bands.fermi, 0)
+        testing.assert_allclose(bands.vbt, -1.5)
+        testing.assert_allclose(bands.cbb, 1.5)
+
 
 class GridTest(unittest.TestCase):
 

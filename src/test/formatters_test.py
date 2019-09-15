@@ -95,6 +95,26 @@ class BackForthTests(unittest.TestCase):
             "RANDOM hello",
             "    d = .true.",
         )))
+        self.assertEqual(qe_input(
+            cell=cell,
+            relax_mask=(0, 1),
+            pseudopotentials={"C": "C.UPF"},
+        ), "\n".join((
+            "&SYSTEM",
+            "    ibrav = 0",
+            "    nat = 2",
+            "    ntyp = 1",
+            "/",
+            "ATOMIC_SPECIES",
+            "    C  1.000 C.UPF",
+            "ATOMIC_POSITIONS crystal",
+            "     C 0.33333333333333 0.33333333333333 0.50000000000000 0.000000 0.000000 0.000000",
+            "     C 0.66666666666667 0.66666666666667 0.50000000000000 1.000000 1.000000 1.000000",
+            "CELL_PARAMETERS angstrom",
+            "    2.50000000000000e+00 0.00000000000000e+00 0.00000000000000e+00",
+            "    0.00000000000000e+00 2.50000000000000e+00 0.00000000000000e+00",
+            "    0.00000000000000e+00 0.00000000000000e+00 1.00000000000000e+01",
+        )))
 
     def test_qe_back_forth(self):
         c1 = self.cell

@@ -142,7 +142,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
             relax_mask = ((relax_mask,) * 3,) * cell.size
         relax_mask = numpy.array(relax_mask, dtype=float)
         if relax_mask.ndim == 1:
-            relax_mask = numpy.dstack((relax_mask,) * 3)
+            relax_mask = numpy.repeat(relax_mask[:, numpy.newaxis], 3, axis=1)
 
         if "&SYSTEM" not in parameters:
             parameters["&SYSTEM"] = {}
@@ -169,9 +169,9 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
                 x=cell.coordinates[i, 0],
                 y=cell.coordinates[i, 1],
                 z=cell.coordinates[i, 2],
-                fx=relax_mask[i][0],
-                fy=relax_mask[i][1],
-                fz=relax_mask[i][2],
+                fx=relax_mask[i, 0],
+                fy=relax_mask[i, 1],
+                fz=relax_mask[i, 2],
             )
             for i in range(cell.size)
         )

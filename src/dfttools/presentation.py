@@ -1352,6 +1352,17 @@ def matplotlib_bands_density(
     return plot
 
 
+def __covering_range__(left, right, spacing, anchor=None):
+    left, right = min(left, right), max(left, right)
+    spacing = abs(spacing)
+    if anchor is None:
+        anchor = left
+    # anchor = anchor % spacing
+    left_scaled = numpy.floor((left - anchor) / spacing)
+    right_scaled = numpy.ceil((right - anchor) / spacing)
+    return numpy.arange(left_scaled, right_scaled + 1) * spacing + anchor
+
+
 def matplotlib_scalar(
         grid,
         axes,
@@ -1367,62 +1378,58 @@ def matplotlib_scalar(
         margins=0.1,
         scale_bar=None,
         scale_bar_location=1,
+        postproc=None,
         **kwargs
 ):
     """
     Plots scalar values on the grid using imshow.
 
     Args:
-
         grid (Grid): a 3D grid to be plotted;
-
         axes (matplotlib.axes.Axes): axes to plot on;
-
         origin (array): origin of the 2D slice to be plotted in the
         units of ``grid``;
-
-        plane (str, int): the plotting plane: either 'x','y' or 'z' or a
-        correspondint int.
-
-    Kwargs:
-
+        plane (str, int): the plotting plane: either 'x','y' or 'z' or
+        the corresponding int.
         units (str, float): either a field from ``numericalunits``
-        package or a float with energy units;
-
+        package or a float with axes units;
         units_name (str): a string used for the units. Used only if the
         ``units`` keyword is a float;
-
         show_cell (bool): if True then projected unit cell boundaries are
         shown on the final image;
-
         normalize (bool): normalize data before plotting such that the
         minimum is set at zero and the maximum is equal to one;
-
         ppu (float): points per ``unit`` for the raster image;
-
         isolines (array): plot isolines at the specified levels;
-
         window (array): 4 values representing a window to plot the data:
         minimum and maximum 'x' coordinate and minimum and maximum 'y'
         coordinate;
-
         margins (float): adds margins to the grid where the data is
         interpolated;
-
         scale_bar (int): adds a scal bar to the image at the specified
         location;
-
         scale_bar_location (int): location of the scale bar;
-
-        The rest of kwargs are passed to ``pyplot.imshow`` or ``pyplot.contour``.
+        postproc (Callable): a callable to post-process the interpolated data;
+        **kwargs: passed to ``pyplot.imshow`` or ``pyplot.contour``;
 
     Returns:
-
         A ``matplotlib.image.AxesImage`` plotted.
     """
+    if grid.vectors.shape[0] != 3:
+        raise ValueError("A {:d}D grid found, required 3D".format(grid.vectors.shape[0]))
 
-    if not grid.vectors.shape[0] == 3:
-        raise TypeError("A {:d}D grid found, required 3D".format(grid.vectors.shape[0]))
+    if isinstance(grid, Grid):
+        if grid.values.ndim != 3 and isolines is None:
+            raise ValueError("For color plot [isolines=None], the number of data dimensions "
+                             "of the grid should be 3, found: {:d}".format(grid.values.ndim))
+
+    elif isinstance(grid, UnitCell):
+        if grid.values.ndim != 1 and isolines is None:
+            raise ValueError("For color plot [isolines=None], the number of data dimensions "
+                             "of the cell should be 1, found: {:d}".format(grid.values.ndim))
+
+    else:
+        raise ValueError("Unknown grid input: {}".format(grid))
 
     if isinstance(units, str):
         units_name = units
@@ -1473,13 +1480,12 @@ def matplotlib_scalar(
                 units_name,
             ))
 
-    # In-plane grid spacing: dx, dy
-    dx = (mx[0] - mn[0]) / px
-    dy = (mx[0] - mn[0]) / py
-
     # Build an inplane grid
-    x = numpy.linspace(mn[0] + dx / 2, mx[0] - dx / 2, px)
-    y = numpy.linspace(mn[1] + dy / 2, mx[1] - dy / 2, py)
+    upp = 1. / ppu
+    x = __covering_range__(mn[0], mx[0], upp, anchor=0)
+    y = __covering_range__(mn[1], mx[1], upp, anchor=0)
+    print(x / units)
+    print(y / units)
     mg = numpy.meshgrid(x, y, (0,), indexing='ij')
     dims = mg[0].shape[:2]
     points_inplane = numpy.concatenate(tuple(i[..., numpy.newaxis] for i in mg), axis=len(mg)).reshape(-1, 3)
@@ -1495,18 +1501,20 @@ def matplotlib_scalar(
     else:
         interpolated = grid.interpolate(points_lattice)
 
+    if postproc is not None:
+        interpolated.values = postproc(interpolated.values)
+
     if isolines is None:
 
-        interpolated.values = numpy.sum(interpolated.values, axis=tuple(range(1, len(interpolated.values.shape))))
         if normalize:
             interpolated.values -= interpolated.values.min()
             interpolated.values /= interpolated.values.max()
 
         image = axes.imshow(numpy.swapaxes(interpolated.values.reshape(*dims), 0, 1), extent=[
-            mn[0] / units,
-            mx[0] / units,
-            mn[1] / units,
-            mx[1] / units,
+            (min(x) - upp/2) / units,
+            (max(x) + upp/2) / units,
+            (min(y) - upp/2) / units,
+            (max(y) + upp/2) / units,
         ], origin="lower", **kwargs)
 
     else:
@@ -1567,7 +1575,8 @@ def matplotlib_scalar(
         w = (scale_bar / units) * w
         axes.add_patch(Rectangle((x, y), w, h, color='white'))
 
-    return image
+    if isolines is None:
+        return image
 
 
 def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format=None, **kwargs):

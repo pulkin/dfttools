@@ -15,7 +15,17 @@ from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.image import AxesImage
 
 from dfttools.utypes import BandsPath, BandsGrid, CrystalGrid, RealSpaceBasis
-from dfttools.presentation import matplotlib_bands, matplotlib_scalar, matplotlib_bands_density
+from dfttools.presentation import matplotlib_bands, matplotlib_scalar, matplotlib_bands_density, __covering_range__
+
+
+class CommonTest(unittest.TestCase):
+    def test_cov_range(self):
+        testing.assert_equal(__covering_range__(0, 3, 1), [0, 1, 2, 3])
+        testing.assert_equal(__covering_range__(0.1, 3.1, 1), [0.1, 1.1, 2.1, 3.1])
+        testing.assert_equal(__covering_range__(3, 0, -1), [0, 1, 2, 3])
+        testing.assert_equal(__covering_range__(0, 3, -1), [0, 1, 2, 3])
+        testing.assert_allclose(__covering_range__(0, 3, 1.1, anchor=0.3), [-0.8, 0.3, 1.4, 2.5, 3.6])
+        testing.assert_allclose(__covering_range__(0, 3.6, 1.1, anchor=0.3), [-0.8, 0.3, 1.4, 2.5, 3.6])
 
 
 class BandPlotTest(unittest.TestCase):
@@ -392,15 +402,16 @@ class ScalarGridPlotTest(unittest.TestCase):
     @cleanup
     def test_plot_2(self):
         im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1, 0.1, 0.1), 'z', ppu=10, margins=0)
-        testing.assert_equal(im.get_size(), (round(10 * 3. ** .5 / 2), 15))
+        pyplot.colorbar(im)
+        testing.assert_equal(im.get_size(), (10, 17))
 
     @cleanup
     def test_plot_3(self):
-        im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1, 0.1, 0.1), 'z', show_cell=True)
+        matplotlib_scalar(self.grid, pyplot.gca(), (0.1, 0.1, 0.1), 'z', show_cell=True)
         l = list(i for i in pyplot.gca().get_children() if isinstance(i, Line2D))
         assert len(l) == 12
 
     @cleanup
     def test_plot_error_1(self):
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ValueError):
             matplotlib_scalar(self.wrong_dims, pyplot.gca(), (0.1, 0.1, 0.1), 'z')

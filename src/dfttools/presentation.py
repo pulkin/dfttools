@@ -1464,8 +1464,6 @@ def matplotlib_scalar(
     upp = 1. / ppu
     x = __covering_range__(mn[0], mx[0], upp, anchor=0)
     y = __covering_range__(mn[1], mx[1], upp, anchor=0)
-    print(x / units)
-    print(y / units)
     mg = numpy.meshgrid(x, y, (0,), indexing='ij')
     dims = mg[0].shape[:2]
     points_inplane = numpy.concatenate(tuple(i[..., numpy.newaxis] for i in mg), axis=len(mg)).reshape(-1, 3)
@@ -1481,16 +1479,22 @@ def matplotlib_scalar(
     else:
         interpolated = grid.interpolate(points_lattice)
 
+    interpolated_values = interpolated.values
+    if interpolated_values.ndim == 1:
+        interpolated_values = interpolated_values.reshape(*dims)
+    else:
+        interpolated_values = interpolated_values.reshape(*(dims + (-1,)))
+
     if postproc is not None:
-        interpolated.values = postproc(interpolated.values)
+        interpolated_values = postproc(interpolated_values)
 
     if isolines is None:
 
         if normalize:
-            interpolated.values -= interpolated.values.min()
-            interpolated.values /= interpolated.values.max()
+            interpolated_values -= interpolated_values.min()
+            interpolated_values /= interpolated_values.max()
 
-        image = axes.imshow(numpy.swapaxes(interpolated.values.reshape(*dims), 0, 1), extent=[
+        image = axes.imshow(numpy.swapaxes(interpolated_values, 0, 1), extent=[
             (min(x) - upp/2) / units,
             (max(x) + upp/2) / units,
             (min(y) - upp/2) / units,
@@ -1499,7 +1503,7 @@ def matplotlib_scalar(
 
     else:
 
-        values = numpy.swapaxes(numpy.reshape(interpolated.values, (x.size, y.size, -1)), 0, 1)
+        values = numpy.swapaxes(interpolated_values, 0, 1)
         lmax = max(isolines)
         lmin = min(isolines)
         for i in range(values.shape[-1]):
@@ -1611,4 +1615,3 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
 
     else:
         raise ValueError("Illegal 'embed' value")
-

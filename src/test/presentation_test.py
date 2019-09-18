@@ -401,9 +401,15 @@ class ScalarGridPlotTest(unittest.TestCase):
 
     @cleanup
     def test_plot_2(self):
-        im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1, 0.1, 0.1), 'z', ppu=10, margins=0)
+        expected_shape = (17, 10)
+
+        def pp(x):
+            testing.assert_equal(x.shape, expected_shape)
+            return x
+
+        im = matplotlib_scalar(self.grid, pyplot.gca(), (0.1, 0.1, 0.1), 'z', ppu=10, margins=0, postproc=pp)
         pyplot.colorbar(im)
-        testing.assert_equal(im.get_size(), (10, 17))
+        testing.assert_equal(im.get_size(), expected_shape[::-1])
 
     @cleanup
     def test_plot_3(self):

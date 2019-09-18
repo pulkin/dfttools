@@ -116,6 +116,57 @@ class BackForthTests(unittest.TestCase):
             "    0.00000000000000e+00 0.00000000000000e+00 1.00000000000000e+01",
         )))
 
+    def test_wan90_input(self):
+        _g = (2, 3, 2)
+        self.maxDiff = None
+        grid = Grid.uniform(_g).reshape(-1, 3)
+        cell = UnitCell(Basis((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), kind='orthorhombic'),
+            (
+                (1. / 3, 1. / 3, .5),
+                (2. / 3, 2. / 3, .5),
+            ),
+            'C',
+        )
+        self.assertEqual(wannier90_input(
+            cell=cell,
+            kpts=grid,
+            kp_grid=_g,
+            parameters={"some_str": "abc", "some_int": 3, "some_float": 3.0, "some_bool": True},
+            block_parameters={"some_block": "some_block"},
+        ), "\n".join((
+            "mp_grid = 2 3 2",
+            "some_bool = .true.",
+            "some_float = 3.000000e+00",
+            "some_int = 3",
+            "some_str = abc",
+            "begin atoms_frac",
+            "    C 0.3333333 0.3333333 0.5000000",
+            "    C 0.6666667 0.6666667 0.5000000",
+            "end atoms_frac",
+            "begin kpoints",
+            "    0.0000000 0.0000000 0.0000000",
+            "    0.0000000 0.0000000 0.5000000",
+            "    0.0000000 0.3333333 0.0000000",
+            "    0.0000000 0.3333333 0.5000000",
+            "    0.0000000 0.6666667 0.0000000",
+            "    0.0000000 0.6666667 0.5000000",
+            "    0.5000000 0.0000000 0.0000000",
+            "    0.5000000 0.0000000 0.5000000",
+            "    0.5000000 0.3333333 0.0000000",
+            "    0.5000000 0.3333333 0.5000000",
+            "    0.5000000 0.6666667 0.0000000",
+            "    0.5000000 0.6666667 0.5000000",
+            "end kpoints",
+            "begin some_block",
+            "    some_block",
+            "end some_block",
+            "begin unit_cell_cart",
+            "    2.5000000 0.0000000 0.0000000",
+            "    0.0000000 2.5000000 0.0000000",
+            "    0.0000000 0.0000000 10.0000000",
+            "end unit_cell_cart",
+        )))
+
     def test_qe_back_forth(self):
         c1 = self.cell
         c2 = qe.input(qe_input(

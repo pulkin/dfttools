@@ -8,6 +8,8 @@ from dfttools.util import dumps
 import numericalunits
 
 from collections import defaultdict
+from itertools import chain
+
 
 def __xsf_structure__(cell, tag=None, indent=4):
     indent = " " * indent
@@ -92,13 +94,31 @@ def xsf_grid(grid, cell, npl=6):
     return result
 
 
+def __format_fort__(x, quote=True):
+    """
+    Formats input into a string recognizable by fortran input libraries.
+    Args:
+        x (bool, str, int, float): a value tp format;
+        quote (bool): if True, quotes strings;
+
+    Returns:
+        A formatted string.
+    """
+    if isinstance(x, bool):
+        return {True: ".true.", False: ".false."}[x]
+    elif isinstance(x, (int, float, str)):
+        t = str if isinstance(x, str) else float if isinstance(x, float) else int if isinstance(x, int) else None
+        return {int: "{:d}", float: "{:e}", str: "'{}'" if quote else "{}"}[t].format(x)
+    else:
+        raise ValueError("Unknown input {}".format(x))
+
+
 def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
              pseudopotentials=None, masses=None, indent=4):
     """
     Generates Quantum Espresso input file.
     Args:
-
-        cell (UnitCell): a unit cell with atomic coordinates;
+        cell (CrystallCell): a unit cell with atomic coordinates;
         relax_mask (array,int): array with triggers for relaxation
         written as additional columns in the input file;
         parameters (dict): parameters for the input file;
@@ -106,7 +126,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
         ``crystal_b``, etc;
         pseudopotentials (dict): a dict of pseudopotential file names;
         masses (dict): a dict with elements' masses;
-        indent (int): size of indent;
+        indent (int): indent size in spaces;
 
     Returns:
         A string with Quantum Espresso input.
@@ -217,20 +237,10 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
 
         if isinstance(data, dict):
             for key, value in sorted(data.items()):
-                if isinstance(value, bool):
-                    value = ".true." if value else ".false."
-                elif isinstance(value, int):
-                    value = "{:d}".format(value)
-                elif isinstance(value, float):
-                    value = "{:e}".format(value)
-                elif isinstance(value, str):
-                    value = "'{}'".format(value)
-                else:
-                    raise ValueError("Unknown data type {}".format(type(value)))
                 result.append("{indent}{key} = {value}".format(
                     indent=indent,
                     key=key,
-                    value=value,
+                    value=__format_fort__(value),
                 ))
 
         elif isinstance(data, str):
@@ -246,6 +256,62 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
         raise ValueError("Keys {} are present in inline_parameters but not in parameters".format(
             ", ".join(inline_parameters.keys())))
     return "\n".join(result)
+
+
+def wannier90_input(cell=None, kpts=None, kp_grid=None, parameters=None, block_parameters=None,
+                    indent=4):
+    """
+    Wannier90 input file.
+    Args:
+        cell (CrystallCell): a unit cell with atomic coordinates;
+        kpts (array): k-points list (crystal coordinates);
+        kp_grid (list, tuple): grid dimensions of k-points;
+        parameters (dict): wannier90 options;
+        block_parameters (dict): wannier90 block options;
+        indent (int): indent size in spaces;
+
+    Returns:
+        A string with input file contents.
+    """
+
+    if parameters is None:
+        parameters = {}
+
+    if block_parameters is None:
+        block_parameters = {}
+
+    indent = " " * indent
+
+    if cell is not None:
+        block_parameters["atoms_frac"] = "\n".join(
+            "{atom} {x:.7f} {y:.7f} {z:.7f}".format(atom=a, x=x, y=y, z=z)
+            for a, (x, y, z) in zip(cell.values, cell.coordinates)
+        )
+        block_parameters["unit_cell_cart"] = "\n".join(
+            "{x:.7f} {y:.7f} {z:.7f}".format(x=x, y=y, z=z)
+            for x, y, z in cell.vectors / numericalunits.angstrom
+        )
+
+    if kp_grid is not None:
+        parameters["mp_grid"] = "{:d} {:d} {:d}".format(*kp_grid)
+
+    if kpts is not None:
+        block_parameters["kpoints"] = "\n".join(
+            "{x:.7f} {y:.7f} {z:.7f}".format(x=x, y=y, z=z)
+            for x, y, z in kpts
+        )
+
+    return "\n".join(chain(
+        ("{} = {}".format(k, __format_fort__(v, quote=False))
+         for k, v in sorted(parameters.items(), key=lambda x: x[0])
+         ),
+        ("begin {k}\n{v}\nend {k}".format(k=k, v="\n".join(
+            "{indent}{line}".format(indent=indent, line=i)
+            for i in v.split("\n")
+        ))
+         for k, v in sorted(block_parameters.items(), key=lambda x: x[0])
+         ),
+    ))
 
 
 def siesta_input(cell, indent=4):

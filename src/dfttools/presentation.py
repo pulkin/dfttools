@@ -8,13 +8,14 @@ from itertools import product
 
 from .types import Basis, UnitCell, Grid, __xyz2i__
 
+import numpy
+import numericalunits
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 
-import numpy
-import numericalunits
 
 __elements_table__ = (
     ('H', (255, 255, 255), 0.53, 0.37),
@@ -883,60 +884,39 @@ def matplotlib_bands(
     Plots basic band structure using pyplot.
 
     Args:
-
         cell (UnitCell): cell with the band structure;
-
         axes (matplotlib.axes.Axes): axes to plot on;
-
-    Kwargs:
-
         show_fermi (bool): shows the Fermi level if specified;
-
         fermi_origin (bool): shift the energy origin to the Fermi level;
-
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
-
         energy_units (str, float): either a field from ``numericalunits``
         package or a float with energy units;
-
         energy_units_name (str): a string used for the units. Used only if the
         ``energy_units`` keyword is a float;
-
         coordinate_units (str, float): either a field from ``numericalunits``
         package or a float with coordinate units or None;
-
         coordinate_units_name (str): a string used for the coordinate
         units. Used only if the ``coordinate_units`` keyword is a float;
-
         threshold (float): threshold for determining edges of k point
         path;
-
         weights, weights_color (array): a 2D array with weights on the
         band structure which will be converted to color according to
         current colormap;
-
         weights_size (array): a 2D array with weights on the band
         structure which will be converted to line thickness;
-
         optimize_visible (bool): draw only visible lines;
-
         edge_names (list): the edges names to appear on the band structure;
-
         mark_points (list): marks specific points on the band structure,
         the first number in each list element is interpreted as k-point
         while the second number is band number;
-
         project (array): projects k-points along specified direction
         instead of unfolding the entire bands path. If ``coordinate_units``
         specified the direction is expressed in the unit cell vectors,
         otherwise cartesian basis is used;
-
         return_projected (bool): if True, additionally returns a 1D array
         with x coordinates of bands on the plot;
-
         ls (str): a shortcut for line styles: "-", "--", ".", "-.";
-
         The rest of kwargs are passed to
         ``matplotlib.collections.LineCollection``.
 

@@ -1488,6 +1488,8 @@ def matplotlib_scalar(
     if postproc is not None:
         interpolated_values = postproc(interpolated_values)
 
+    image = None
+
     if isolines is None:
 
         if normalize:
@@ -1503,12 +1505,14 @@ def matplotlib_scalar(
 
     else:
 
-        values = numpy.swapaxes(interpolated_values, 0, 1)
+        interpolated_values = numpy.swapaxes(interpolated_values, 0, 1)
+        if interpolated_values.ndim == 2:
+            interpolated_values = interpolated_values[..., numpy.newaxis]
         lmax = max(isolines)
         lmin = min(isolines)
-        for i in range(values.shape[-1]):
-            if values[..., i].min() < lmax and values[..., i].max() > lmin:
-                image = axes.contour(x / units, y / units, values[..., i], isolines, **kwargs)
+        for i in range(interpolated_values.shape[-1]):
+            if interpolated_values[..., i].min() < lmax and interpolated_values[..., i].max() > lmin:
+                image = axes.contour(x / units, y / units, interpolated_values[..., i], isolines, **kwargs)
         axes.set_aspect('equal')
 
     if show_cell:
@@ -1559,8 +1563,7 @@ def matplotlib_scalar(
         w = (scale_bar / units) * w
         axes.add_patch(Rectangle((x, y), w, h, color='white'))
 
-    if isolines is None:
-        return image
+    return image
 
 
 def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format=None, **kwargs):

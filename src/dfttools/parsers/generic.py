@@ -3,8 +3,6 @@ Contains helper routines to parse text.
 """
 import json
 import re
-import warnings
-from functools import wraps
 
 import numpy
 
@@ -545,7 +543,7 @@ class StringParser(object):
         else:
             matched_string = match.group()
             for i in range(len(patterns)):
-                if not re.search(patterns[i], matched_string, re.I) is None:
+                if re.search("^" + patterns[i] + "$", matched_string, re.I) is not None:
                     return i
 
 

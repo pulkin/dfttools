@@ -832,54 +832,8 @@ class Test_cond4(unittest.TestCase):
 
 class Test_input0(unittest.TestCase):
     def setUp(self):
-        raw = """
-&control
-    calculation = 'scf'
-    outdir = './out'
-    prefix = 'leads'
-    restart_mode = 'from_scratch'
-    verbosity = 'high'
-    wf_collect = .true.
-/
-&system
-    celldm(1) = 5.669178374
-    celldm(2) = 1
-    celldm(3) = 0.9466666667
-    celldm(4) = 0
-    celldm(5) = 0
-    celldm(6) = 0
-    degauss = 0.001
-    ecutrho = 300
-    ecutwfc = 50
-    ibrav = 14
-    lspinorb = .true.
-    nat = 2
-    noncolin = .true.
-    ntyp = 1
-    occupations = 'smearing'
-/
-&electrons
-    electron_maxstep = 500
-    mixing_beta = 0.2
-/
-&ions
-/
-ATOMIC_SPECIES
-    c 1.000000 C.pbe-rrkjus.UPF
-ATOMIC_POSITIONS crystal
-    c 0.500000 0.500000 0.300000 1 1 1
-    c 0.500000 0.500000 0.700000 1 1 1
-K_POINTS automatic
-    1, 1, 32, 0, 0, 0
-ATOMIC_SPECIES
-    c 1.000000 C.pbe-rrkjus.UPF
-ATOMIC_POSITIONS crystal
-    c 0.500000 0.500000 0.300000 1 1 1
-    c 0.500000 0.500000 0.700000 1 1 1
-K_POINTS automatic
-    1, 1, 32, 0, 0, 0
-"""
-        self.parser = input(raw)
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.input.0.testcase"), 'r') as f:
+            self.parser = input(f.read())
 
     def test_unitCell(self):
         cell = self.parser.unitCell()
@@ -897,3 +851,18 @@ K_POINTS automatic
 
     def test_valid_header(self):
         assert input.valid_header(self.parser.parser.string[:1000])
+
+
+class Test_input1(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.input.1.testcase"), 'r') as f:
+            self.parser = input(f.read())
+
+    def test_unitCell(self):
+        cell = self.parser.unitCell()
+        assert_standard_crystal_cell(cell)
+
+        testing.assert_allclose(cell.vectors, numpy.diag(
+            (5.7237733311114, 3.1858694074166, 19.9999973260228)
+        ) * numericalunits.angstrom, rtol=1e-10, atol=1e-15)
+        testing.assert_array_equal(cell.values, ('s', 'mo', 's') * 2)

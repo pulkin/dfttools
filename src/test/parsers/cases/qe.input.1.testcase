@@ -1,0 +1,44 @@
+&CONTROL
+    calculation = 'vc-relax'
+    outdir = './out-shared'
+    prefix = 'tmd'
+    pseudo_dir = '.'
+    restart_mode = 'from_scratch'
+    verbosity = 'high'
+    wf_collect = .true.
+    wfcdir = './out-node'
+/
+&SYSTEM
+    degauss = 1.000000e-04
+    ecutrho = 1.000000e+03
+    ecutwfc = 8.000000e+01
+    ibrav = 0
+    nat = 6
+    ntyp = 2
+    occupations = 'smearing'
+/
+&ELECTRONS
+    conv_thr = 1.000000e-08
+    electron_maxstep = 100
+/
+&IONS
+/
+&CELL
+    cell_dofree = '2Dxy'
+/
+ATOMIC_SPECIES
+    s  1.0 S.pbe-n-rrkjus_psl.0.1.UPF
+    mo 1.0 Mo.pbe-spn-rrkjus_psl.0.3.0.UPF
+ATOMIC_POSITIONS crystal
+     s 0.01722540000000 0.24999973050810 0.41342044726716 1 1 1
+    mo 0.13326550000000 0.74999937118557 0.49603700191002 1 1 1
+     s 0.35598990000000 0.24999973050810 0.56636495699442 1 1 1
+     s 0.51401020000000 0.74999937118557 0.43363515748106 1 1 1
+    mo 0.73673440000000 0.24999973050810 0.50396311256546 1 1 1
+     s 0.85277450000000 0.74999937118557 0.58657969582720 1 1 1
+K_POINTS automatic
+18 18 1 0 0 0
+CELL_PARAMETERS angstrom
+    5.72377333111140e+00 0.00000000000000e+00 0.00000000000000e+00
+    0.00000000000000e+00 3.18586940741660e+00 0.00000000000000e+00
+    0.00000000000000e+00 0.00000000000000e+00 1.99999973260228e+01

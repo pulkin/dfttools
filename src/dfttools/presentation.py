@@ -1357,7 +1357,8 @@ def matplotlib_scalar(
         window=None,
         margins=0.1,
         scale_bar=None,
-        scale_bar_location=1,
+        scale_bar_location=4,
+        scale_bar_color="black",
         postproc=None,
         **kwargs
 ):
@@ -1386,9 +1387,9 @@ def matplotlib_scalar(
         coordinate;
         margins (float): adds margins to the grid where the data is
         interpolated;
-        scale_bar (int): adds a scal bar to the image at the specified
-        location;
+        scale_bar (float): adds a scale bar of the specified width to the image;
         scale_bar_location (int): location of the scale bar;
+        scale_bar_color (str): the color of the scale bar;
         postproc (Callable): a callable to post-process the interpolated data;
         **kwargs: passed to ``pyplot.imshow`` or ``pyplot.contour``;
 
@@ -1531,7 +1532,7 @@ def matplotlib_scalar(
         axes.set_xlabel("x")
         axes.set_ylabel("y")
 
-    if not scale_bar is None:
+    if scale_bar is not None:
 
         from matplotlib.patches import Rectangle
 
@@ -1561,7 +1562,7 @@ def matplotlib_scalar(
         ((x, y), (_, h)) = t.transform(((x, y), (w, y + h)))
         h -= y
         w = (scale_bar / units) * w
-        axes.add_patch(Rectangle((x, y), w, h, color='white'))
+        axes.add_patch(Rectangle((x, y), w, h, color=scale_bar_color, zorder=100))
 
     return image
 

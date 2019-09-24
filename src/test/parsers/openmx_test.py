@@ -3,7 +3,11 @@ import unittest
 from dfttools.parsers.openmx import *
 from dfttools.utypes import CrystalCell
 from ..utypes_test import assert_standard_crystal_cell, assert_standard_bands_path
+import numpy
 from numpy import testing
+
+import os
+import numericalunits
 
 
 class Test_bands0(unittest.TestCase):

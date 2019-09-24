@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from dfttools.parsers import qe, openmx, elk, structure, tools
+from dfttools.parsers import qe, openmx, elk, structure, tools, wannier90
 from dfttools.parsers.generic import IdentifiableParser, ParseError
 from dfttools.simple import get_all_parsers, guess_parser, parse
 
@@ -38,7 +38,8 @@ class Test_methods(unittest.TestCase):
             ("structure.xsf.1.testcase", structure.XSF),
             ("structure.xsf.2.testcase", structure.XSF),
             ("dfttools.0.testcase", tools.JSONStorage),
-            ("structure.cif.0.testcase", structure.CIF)
+            ("structure.cif.0.testcase", structure.CIF),
+            ("wannier.input.0.testcase", wannier90.input),
         )
 
     def test_get_all_parsers(self):
@@ -50,12 +51,7 @@ class Test_methods(unittest.TestCase):
             path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsers/cases/" + f)
             with open(path, "r") as fl:
                 parsers = guess_parser(fl)
-                try:
-                    assert len(parsers) == 1
-                    assert parsers[0] == p
-                except AssertionError:
-                    print(parsers)
-                    raise
+                self.assertEqual(tuple(parsers), (p,))
 
     def test_parse_0(self):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsers/cases/qe.output.0.testcase")

@@ -828,7 +828,7 @@ class UnitCell(Basis):
         c = self.normalized()
         coordinates = c.cartesian() + gap
         shape = numpy.amax(c.vertices(), axis=0) + 2 * gap
-        return UnitCell(
+        return self.__class__(
             Basis(
                 shape,
                 kind='orthorhombic',
@@ -960,7 +960,7 @@ class UnitCell(Basis):
             c.append(cell.coordinates)
             v.append(cell.values)
 
-        return UnitCell(
+        return self.__class__(
             self,
             numpy.concatenate(c, axis=0),
             numpy.concatenate(v, axis=0))
@@ -989,7 +989,7 @@ class UnitCell(Basis):
             shift += c.vectors[d, :]
         coordinates = numpy.concatenate(coordinates, axis=0)
 
-        return UnitCell(basis, coordinates, values, c_basis="cartesian")
+        return self.__class__(basis, coordinates, values, c_basis="cartesian")
     stack.__doc__ = Basis.stack.__doc__
 
     @input_as_list
@@ -1037,7 +1037,7 @@ class UnitCell(Basis):
 
         origin = (self.vectors * sc_min[:, numpy.newaxis]).sum(axis=0)
 
-        result = UnitCell(
+        result = self.__class__(
             Basis(
                 numpy.dot(vec, self.vectors),
                 meta=self.meta),
@@ -1148,7 +1148,7 @@ class UnitCell(Basis):
             points_i = self.transform_to_cartesian(points)
 
         # Interpolate
-        return UnitCell(
+        return self.__class__(
             self,
             points,
             cast_units(driver(data_points, data_values, points_i, **kwargs), self.values),
@@ -1414,7 +1414,7 @@ class Grid(Basis):
             for j in range(len(offsets)):
                 offsets[j] += i.coordinates[j].shape[0]
 
-        return Grid(
+        return self.__class__(
             self,
             new_coordinates,
             new_values,
@@ -1461,7 +1461,7 @@ class Grid(Basis):
             else:
                 coordinates.append(self.coordinates[dim])
 
-        return Grid(basis, coordinates, values)
+        return self.__class__(basis, coordinates, values)
     stack.__doc__ = Basis.stack.__doc__
 
     @input_as_list
@@ -1548,7 +1548,7 @@ class Grid(Basis):
         Returns:
             A grid with the interpolated data.
         """
-        return Grid(self, points, self.interpolate_to_array(Grid.combine_arrays(points), **kwargs))
+        return self.__class__(self, points, self.interpolate_to_array(Grid.combine_arrays(points), **kwargs))
 
     def interpolate_to_cell(self, points, **kwargs):
         """
@@ -1614,7 +1614,7 @@ class Grid(Basis):
             # Sum over bands
             raw = tetrahedron(self, points).reshape(self.values.shape + points.shape)
             self.values = initial
-            return Grid(
+            return self.__class__(
                 self,
                 self.coordinates,
                 raw,

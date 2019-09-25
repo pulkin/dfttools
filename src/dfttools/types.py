@@ -8,6 +8,7 @@ from functools import wraps
 import numpy
 from numpy import random
 from scipy.spatial import cKDTree
+from scipy.interpolate import LinearNDInterpolator
 
 from .blochl import tetrahedron, tetrahedron_plain
 from .util import cast_units
@@ -54,6 +55,20 @@ def __xyz2i__(i):
         return {'x': 0, 'y': 1, 'z': 2}[i]
     except KeyError:
         return i
+
+
+def qhull_interpolation_driver(points, values, points_i):
+    """
+    Delaunay interpolation driver provided by `Qhull` and interfaced by `scipy`.
+    Args:
+        points (ndarray): sparse points' coordinates;
+        values (ndarray): points' values;
+        points_i (ndarray): target points' coordinates to interpolate;
+
+    Returns:
+        The interpolated values.
+    """
+    return LinearNDInterpolator(points, values)(points_i)
 
 
 class ArgumentError(Exception):
@@ -1113,8 +1128,7 @@ class UnitCell(Basis):
         points = numpy.asanyarray(points, dtype=numpy.float64)
 
         if driver is None:
-            from scipy import interpolate
-            driver = interpolate.griddata
+            driver = qhull_interpolation_driver
 
         if periodic:
 

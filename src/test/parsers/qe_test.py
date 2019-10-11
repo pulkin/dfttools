@@ -399,7 +399,7 @@ class Test_output4(unittest.TestCase):
 
     def test_fermi(self):
         f = self.parser.fermi()
-        testing.assert_equal(f, numpy.array((
+        testing.assert_allclose(f, numpy.array((
             0.1229,
             0.6136,
         )) * numericalunits.eV)
@@ -468,6 +468,24 @@ class Test_output5(unittest.TestCase):
             (0.858847877, 0.749999461, 0.594463213,),
             (0.011151454, 0.249999820, 0.405536755,),
         )))
+
+
+class Test_output6(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.output.6.testcase"), 'r') as f:
+            self.parser = output(f.read())
+
+    def test_fermi(self):
+        ref_fermi = 7.7505 * numericalunits.eV
+        testing.assert_allclose(self.parser.fermi(), [ref_fermi])
+
+        bands = self.parser.bands(None)
+        self.assertEqual(len(bands), 1)
+        testing.assert_allclose(bands[0].fermi, ref_fermi)
+
+        bands = self.parser.bands()
+        testing.assert_allclose(bands.fermi, ref_fermi)
+        testing.assert_equal(bands.nocc, 144)
 
 
 class Test_proj0(unittest.TestCase):

@@ -1155,54 +1155,36 @@ def matplotlib_bands_density(
 ):
     """
     Plots density of bands (density of states).
-
     The cell values are considered to be band energies.
 
     Args:
-
-        cell (Grid,UnitCell): a unit cell with the band structure,
+        cell (Grid, UnitCell): a unit cell with the band structure,
         possibly on the grid;
-
         axes (matplotlib.axes.Axes): axes to plot on;
-
         energies (int,array): energies to calculate density at. The
         integer value has the meaning of number of points to cover
         the range ``energy_range``. Otherwise the units of energy are
         defined by the ``units`` keyword;
-
-    Kwargs:
-
         show_fermi (bool): shows the Fermi level if specified;
-
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
-
         units (str, float): either a field from ``numericalunits``
         package or a float with energy units;
-
         units_name (str): a string used for the units. Used only if the
         ``units`` keyword is a float;
-
         weights (array): a 2D array with weights on the band structure;
-
         on_top_of (array): a 2D array with weights on the band structure
         to plot on top of;
-
         use_fill (bool): fill the area below plot;
-
         orientation (str): either 'portrait' or 'landscape' - orientation
         of the plot;
-
         gaussian_spread (float): the gaussian spread for the density of
         states. This value is used only if the provided ``cell`` is not
         a Grid;
-
         method (bool): method to calculate density: 'default', 'gaussian'
         or 'optimal';
-
         postproc (Callable): a post-processing function accepting density
         and energy values (in final units) and returning density values;
-
         The rest of kwargs are passed to pyplot plotting functions.
 
     Returns:
@@ -1241,7 +1223,9 @@ def matplotlib_bands_density(
     # Try converting to grid
     if method == "optimal":
         method = "gaussian"
-        if isinstance(cell, Grid):
+        if cell.size == 1:
+            pass
+        elif isinstance(cell, Grid):
             method = "tetrahedron"
         elif isinstance(cell, UnitCell):
             grid = cell.as_grid()
@@ -1287,7 +1271,8 @@ def matplotlib_bands_density(
     if postproc is not None:
         data = postproc(data, energies)
 
-    kwargs.update(next(axes._get_lines.prop_cycler))
+    if "color" not in kwargs:
+        kwargs.update(next(axes._get_lines.prop_cycler))
 
     if orientation == "portrait":
 

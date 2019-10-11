@@ -189,9 +189,12 @@ class Output(AbstractTextParser, IdentifiableParser):
         """
         return 'convergence NOT achieved' in self.data
 
-    def fermi(self):
+    def fermi(self, eps=numpy.finfo(float).eps):
         """
         Retrieves Fermi energies.
+        Args:
+            eps (float): machine epsilon for shifting the Fermi level from
+            the highest occupied band energy;
 
         Returns:
 
@@ -220,7 +223,7 @@ class Output(AbstractTextParser, IdentifiableParser):
 
             elif x == 1:
                 self.parser.skip("highest occupied level")
-                result.append(self.parser.next_float() * numericalunits.eV)
+                result.append(self.parser.next_float() * (1 + eps) * numericalunits.eV)
 
             elif x == 2 or x == 3:
                 result.append(None)

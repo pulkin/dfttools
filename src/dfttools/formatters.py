@@ -2,9 +2,10 @@
 This submodule contains routines presenting data (unit cell) in various
 text formats.
 """
+from .data import element_number
+from .util import dumps
+
 import numpy
-from dfttools.presentation import __elements_name_lookup_table__
-from dfttools.util import dumps
 import numericalunits
 
 from collections import defaultdict
@@ -334,7 +335,7 @@ def siesta_input(cell, indent=4):
     species = tuple(cell.species().keys())
 
     section_csl = "\n".join(tuple(
-        indent + "{:d} {:d} {}".format(i + 1, __elements_name_lookup_table__[s.lower()][0], s)
+        indent + "{:d} {:d} {}".format(i + 1, element_number[s.lower()], s)
         for i, s in enumerate(species)
     ))
 

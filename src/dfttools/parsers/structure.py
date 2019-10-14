@@ -5,7 +5,7 @@ import numericalunits
 import numpy
 
 from .generic import cre_word, cre_non_space, AbstractTextParser, IdentifiableParser
-from ..presentation import __elements_table__
+from ..data import element_for_number
 from ..simple import unit_cell
 from ..utypes import CrystalCell, CrystalGrid, RealSpaceBasis
 from ..types import element_type
@@ -244,7 +244,7 @@ class GaussianCube(AbstractTextParser, IdentifiableParser):
             ac = self.parser.next_float(3)
 
             if not aid == 0:
-                v.append(__elements_table__[abs(aid) - 1][0])
+                v.append(element_for_number[abs(aid)])
             else:
                 v.append("??")
 

@@ -281,13 +281,11 @@ def svgwrite_unit_cell(
     projected = projection.transform_from(cell, cell.coordinates)
 
     # Collect elements
-    elements = tuple(
-        (element_number[i.lower()], i.lower(), element_color_convention[i.lower()], *element_size[i.lower()])
-        for i in cell.values
-    )
-    e_color = tuple(i[2] for i in elements)
-    e_size = numpy.array(tuple(i[3] for i in elements)) * numericalunits.angstrom
-    e_covsize = numpy.array(tuple(i[4] for i in elements)) * numericalunits.angstrom * bond_ratio
+    e_color = tuple(element_color_convention[i.lower()] for i in cell.values)
+    e_sizes = numpy.array(tuple(element_size[i.lower()] for i in cell.values)) * numericalunits.angstrom
+    e_size = e_sizes[:, 0]
+    e_covsize = e_sizes[:, 1]
+    e_covsize *= bond_ratio
 
     # Determine boundaries
     b_min = numpy.min((projected - e_size[..., numpy.newaxis] * circle_size)[visible, :], axis=0)
@@ -488,10 +486,7 @@ def svgwrite_unit_cell(
 
     if show_legend:
 
-        unique = []
-        for i in elements:
-            if not i in unique:
-                unique.append(i)
+        unique = set(cell.values)
 
         __legend_margin__ = 10
         __box_size__ = (font_size + font_size_small) * 1.2
@@ -505,12 +500,13 @@ def svgwrite_unit_cell(
             xx = x + (__legend_margin__ + __box_size__) * i
             yy = y
 
-            color_1 = __dark__(e[2], delta=0.8) if sum(e[2]) > 0x180 else __light__(e[2], delta=0.8)
+            color_base = element_color_convention[e.lower()]
+            color_1 = __dark__(color_base, delta=0.8) if sum(color_base) > 0x180 else __light__(color_base, delta=0.8)
 
             group.add(svg.rect(
                 insert=(xx, yy),
                 size=(__box_size__, __box_size__),
-                fill=__svg_color__(e[2]),
+                fill=__svg_color__(color_base),
                 stroke_width=1,
                 stroke=__svg_color__(color_1),
                 rx=2,
@@ -518,7 +514,7 @@ def svgwrite_unit_cell(
             ))
 
             group.add(svg.text(
-                str(e[0] + 1),
+                str(element_number[e]),
                 insert=(xx + __i_x__, yy + __i_y__),
                 fill=__svg_color__(color_1),
                 text_anchor="middle",
@@ -526,7 +522,7 @@ def svgwrite_unit_cell(
             ))
 
             group.add(svg.text(
-                e[1],
+                e[:1].upper() + e[1:],
                 insert=(xx + __box_size__ / 2, yy + __box_size__ - __text_baseline__),
                 fill=__svg_color__(color_1),
                 text_anchor="middle",

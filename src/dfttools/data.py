@@ -3,7 +3,7 @@ This file contains various package constants.
 """
 from collections import defaultdict
 
-element_mass = {
+element_mass = defaultdict(lambda: 1, {
     "H": 1.008,
     "He": 4.0026022,
     "Li": 6.94,
@@ -123,10 +123,9 @@ element_mass = {
     "Ts": 294,
     "Og": 294,
     "Uue": 315,
-    None: 1,
-}
+})
 
-element_color_convention = {
+element_color_convention = defaultdict(lambda: (0xA0, 0xA0, 0xA0), {
     "H": (255, 255, 255),
     "He": (217, 255, 255),
     "Li": (204, 128, 255),
@@ -236,11 +235,10 @@ element_color_convention = {
     "Bh": (224, 0, 56),
     "Hs": (230, 0, 46),
     "Mt": (235, 0, 38),
-    None: (0xA0, 0xA0, 0xA0),
-}
+})
 
 # The size is for visualization purposes only. It does not represent the actual element size
-element_size = {
+element_size = defaultdict(lambda: (1.75, 1.45), {
     "H": (0.53, 0.37),
     "He": (0.31, 0.32),
     "Li": (1.67, 1.34),
@@ -350,10 +348,9 @@ element_size = {
     "Bh": (1.75, 1.45),
     "Hs": (1.75, 1.45),
     "Mt": (1.75, 1.45),
-    None: (1.75, 1.45),
-}
+})
 
-element_number = {
+element_number = defaultdict(lambda: 0, {
     "H": 1,
     "He": 2,
     "Li": 3,
@@ -463,16 +460,7 @@ element_number = {
     "Bh": 107,
     "Hs": 108,
     "Mt": 109,
-    None: 0,
-}
-
-# Transform into convention: default and lowercase
-for i in "element_color_convention", "element_mass", "element_size", "element_number":
-    d = globals()[i]
-    default_value = d.pop(None)
-    d_new = defaultdict(lambda: default_value)
-    d_new.update({k.lower(): v for k, v in d.items()})
-    globals()[i] = d_new
+})
 
 element_for_number = defaultdict(lambda: "??")
 element_for_number.update({

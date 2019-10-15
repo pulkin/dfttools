@@ -2,7 +2,7 @@
 This submodule contains routines presenting data (unit cell) in various
 text formats.
 """
-from .data import element_number
+from .data import element_number, element_mass
 from .util import dumps
 
 import numpy
@@ -154,8 +154,9 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
     if pseudopotentials is None:
         pseudopotentials = {}
 
-    if masses is None:
-        masses = defaultdict(lambda: 1)
+    _masses = element_mass.copy()
+    if masses is not None:
+        _masses.update(masses)
 
     if cell is not None:
 
@@ -203,7 +204,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
             "{indent}{name:2s} {mass:.3f} {data:s}".format(
                 indent=indent,
                 name=s,
-                mass=masses[s],
+                mass=_masses[s],
                 data=pseudopotentials[s],
             ) for s in sorted(cell.species())
         )

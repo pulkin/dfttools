@@ -693,23 +693,19 @@ def svgwrite_unit_cell(
         return svg
 
 
-def __guess_energy_range__(cell, bands=10, window=0.05):
+def __guess_energy_range__(cell, bands=10, window=0.05, center_fermi=True):
     """
     Attempts to guess the energy range of interest.
 
     Args:
 
         cell (UnitCell): cell with the band structure;
-
-    Kwargs:
-
         bands (int): number of bands to focus;
-
         window (float): relative size of the gaps below and above
         selected energy range;
+        center_fermi (bool): if True, centers the Fermi level within the window;
 
     Returns:
-
         A tuple with the energy range.
     """
     if cell.fermi is not None and cell.values.shape[1] > bands:
@@ -724,6 +720,11 @@ def __guess_energy_range__(cell, bands=10, window=0.05):
 
         global_min = minimas[top[:bands]].min()
         global_max = maximas[top[:bands]].max()
+
+        if center_fermi:
+            shift = .5 * (global_min + global_max) - cell.fermi
+            global_min -= shift
+            global_max -= shift
 
     else:
 
@@ -751,7 +752,7 @@ def matplotlib_bands(
         weights_color=None,
         weights_size=None,
         optimize_visible=False,
-        edge_names=[],
+        edge_names=None,
         mark_points=None,
         project=None,
         return_projected=False,
@@ -839,6 +840,9 @@ def matplotlib_bands(
     # Set energy range
     if energy_range is None:
         energy_range = __guess_energy_range__(cell) / energy_units
+
+    if edge_names is None:
+        edge_names = tuple()
 
     defaults = {}
     if ls == "-":

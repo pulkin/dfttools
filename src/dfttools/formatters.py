@@ -156,7 +156,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
 
     _masses = element_mass.copy()
     if masses is not None:
-        _masses.update(masses)
+        _masses.update({k.lower(): v for k, v in masses.items()})
 
     if cell is not None:
 
@@ -204,7 +204,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
             "{indent}{name:2s} {mass:.3f} {data:s}".format(
                 indent=indent,
                 name=s,
-                mass=_masses[s],
+                mass=_masses[s.lower()],
                 data=pseudopotentials[s],
             ) for s in sorted(cell.species())
         )

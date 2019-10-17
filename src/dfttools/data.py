@@ -3,7 +3,31 @@ This file contains various package constants.
 """
 from collections import defaultdict
 
-element_mass = defaultdict(lambda: 1, {
+
+def lower_dict_keys(d):
+    """Makes a copy with lower-case dict keys"""
+    return {k.lower(): v for k, v in d.items()}
+
+
+class FrozenDefaultDict(dict):
+    def __init__(self, default_value, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__default__ = default_value
+
+    def __getitem__(self, item):
+        try:
+            return super().__getitem__(item)
+        except KeyError:
+            return self.__default__
+
+    def __setitem__(self, key, value):
+        raise RuntimeError("Modifying is not allowed")
+
+    def update(self, *args, **kwargs):
+        raise RuntimeError("Modifying is not allowed")
+
+
+element_mass = FrozenDefaultDict(1, lower_dict_keys({
     "H": 1.008,
     "He": 4.0026022,
     "Li": 6.94,
@@ -123,9 +147,9 @@ element_mass = defaultdict(lambda: 1, {
     "Ts": 294,
     "Og": 294,
     "Uue": 315,
-})
+}))
 
-element_color_convention = defaultdict(lambda: (0xA0, 0xA0, 0xA0), {
+element_color_convention = FrozenDefaultDict((0xA0, 0xA0, 0xA0), lower_dict_keys({
     "H": (255, 255, 255),
     "He": (217, 255, 255),
     "Li": (204, 128, 255),
@@ -235,10 +259,10 @@ element_color_convention = defaultdict(lambda: (0xA0, 0xA0, 0xA0), {
     "Bh": (224, 0, 56),
     "Hs": (230, 0, 46),
     "Mt": (235, 0, 38),
-})
+}))
 
 # The size is for visualization purposes only. It does not represent the actual element size
-element_size = defaultdict(lambda: (1.75, 1.45), {
+element_size = FrozenDefaultDict((1.75, 1.45), lower_dict_keys({
     "H": (0.53, 0.37),
     "He": (0.31, 0.32),
     "Li": (1.67, 1.34),
@@ -348,9 +372,9 @@ element_size = defaultdict(lambda: (1.75, 1.45), {
     "Bh": (1.75, 1.45),
     "Hs": (1.75, 1.45),
     "Mt": (1.75, 1.45),
-})
+}))
 
-element_number = defaultdict(lambda: 0, {
+element_number = FrozenDefaultDict(0, lower_dict_keys({
     "H": 1,
     "He": 2,
     "Li": 3,
@@ -460,9 +484,8 @@ element_number = defaultdict(lambda: 0, {
     "Bh": 107,
     "Hs": 108,
     "Mt": 109,
-})
+}))
 
-element_for_number = defaultdict(lambda: "??")
-element_for_number.update({
+element_for_number = FrozenDefaultDict("??", {
     v: k for k, v in element_number.items()
 })

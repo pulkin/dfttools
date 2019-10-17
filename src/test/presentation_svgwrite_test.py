@@ -2,6 +2,7 @@ import math
 import os
 import tempfile
 import unittest
+from collections import defaultdict
 
 import matplotlib
 import numpy
@@ -15,6 +16,7 @@ from matplotlib.testing.decorators import cleanup
 import svgwrite
 
 from dfttools.types import Basis, UnitCell
+from dfttools.data import element_color_convention
 from dfttools.presentation import svgwrite_unit_cell, matplotlib2svgwrite
 
 
@@ -36,53 +38,50 @@ class CellSVGTest(unittest.TestCase):
             'Si',
         )
 
-    def __check_dims__(self, svg, cell, window, **kwargs):
-        circles = 0
+    def __check_svg__(self, svg, cell, **kwargs):
         lines = 0
 
-        for e in svg.elements:
+        atoms = defaultdict(int)
+        for i in cell.values:
+            atoms["rgb({:d},{:d},{:d})".format(*element_color_convention[i.lower()])] += 1
 
+        def recursive_traversal(e):
+            yield e
+            if isinstance(e, svgwrite.base.BaseElement):
+                for i in e.elements:
+                    yield from recursive_traversal(i)
+
+        for e in recursive_traversal(svg):
             if isinstance(e, svgwrite.shapes.Circle):
-                circles += 1
-
-                r = e["r"]
-                x = e["cx"]
-                y = e["cy"]
-
-                assert x >= r + window[0]
-                assert y >= r + window[1]
-                assert x <= window[2] - r
-                assert y <= window[3] - r
+                atoms[e["fill"]] -= 1
 
             elif isinstance(e, svgwrite.shapes.Line):
                 lines += 1
+                self.assertGreater(e["stroke-width"], 0)
 
-                for x, y in ((e["x1"], e["y1"]), (e["x2"], e["y2"])):
-                    assert x >= window[0]
-                    assert y >= window[1]
-                    assert x <= window[2]
-                    assert y <= window[3]
+        # Default is True
+        if "show_atoms" not in kwargs or kwargs["show_atoms"] is True:
+            deviation = {k: v for k, v in atoms.items() if v != 0}
+            self.assertEqual(deviation, {})
 
-                assert e["stroke-width"] > 0
-
-        if "show_atoms" in kwargs and kwargs["show_atoms"] == True:
-            assert circles == cell.size
-
-        if cell.size > 0 and "show_bonds" in kwargs and kwargs["show_bonds"] == True:
+        # Default is True
+        if cell.size > 0 and ("show_bonds" not in kwargs or kwargs["show_bonds"] is True):
             assert lines > 0
 
     def __test_0__(self, cell, **kwargs):
-
-        svg = svgwrite.Drawing(size=(1000, 1000))
-        svgwrite_unit_cell(self.cell, svg, insert=(100, 100), size=(800, 800), **kwargs)
-        self.__check_dims__(svg, self.cell, (99, 99, 901, 901))
+        svg = svgwrite.Drawing()
+        svgwrite_unit_cell(cell, svg, fadeout_strength=0, **kwargs)
+        self.__check_svg__(svg, cell, **kwargs)
 
     def test_draw_simple_xyz(self):
         for s in (True, False):
-            for c in ('x', 'y', 'z'):
-                for atoms in (True, False):
-                    for bonds in (True, False):
-                        self.__test_0__(self.cell, camera=c, show_cell=s, show_atoms=atoms, show_bonds=bonds)
+            self.__test_0__(self.cell, show_cell=s,)
+        for c in ('x', 'y', 'z'):
+            self.__test_0__(self.cell, camera=c)
+        for atoms in (True, False):
+            self.__test_0__(self.cell, show_atoms=atoms)
+        for bonds in (True, False):
+            self.__test_0__(self.cell, show_bonds=bonds)
 
     def test_draw_inplane_xyz_rotation(self):
         for c in ('x', 'y', 'z'):
@@ -105,8 +104,8 @@ class CellSVGTest(unittest.TestCase):
 
     def test_2(self):
         fl = tempfile.mkstemp()[1]
-        svg = svgwrite_unit_cell(self.cell2, fl, show_cell=True)
-        self.__check_dims__(svg, self.cell2, (-0.1, -0.1, svg["width"] + 0.1, svg["height"] + 0.1))
+        svg = svgwrite_unit_cell(self.cell2, fl, show_cell=True, fadeout_strength=0)
+        self.__check_svg__(svg, self.cell2)
         assert os.path.isfile(fl)
         os.remove(fl)
 

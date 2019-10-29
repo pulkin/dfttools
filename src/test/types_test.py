@@ -81,6 +81,10 @@ class BasisTest(unittest.TestCase):
         assert self.b == Basis(self.b.vectors)
         assert not self.b == self.c
 
+    def test_round(self):
+        b = self.b.rounded(1)
+        testing.assert_allclose(b.vectors, [(1, 0, 0), (.5, .9, 0), (0, 0, 3)])
+
     def test_transform(self):
         coordinates = numpy.array((1, 1, 1))
 
@@ -431,6 +435,11 @@ class CellTest(unittest.TestCase):
         assert self.cell == c
         c.values[0] = 'x'
         assert not self.cell == c
+
+    def test_round(self):
+        c = self.cell.rounded(1)
+        testing.assert_allclose(c.vectors, [(2.5, 0, 0), (1.3, 2.2, 0), (0, 0, 4.1)])
+        testing.assert_allclose(c.coordinates, [(0, 0, 0), (0.3, 0.3, 0.5)])
 
     def test_volume_0(self):
         assert abs(self.cell.volume / (.5 * 3. ** .5 * self.a ** 2 * self.h) - 1) < 1e-7
@@ -960,6 +969,12 @@ class GridTest(unittest.TestCase):
         assert self.grid == g
         g.values[0, 0, 0] = 3.14
         assert not self.grid == g
+
+    def test_round(self):
+        g = self.grid.rounded(1)
+        testing.assert_equal(g.vectors, [(1, 0, 0), (0, 2, 0), (0, 0, 3)])
+        testing.assert_equal(g.coordinates, [(0, .5), (0, .3, .7), (0, .2, .5, .8)])
+        testing.assert_equal(g.values, self.grid.values)
 
     def test_size(self):
         assert self.grid.size == 24

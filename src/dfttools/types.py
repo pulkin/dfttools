@@ -511,6 +511,27 @@ class Basis(object):
             result.append(interpolate(pt1, pt2, _n, e))
         return numpy.concatenate(result)
 
+    def round(self, decimals=8):
+        """
+        Rounds this basis up to a given number of decimals.
+        Args:
+            decimals (int): the number of decimals;
+        """
+        numpy.around(self.vectors, decimals=decimals, out=self.vectors)
+
+    def rounded(self, decimals=8):
+        """
+        Rounds this basis/unit cell/grid up to a given number of decimals.
+        Args:
+            decimals (int): the number of decimals;
+
+        Returns:
+            A new object with rounded fields.
+        """
+        result = self.copy()
+        result.round(decimals=decimals)
+        return result
+
 
 def diamond_basis(a):
     """
@@ -1074,6 +1095,18 @@ class UnitCell(Basis):
         self.coordinates = self.coordinates[:, new]
     transpose_vectors.__doc__ = Basis.transpose_vectors.__doc__
 
+    def round(self, decimals=8):
+        """
+        Rounds this unit cell up to a given number of decimals.
+        Args:
+            decimals (int): the number of decimals for vectors and coordinates;
+
+        Returns:
+            A new unit cell with rounded vectors and coordinates.
+        """
+        super().round(decimals=decimals)
+        numpy.around(self.coordinates, decimals=decimals, out=self.coordinates)
+
     def as_grid(self, fill=numpy.nan):
         """
         Converts this unit cell into a grid.
@@ -1476,6 +1509,19 @@ class Grid(Basis):
                 self.values = self.values.swapaxes(i, new[i])
                 new[new[i]] = new[i]
     transpose_vectors.__doc__ = Basis.transpose_vectors.__doc__
+
+    def round(self, decimals=8):
+        """
+        Rounds this grid up to a given number of decimals.
+        Args:
+            decimals (int): the number of decimals for vectors and coordinates;
+
+        Returns:
+            A new grid with rounded vectors and coordinates.
+        """
+        super().round(decimals=decimals)
+        for i in self.coordinates:
+            numpy.around(i, decimals=decimals, out=i)
 
     def as_cell(self):
         """

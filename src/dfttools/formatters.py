@@ -4,11 +4,11 @@ text formats.
 """
 from .data import element_number, element_mass
 from .util import dumps
+from .types import Basis
 
 import numpy
 import numericalunits
 
-from collections import defaultdict
 from itertools import chain
 
 
@@ -133,7 +133,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
         A string with Quantum Espresso input.
     """
     indent = ' ' * indent
-    special = ("control", "system", "electrons", "ions", "cell", "inputpp")
+    special = ("control", "system", "electrons", "ions", "cell", "inputpp", "plot")
 
     if parameters is None:
         parameters = {}
@@ -520,13 +520,24 @@ def pyscf_cell(cell, **kwargs):
     return c
 
 
-def json_structure(cell):
+def json_structure(cell, **kwargs):
     """
     Outputs the unit cell into JSON string.
     Args:
-        cell (UnitCell): a unit cell to serialize;
+        cell (UnitCell): a unit cell or multiple unit cells
+        to serialize;
 
     Returns:
         A string with serialized unit cell.
     """
-    return dumps(cell.to_json(), indent=2)
+    default = dict(indent=2)
+    default.update(kwargs)
+
+    if isinstance(cell, Basis):
+        return dumps(cell.to_json(), **default)
+
+    elif isinstance(cell, (list, tuple)):
+        return dumps(tuple(i.to_json() for i in cell), **default)
+
+    else:
+        raise ValueError("Unknown input: {}".format(cell))

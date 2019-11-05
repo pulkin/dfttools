@@ -6,8 +6,10 @@ from dfttools.types import *
 from numpy import testing
 from numericalunits import angstrom
 
+from json import loads
 
-class BackForthTests(unittest.TestCase):
+
+class Tests(unittest.TestCase):
 
     def setUp(self):
         self.cell = UnitCell(
@@ -116,6 +118,23 @@ class BackForthTests(unittest.TestCase):
             "    0.00000000000000e+00 0.00000000000000e+00 1.00000000000000e+01",
         )))
 
+        self.assertEqual(qe_input(
+            parameters=dict(
+                inputpp=dict(plot_num=3, prefix="tmd"),
+                plot=dict(fileout='something.xsf', iflag=3),
+            )
+        ), "\n".join((
+            "&INPUTPP",
+            "    plot_num = 3",
+            "    prefix = 'tmd'",
+            "/",
+            "&PLOT",
+            "    fileout = 'something.xsf'",
+            "    iflag = 3",
+            "/",
+        )))
+
+
     def test_wan90_input(self):
         _g = (2, 3, 2)
         self.maxDiff = None
@@ -219,3 +238,8 @@ class BackForthTests(unittest.TestCase):
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)
         testing.assert_equal(c1.values, c2.values)
+
+    def test_json(self):
+        data = loads(json_structure(self.cell))
+        another_data = loads(json_structure([self.cell, self.cell]))
+        self.assertEqual(another_data, [data, data])

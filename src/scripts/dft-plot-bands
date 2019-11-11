@@ -15,6 +15,7 @@ parser.add_argument("-e", "--range", nargs=2, help="Energy range in eV", metavar
 parser.add_argument("-c", "--color", nargs=1, help="Color bands according to a scalar", metavar="FILENAME")
 parser.add_argument("-m", "--cmap", nargs=1, help="Color map used for coloring bands", metavar="VALUE")
 parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+parser.add_argument("-l", "--labels", help="Labels for bands path")
 parser.add_argument("file", help="file with the band structure", metavar="FILENAME")
 
 options = parser.parse_args()
@@ -44,6 +45,9 @@ if options.fermi is not None:
 
 if options.range is not None:
     options.range = list(float(v.replace("_", "-")) for v in options.range)
+
+if options.labels is not None:
+    options.labels = options.labels.split(",")
 
 data = {}
 
@@ -125,6 +129,7 @@ if "density" not in data:
             energy_range=options.range,
             weights_color=weights,
             cmap=options.cmap,
+            edge_names=options.labels,
         )
 
         if options.color is not None:
@@ -146,6 +151,7 @@ else:
         energy_range=options.range,
         weights_color=weights,
         cmap=options.cmap,
+        edge_names=options.labels,
     )
 
     if options.verbose:

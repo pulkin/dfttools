@@ -5,6 +5,7 @@ import base64
 import math
 from xml.etree import ElementTree
 from itertools import product
+from tempfile import NamedTemporaryFile
 
 from .types import Basis, UnitCell, Grid, __xyz2i__
 from .data import element_number, element_size, element_color_convention
@@ -1486,3 +1487,11 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
 
     else:
         raise ValueError("Illegal 'embed' value")
+
+
+def notebook_unit_cell(cell, **kwargs):
+    """Display unit cell in iPython notebook."""
+    from IPython.display import SVG, display
+    f = NamedTemporaryFile()
+    svgwrite_unit_cell(cell, f.name, **kwargs)
+    display(SVG(filename=f.name))

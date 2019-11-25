@@ -36,47 +36,70 @@ class JSONStorage(AbstractJSONParser, IdentifiableParser):
 
     loads = staticmethod(loads)
 
-    def __pick_class__(self):
-        if "type" not in self.json:
+    @staticmethod
+    def __pick_class__(o):
+        if "type" not in o:
             raise ParseError("Not a dfttools storage")
-        t = self.json["type"]
+        t = o["type"]
         if t not in lookup_container:
             raise ParseError("Unknown type: {}".format(t))
         return lookup_container[t]
 
-    def assemble(self):
+    @staticmethod
+    def __common_class__(objs):
+        if not isinstance(objs, list):
+            objs = [objs]
+        c = set(i.__class__ for i in objs)
+        if len(c) > 1:
+            raise ParseError("Several different classes found: {}".format(c))
+        return c.pop()
+
+    def assemble(self, index=None):
         """
         Assembles a python object from this container.
+        Args:
+            index (int): the index of the object, if available;
 
         Returns:
             One of the objects defined in `dfttools.types`, `dfttools.utypes`.
         """
-        return self.__pick_class__().from_json(self.json)
+        data = self.json
+        if isinstance(self.json, list):
+            if index is None:
+                return list(self.__pick_class__(i).from_json(i) for i in self.json)
+            data = self.json[index]
+        return self.__pick_class__(data).from_json(data)
 
     @unit_cell
-    def unitCell(self):
+    def unitCells(self, index=None):
         """
         Retrieves the atomic structure data.
+        Args:
+            index (int): the index of the structure, if available;
 
         Returns:
             The unit cell.
         """
-        result = self.assemble()
-        if lookup_type_string[result.__class__] not in valid_containers_uc:
-            raise ParseError("The container is not an atomic structure: {}".format(result.__class__))
+        result = self.assemble(index=index)
+        common_class = self.__common_class__(result)
+        if lookup_type_string[common_class] not in valid_containers_uc:
+            raise ParseError("The container is not an atomic structure: {}".format(common_class))
         return result
 
     @band_structure
-    def bands(self):
+    def bands(self, index=-1):
         """
         Retrieves the band structure data.
+        Args:
+            index (int): the index of the band structure, if available;
 
         Returns:
             Band structure.
         """
-        result = self.assemble()
-        if lookup_type_string[result.__class__] not in valid_containers_bands:
-            raise ParseError("The container is not bands: {}".format(result.__class__))
+        result = self.assemble(index=index)
+        common_class = self.__common_class__(result)
+        if lookup_type_string[common_class] not in valid_containers_bands:
+            raise ParseError("The container is not bands: {}".format(common_class))
         return result
 
 

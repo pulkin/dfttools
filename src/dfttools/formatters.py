@@ -379,31 +379,50 @@ AtomicCoordinatesFormat Fractional
     )
 
 
-def openmx_input(cell, populations, l=None, r=None, tolerance=1e-10, indent=4):
+def __format_openmx__(x):
+    """
+    Formats input into a string recognizable by OpenMX input parser.
+    Args:
+        x (bool, str, int, float): a value to format;
+
+    Returns:
+        A formatted string.
+    """
+    if isinstance(x, bool):
+        return {True: "on", False: "off"}[x]
+    elif isinstance(x, (int, float, str)):
+        t = str if isinstance(x, str) else float if isinstance(x, float) else int if isinstance(x, int) else None
+        return {int: "{:d}", float: "{:e}", str: "{}"}[t].format(x)
+    else:
+        raise ValueError("Unknown input {}".format(x))
+
+
+def openmx_input(cell, populations, parameters=None, block_parameters=None,
+                 l=None, r=None, tolerance=1e-10, indent=4, pseudos=None):
     """
     Generates OpenMX minimal input file with atomic structure.
-
     Args:
-
         cell (UnitCell): input unit cell;
-
         populations (dict): a dict with initial electronic populations data;
-
-    Kwargs:
-
-        l (UnitCell): left lead;
-
-        r (UnitCell): right lead;
-
+        parameters (dict): a dict with parameters;
+        block_parameters (dict): a dict with block parameters;
+        l (UnitCell): left lead for transport calculations;
+        r (UnitCell): right lead for transport calculations;
         tolerance (float): tolerance for checking whether left-center-right
         unit cells can be stacked;
-
         indent (int): size of indent;
+        pseudos (dict): a collection of pseudopotential/basis strings;
 
     Returns:
 
         String with OpenMX input file formatted data.
     """
+    if parameters is None:
+        parameters = {}
+
+    if block_parameters is None:
+        block_parameters = {}
+
     indent = ' ' * indent
     left = l
     right = r
@@ -422,22 +441,15 @@ def openmx_input(cell, populations, l=None, r=None, tolerance=1e-10, indent=4):
     c = target.cartesian() / numericalunits.angstrom
     v = target.values
 
-    result = """Atoms.Number {anum:d}
-Species.Number {snum:d}
-""".format(anum=cell.size, snum=len(target.species()))
+    parameters["atoms.number"] = cell.size
+    parameters["species.number"] = len(target.species())
 
     if frac:
-        result += """
-Atoms.UnitVectors.Unit Ang
-<Atoms.UnitVectors
-""" + (
-            "\n".join(tuple(
+        parameters["atoms.unitvectors.unit"] = "Ang"
+        block_parameters["atoms.unitvectors"] = "\n".join(tuple(
                 "{indent}{:.15e} {:.15e} {:.15e}".format(*v, indent=indent)
                 for v in target.vectors / numericalunits.angstrom
             ))
-        ) + """
-Atoms.UnitVectors>
-"""
 
     def __coords__(fr, num, frac=False):
         _c_ = c if not frac else target.coordinates
@@ -450,32 +462,31 @@ Atoms.UnitVectors>
 
     offset = left.size if not frac else 0
 
-    result += """
-Atoms.SpeciesAndCoordinates.Unit {}
-<Atoms.SpeciesAndCoordinates
-""".format("frac" if frac else "ang") + __coords__(offset, cell.size, frac=frac) + """
-Atoms.SpeciesAndCoordinates>
-"""
+    parameters["atoms.speciesandcoordinates.unit"] = "frac" if frac else "ang"
+    block_parameters["atoms.speciesandcoordinates"] = __coords__(offset, cell.size, frac=frac)
 
     if left is not None:
-        result += """
-LeftLeadAtoms.Number {anum:d}""".format(anum=left.size) + """
-<LeftLeadAtoms.SpeciesAndCoordinates
-""" + __coords__(0, left.size) + """
-LeftLeadAtoms.SpeciesAndCoordinates>
-"""
+        parameters["leftleadatoms.number"] = left.size
+        block_parameters["leftleadatoms.speciesandcoordinates"] = __coords__(0, left.size)
 
     if right is not None:
         offset += cell.size
+        parameters["rightleadatoms.number"] = right.size
+        block_parameters["rightleadatoms.speciesandcoordinates"] = __coords__(offset, right.size)
 
-        result += """
-RightLeadAtoms.Number {anum:d}""".format(anum=right.size) + """
-<RightLeadAtoms.SpeciesAndCoordinates
-""" + __coords__(offset, right.size) + """
-RightLeadAtoms.SpeciesAndCoordinates>
-"""
+    if pseudos is not None:
+        species = sorted(target.species().keys())
+        block_parameters["definition.of.atomic.species"] = "\n".join("{indent}{key} {value}".format(
+            indent=indent, key=i, value=pseudos[i]) for i in species)
 
-    return result
+    result = []
+    for k in sorted(chain(parameters.keys(), block_parameters.keys())):
+        if k in parameters:
+            result.append("{key} {value}".format(key=k, value=__format_openmx__(parameters[k])))
+        else:
+            result.append("\n<{key}\n{value}\n{key}>\n".format(key=k, value=block_parameters[k]))
+
+    return "\n".join(result)
 
 
 def pyscf_cell(cell, **kwargs):

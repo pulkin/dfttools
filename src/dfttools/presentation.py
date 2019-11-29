@@ -876,7 +876,7 @@ def matplotlib_bands(
 
         # Fold K points to 0- > 1 line or project
         if not project is None:
-            __ = {"kx": 0, "ky": 1, "kz": 2}
+            __ = {"kx": 0, "x": 0, "ky": 1, "y": 1, "kz": 2, "z": 2}
             if project in __.keys():
                 x_label = project
                 v = [0] * cell.vectors.shape[0]

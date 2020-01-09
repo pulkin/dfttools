@@ -285,11 +285,11 @@ def wannier90_input(cell=None, kpts=None, kp_grid=None, parameters=None, block_p
     indent = " " * indent
 
     if cell is not None:
-        block_parameters["atoms_frac"] = "\n".join(
+        block_parameters["atoms_frac"] = tuple(
             "{atom} {x:.7f} {y:.7f} {z:.7f}".format(atom=a, x=x, y=y, z=z)
             for a, (x, y, z) in zip(cell.values, cell.coordinates)
         )
-        block_parameters["unit_cell_cart"] = "\n".join(
+        block_parameters["unit_cell_cart"] = tuple(
             "{x:.7f} {y:.7f} {z:.7f}".format(x=x, y=y, z=z)
             for x, y, z in cell.vectors / numericalunits.angstrom
         )
@@ -298,10 +298,12 @@ def wannier90_input(cell=None, kpts=None, kp_grid=None, parameters=None, block_p
         parameters["mp_grid"] = "{:d} {:d} {:d}".format(*kp_grid)
 
     if kpts is not None:
-        block_parameters["kpoints"] = "\n".join(
+        block_parameters["kpoints"] = tuple(
             "{x:.7f} {y:.7f} {z:.7f}".format(x=x, y=y, z=z)
             for x, y, z in kpts
         )
+
+    block_parameters = {k: v if isinstance(v, str) else "\n".join(v) for k, v in block_parameters.items()}
 
     return "\n".join(chain(
         ("{} = {}".format(k, __format_fort__(v, quote=False))

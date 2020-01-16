@@ -13,6 +13,7 @@ from .native_qe import qe_proj_weights
 from ..simple import band_structure, unit_cell, tag_method
 from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
 from ..types import element_type
+from ..util import eV
 
 
 class Bands(AbstractTextParser, IdentifiableParser):
@@ -251,6 +252,17 @@ class Output(AbstractTextParser, IdentifiableParser):
 
         return numpy.array(result) * numericalunits.Ry / numericalunits.aBohr
 
+    def __next_total__(self):
+        c = self.parser.match_closest(("!    total energy", "final energy"))
+        if c == 0:
+            self.parser.skip("!    total energy")
+            return eV(self.parser.next_float() * numericalunits.Ry)
+        elif c == 1:
+            self.parser.skip("final energy")
+            return eV(self.parser.next_float() * numericalunits.Ry)
+        else:
+            raise StopIteration("No total energies are available")
+
     def total(self):
         """
         Retrieves total energies.
@@ -263,11 +275,12 @@ class Output(AbstractTextParser, IdentifiableParser):
         self.parser.reset()
         result = []
 
-        while self.parser.present("!    total energy"):
-            self.parser.skip("!    total energy")
-            result.append(self.parser.next_float())
-
-        return numpy.array(result) * numericalunits.Ry
+        try:
+            while True:
+                result.append(self.__next_total__())
+        except StopIteration:
+            pass
+        return eV(result)
 
     def threads(self):
         """
@@ -317,9 +330,14 @@ class Output(AbstractTextParser, IdentifiableParser):
             return alat * numericalunits.aBohr
 
     @unit_cell
-    def unitCells(self):
+    def unitCells(self, index=-1):
         """
         Retrieves atomic position data.
+
+        Kwargs:
+            index (int or None): index of a band structure or ``None``
+            if all band structures need to be parsed. Supports negative
+            indexing.
 
         Returns:
 
@@ -350,7 +368,9 @@ class Output(AbstractTextParser, IdentifiableParser):
             coordinates[i, :] = self.parser.next_float(3)
 
         coordinates *= alat
-        result.append(CrystalCell(shape, coordinates, captions, c_basis="cartesian"))
+        result.append(CrystalCell(shape, coordinates, captions, c_basis="cartesian", meta={
+            "total-energy": self.__next_total__(),
+        }))
 
         # Parse MD steps
         while self.parser.present("ATOMIC_POSITIONS"):
@@ -381,12 +401,17 @@ class Output(AbstractTextParser, IdentifiableParser):
                 coordinates[i, :] = self.parser.next_float(3)
                 self.parser.next_line()
 
+            try:
+                meta = {"total-energy": self.__next_total__()}
+            except StopIteration:
+                meta = None
             if units == "crystal":
-                result.append(CrystalCell(shape, coordinates, captions))
+                result.append(CrystalCell(shape, coordinates, captions, meta=meta))
             elif units == "alat":
-                result.append(CrystalCell(shape, coordinates * alat, captions, c_basis="cartesian"))
+                result.append(CrystalCell(shape, coordinates * alat, captions, c_basis="cartesian", meta=meta))
             elif units == "bohr":
-                result.append(CrystalCell(shape, coordinates * numericalunits.aBohr, captions, c_basis="cartesian"))
+                result.append(CrystalCell(shape, coordinates * numericalunits.aBohr, captions, c_basis="cartesian",
+                                          meta=meta))
             else:
                 raise ParseError("Unknown units: %s" % units)
 

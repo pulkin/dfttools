@@ -105,6 +105,9 @@ class Test_output0(unittest.TestCase):
         assert len(cells) == 20
         for i in range(20):
             testing.assert_equal(cells[i].values, ('As', 'As'))
+        total = self.parser.total()
+        test_total = [i.meta["total-energy"] for i in cells[:-1]]
+        testing.assert_equal(total, test_total)
         assert_standard_crystal_cell(cells[0])
         testing.assert_allclose(cells[0].vectors, numpy.array(
             ((0.580130, 0.000000, 0.814524),

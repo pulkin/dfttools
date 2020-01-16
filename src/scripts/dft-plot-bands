@@ -4,7 +4,6 @@ from dfttools.parsers.generic import ParseError
 from dfttools.simple import parse
 
 from numericalunits import eV
-import numpy
 
 parser = argparse.ArgumentParser(description="Plots a band structure from a supported file")
 parser.add_argument("-o", "--output", nargs=1, help="plotted band structure file name", metavar="FILENAME")

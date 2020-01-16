@@ -4,7 +4,7 @@ import unittest
 import numericalunits
 
 from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis, RealSpaceBasis
-from dfttools.util import dumps, loads, ArrayWithUnits
+from dfttools.util import dumps, loads, ArrayWithUnits, angstrom
 from numpy import testing
 
 
@@ -54,6 +54,7 @@ class CellTest(unittest.TestCase):
             ((self.a, 0, 0), (.5 * self.a, .5 * self.a * 3. ** .5, 0), (0, 0, self.h)),
             ((0., 0., 0.), (1. / 3., 1. / 3., 0.5)),
             'Co',
+            meta={"length": angstrom(1 * numericalunits.angstrom)}
         )
         self.ia = 1. / self.a
         self.ih = 1. / self.h
@@ -79,6 +80,21 @@ class CellTest(unittest.TestCase):
         testing.assert_allclose(x.values, cell2.values)
         testing.assert_allclose(x.fermi, cell2.fermi)
 
+    def test_save_load_uc(self):
+        cell = self.co_cell
+
+        data = pickle.dumps(cell)
+        numericalunits.reset_units()
+        x = pickle.loads(data)
+
+        # Assert object is the same wrt numericalunits
+        self.setUp()
+        cell2 = self.co_cell
+        testing.assert_allclose(x.vectors, cell2.vectors)
+        testing.assert_equal(x.coordinates, cell2.coordinates)
+        testing.assert_equal(x.values, cell2.values)
+        testing.assert_allclose(x.meta["length"], cell2.meta["length"])
+
     def test_save_load_json(self):
         cell = self.bs_cell
 
@@ -98,7 +114,7 @@ class CellTest(unittest.TestCase):
         serialized = self.co_cell.to_json()
         testing.assert_equal(serialized, dict(
             vectors=self.co_cell.vectors,
-            meta={},
+            meta={"length": self.co_cell.meta["length"]},
             type="dfttools.utypes.CrystalCell",
             coordinates=self.co_cell.coordinates,
             values=self.co_cell.values,

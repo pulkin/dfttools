@@ -155,6 +155,21 @@ class ArrayWithUnits(numpy.ndarray):
 array = ArrayWithUnits
 
 
+def eV(x):
+    """A shortcut to adding units to values in eV."""
+    return array(x, units="eV")
+
+
+def angstrom(x):
+    """A shortcut to adding units to values in angstrom."""
+    return array(x, units="angstrom")
+
+
+def inv_angstrom(x):
+    """A shortcut to adding units to values in angstrom."""
+    return array(x, units="1/angstrom")
+
+
 def cast_units(destination, source, inv=False):
     """
     Casts units from one array to another.

@@ -235,7 +235,7 @@ class StringParser(object):
         except StopIteration:
             return False
 
-    def distance(self, expression, n=1, default=None):
+    def distance(self, expression, n=1, to="head", default=None):
         """
         Calculates the distance to nth occurrence of expression in characters.
         
@@ -243,6 +243,7 @@ class StringParser(object):
             expression (str, re.RegexObject): the expression to match. If
             `expression` is str then the case is ignored;
             n (int): the number of occurrences to skip (minus one);
+            to (str): "head" or "tail": whether measure distance to head or tail;
             default: the return value if StopIteration occurs. Raises if
             `None`;
         
@@ -257,10 +258,11 @@ class StringParser(object):
             expression = re.compile(re.escape(expression), re.I)
         ex_it = expression.finditer(self.string[self.__position__:])
         try:
-            start = 0
+            result = 0
             for i in range(n):
-                start = next(ex_it).start()
-            return start
+                token = next(ex_it)
+                result = token.start() if to == "head" else token.end()
+            return result
         except StopIteration:
             if default is None:
                 raise

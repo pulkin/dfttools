@@ -92,6 +92,7 @@ class StringTest(unittest.TestCase):
         sp.__position__ = 1
         assert sp.distance("abc") == 11
         assert sp.distance("abc", default=-1) == 11
+        assert sp.distance("abc", to="tail") == 14
 
     def test_nextInt(self):
         sp = parse("123abc456 78.8 +45.68-73 1 2 3 4 5 6 7 8 abc 9")

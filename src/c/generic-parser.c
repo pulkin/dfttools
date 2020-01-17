@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "generic-parser.h"
+
 void __debug__(FILE *f) {
     long int pos = ftell(f);
     char *line = NULL;
@@ -9,6 +11,11 @@ void __debug__(FILE *f) {
     if (getline(&line, &len, f) != -1) printf("Line: [%s]\n", line);
     if (line) free(line);
     fseek(f,pos,SEEK_SET);
+}
+
+const char to_lower_case(const char x) {
+    if (x >= 'A' && x <= 'Z') return x + 32;
+    return x;
 }
 
 int skip_either(char **c, int n, FILE *f) {

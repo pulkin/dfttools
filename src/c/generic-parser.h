@@ -1,4 +1,5 @@
 void __debug__(FILE *f);
+const char to_lower_case(const char x);
 
 int skip_either(char **c, int n, FILE *f);
 int skip(char *c, FILE *f);

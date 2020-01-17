@@ -8,10 +8,13 @@
 static char module_name[] = "native_qe";
 static char module_docstring[] = "A module containing native parsing implementations of QE parsing routines";
 static char qeproj_weights_docstring[] = "Retrieves projection weights as a numpy array";
-static PyObject *qeproj_weights(PyObject *self, PyObject *string_data);
+static char qeproj_cell_docstring[] = "Retrieves a unit cell data";
+static PyObject *native_qe_proj_weights(PyObject *self, PyObject *string_data);
+static PyObject *native_qe_scf_cell(PyObject *self, PyObject *string_data);
 
 static PyMethodDef module_methods[] = {
-    {"qe_proj_weights", qeproj_weights, METH_VARARGS, qeproj_weights_docstring},
+    {"qe_proj_weights", native_qe_proj_weights, METH_VARARGS, qeproj_weights_docstring},
+    {"qe_scf_cell", native_qe_scf_cell, METH_VARARGS, qeproj_cell_docstring},
     {NULL, NULL, 0, NULL}
 };
 
@@ -146,7 +149,29 @@ int weights(float **data, int dims[3], FILE *f) {
     return 1;
 }
 
-static PyObject *qeproj_weights(PyObject *self, PyObject *args) {
+int cell_data(double **coordinates, char **values, npy_intp n, FILE *f) {
+
+    *coordinates = malloc(sizeof(double) * 3 * n);
+    *values = malloc(16 * n);
+    if (!*coordinates || !*values) {
+        if (*coordinates) free(*coordinates);
+        if (*values) free(*values);
+        return 0;
+    }
+    memset(*values, 0, 16 * n);
+
+    for (int i=0; i<n; i++) {
+        double *dest = (*coordinates) + 3 * i;
+        if (fscanf(f, "%16s %lf %lf %lf", (*values) + 16 * i, dest, dest + 1, dest + 2) != 4 || !skip_line(f)) {
+            free(*coordinates);
+            free(*values);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static PyObject *native_qe_proj_weights(PyObject *self, PyObject *args) {
     
     char *string_data;
     if (!PyArg_ParseTuple(args, "s", &string_data))
@@ -165,4 +190,27 @@ static PyObject *qeproj_weights(PyObject *self, PyObject *args) {
     int i;
     for (i=0; i<3; i++) dims_npy[i] = dims[i];
     return PyArray_SimpleNewFromData(3, dims_npy, NPY_FLOAT, data);
+}
+
+static PyObject *native_qe_scf_cell(PyObject *self, PyObject *args) {
+
+    char *string_data;
+    npy_intp n;
+    if (!PyArg_ParseTuple(args, "sl", &string_data, &n))
+        return NULL;
+
+    FILE *f = fmemopen(string_data, strlen(string_data), "r");
+    double *coordinates;
+    char *values;
+    if (!cell_data(&coordinates, &values, n, f)) {
+        PyErr_SetString(PyExc_Exception, "Cell data is broken");
+        return NULL;
+    }
+    fclose(f);
+
+    npy_intp dims_npy[] = {n, 3};
+    PyObject *arr_coordinates = PyArray_SimpleNewFromData(2, dims_npy, NPY_DOUBLE, coordinates);
+    dims_npy[1] = 16;
+    PyObject *arr_values = PyArray_SimpleNewFromData(2, dims_npy, NPY_BYTE, values);
+    return Py_BuildValue("(O,O)", arr_coordinates, arr_values);
 }

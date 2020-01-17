@@ -9,7 +9,7 @@ import numpy
 
 from .generic import parse, cre_var_name, cre_word, cre_float, cre_quotedText, cre_int, ParseError, \
     AbstractTextParser, IdentifiableParser
-from .native_qe import qe_proj_weights
+from .native_qe import qe_proj_weights, qe_scf_cell
 from ..simple import band_structure, unit_cell, tag_method
 from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
 from ..types import element_type
@@ -379,8 +379,6 @@ class Output(AbstractTextParser, IdentifiableParser):
                 # Nothing left
                 break
 
-            coordinates = numpy.zeros((n, 3))
-            captions = numpy.zeros(n, dtype=element_type)
             d_lat = self.parser.distance("CELL_PARAMETERS", to="tail", default=float("inf"))
 
             # Check if vcr steps are present
@@ -402,10 +400,9 @@ class Output(AbstractTextParser, IdentifiableParser):
             self.parser.fw(d_apos)
             units = self.parser.next_match(cre_word)
 
-            for i in range(n):
-                captions[i] = self.parser.next_match(cre_word)
-                coordinates[i, :] = self.parser.next_float(3)
-                self.parser.next_line()
+            self.parser.next_line()
+            coordinates, captions = qe_scf_cell(self.data[self.parser.__position__:], n)
+            captions = [bytearray(i).decode() for i in captions]
 
             try:
                 meta = {"total-energy": self.__next_total__()}

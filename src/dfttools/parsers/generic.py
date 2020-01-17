@@ -164,6 +164,16 @@ class StringParser(object):
         """
         self.__history__.append(self.__position__)
 
+    def fw(self, i):
+        """
+        Jumps forward by the given number of symbols.
+        Args:
+            i (int): the number of symbols to skip;
+        """
+        if self.__position__ + i > len(self.string):
+            raise ValueError("Hops beyond the end of the data")
+        self.__position__ += i
+
     def skip(self, expression, n=1):
         """
         Skips n occurrences of expression in the string.

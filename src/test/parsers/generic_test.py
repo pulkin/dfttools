@@ -49,6 +49,11 @@ class StringTest(unittest.TestCase):
         sp.pop()
         assert sp.__position__ == 0
         self.assertRaises(Exception, sp.pop)
+        sp.fw(12)
+        assert sp.__position__ == 12
+        sp.fw(4)
+        assert  sp.__position__ == 16
+        self.assertRaises(Exception, sp.fw, 1)
 
     def test_skip(self):
         sp = parse("ABC, Abc, abc, aBc, aBC, aBC, aBC")

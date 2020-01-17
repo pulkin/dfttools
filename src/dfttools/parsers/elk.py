@@ -126,7 +126,7 @@ class Input(UnitCellsParser, IdentifiableParser):
         l = header.lower()
         return "avec" in l and "atoms" in l and "ngridk" in l
 
-    # Non need to place @unit_cell here: inherits UnitCellsParser.unitCells()
+    # No need to place @unit_cell here: inherits UnitCellsParser.unitCells()
     def unitCell(self):
         """
         Retrieves the unit cell specified in the input file.

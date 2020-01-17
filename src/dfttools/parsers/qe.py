@@ -373,16 +373,21 @@ class Output(AbstractTextParser, IdentifiableParser):
         }))
 
         # Parse MD steps
-        while self.parser.present("ATOMIC_POSITIONS"):
+        while True:
+            d_apos = self.parser.distance("ATOMIC_POSITIONS", to="tail", default=-1)
+            if d_apos == -1:
+                # Nothing left
+                break
 
             coordinates = numpy.zeros((n, 3))
             captions = numpy.zeros(n, dtype=element_type)
+            d_lat = self.parser.distance("CELL_PARAMETERS", to="tail", default=float("inf"))
 
             # Check if vcr steps are present
-            if self.parser.present("CELL_PARAMETERS") and (
-                    self.parser.distance("CELL_PARAMETERS") < self.parser.distance("ATOMIC_POSITIONS")):
+            if d_lat < d_apos:
 
-                self.parser.skip("CELL_PARAMETERS")
+                self.parser.save()
+                self.parser.fw(d_lat)
                 mode = self.parser.match_closest(("(alat=", "(angstrom)"))
                 if mode == 0:
                     alat = self.parser.next_float() * numericalunits.aBohr
@@ -391,9 +396,10 @@ class Output(AbstractTextParser, IdentifiableParser):
                     shape = self.parser.next_float((3, 3)) * numericalunits.angstrom
                 else:
                     raise RuntimeError("Unknown format")
+                self.parser.pop()
 
             # Parse atomic data
-            self.parser.skip("ATOMIC_POSITIONS")
+            self.parser.fw(d_apos)
             units = self.parser.next_match(cre_word)
 
             for i in range(n):

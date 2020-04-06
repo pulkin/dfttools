@@ -689,7 +689,7 @@ class UnitCell(Basis):
         return __angle__(vectors_1, vectors_2)
 
     @input_as_list
-    def distances(self, ids, threshold=None):
+    def distances(self, ids, threshold=None, other=None):
         """
         Computes distances between points in this cell.
 
@@ -704,17 +704,26 @@ class UnitCell(Basis):
             threshold (float): if specified, returns a sparse distance
             matrix with entries less than the threshold. Only for empty
             `ids`;
+            other (UnitCell): other cell to compute distances to;
 
         Returns:
             A numpy array with distances.
         """
 
         v = self.cartesian()
+        if other is None:
+            v2 = v
+        else:
+            v2 = other.cartesian()
 
         if len(ids) == 0:
             if threshold is not None:
                 tree = cKDTree(v)
-                return tree.sparse_distance_matrix(tree, max_distance=threshold)
+                if other is None:
+                    tree_other = tree
+                else:
+                    tree_other = cKDTree(v2)
+                return tree.sparse_distance_matrix(tree_other, max_distance=threshold)
             else:
                 return ((v[numpy.newaxis, ...] - v[:, numpy.newaxis, :]) ** 2).sum(axis=-1) ** .5
 
@@ -723,12 +732,12 @@ class UnitCell(Basis):
         if len(ids.shape) == 1:
             if ids.shape[0] < 2:
                 raise ArgumentError("Only %i points are found, at least 2 required" % ids.shape[0])
-            return ((v[ids[:-1], :] - v[ids[1:], :]) ** 2).sum(axis=1) ** .5
+            return ((v[ids[:-1], :] - v2[ids[1:], :]) ** 2).sum(axis=1) ** .5
 
         elif len(ids.shape) == 2:
             if ids.shape[1] != 2:
                 raise ArgumentError("The input array is [%ix%i], required [nx2]" % ids.shape)
-            return ((v[ids[:, 0], :] - v[ids[:, 1], :]) ** 2).sum(axis=1) ** .5
+            return ((v[ids[:, 0], :] - v2[ids[:, 1], :]) ** 2).sum(axis=1) ** .5
 
         else:
             raise ArgumentError("The input array has unsupported dimensionality %i" % len(ids.shape))

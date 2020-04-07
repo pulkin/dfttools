@@ -13,7 +13,7 @@ from .native_qe import qe_proj_weights, qe_scf_cell
 from ..simple import band_structure, unit_cell, tag_method
 from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
 from ..types import element_type
-from ..util import eV
+from ..util import eV, ArrayWithUnits
 
 
 class Bands(AbstractTextParser, IdentifiableParser):
@@ -251,6 +251,25 @@ class Output(AbstractTextParser, IdentifiableParser):
             result.append(self.parser.next_float())
 
         return numpy.array(result) * numericalunits.Ry / numericalunits.aBohr
+
+    def __next_forces__(self):
+        self.parser.skip("Forces acting on atoms")
+        return self.parser.next_float("Total force").reshape(-1, 5)[:, 2:] * numericalunits.Ry / numericalunits.aBohr
+
+    def forces(self):
+        """
+        Retrieves forces per atom per iteration.
+        Returns:
+            A 3D numpy array with all force vectors.
+        """
+        self.parser.reset()
+        result = []
+        try:
+            while True:
+                result.append(self.__next_forces__())
+        except StopIteration:
+            pass
+        return ArrayWithUnits(result, units="Ry/aBohr")
 
     def __next_total__(self):
         c = self.parser.match_closest(("!    total energy", "final energy"))

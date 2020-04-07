@@ -231,6 +231,20 @@ class Test_output0(unittest.TestCase):
         with self.assertRaises(ParseError):
             self.parser.bands(index=19, skipVCRelaxException=True)
 
+    def test_forces(self):
+        forces = self.parser.forces()
+        testing.assert_equal(forces.shape, (19, 2, 3))
+
+        testing.assert_allclose(forces[0], numpy.array([
+            (0, 0, -0.12659777),
+            (0, 0,  0.12659777),
+        ]) * numericalunits.Ry / numericalunits.aBohr)
+
+        testing.assert_allclose(forces[-1], numpy.array([
+            (0, 0, -0.00007118),
+            (0, 0,  0.00007118),
+        ]) * numericalunits.Ry / numericalunits.aBohr)
+
     def test_valid_header(self):
         assert output.valid_header(self.parser.parser.string[:1000])
 
@@ -311,30 +325,30 @@ class Test_output2(unittest.TestCase):
              (0.500000000, 0.500000000, 2.062079273))
         ) * 5.3033 * numericalunits.aBohr)
 
-    # def test_forces(self):
-    # f = self.parser.forces()
+    def test_forces(self):
+        f = self.parser.forces()
 
-    # assert f.shape[0] == 14
+        testing.assert_equal(f.shape, (12, 7, 3))
 
-    # testing.assert_equal(f[0],numpy.array((
-    # (0, 0,  0.01016766),
-    # (0, 0, -0.00112981),
-    # (0, 0,  0.00255994),
-    # (0, 0,  0.00000000),
-    # (0, 0, -0.00255994),
-    # (0, 0,  0.00112981),
-    # (0, 0, -0.01016766),
-    # ))*numericalunits.Ry/numericalunits.aBohr)
+        testing.assert_equal(f[0], numpy.array((
+            (0, 0,  0.01016766),
+            (0, 0, -0.00112981),
+            (0, 0,  0.00255994),
+            (0, 0,  0.00000000),
+            (0, 0, -0.00255994),
+            (0, 0,  0.00112981),
+            (0, 0, -0.01016766),
+        ))*numericalunits.Ry/numericalunits.aBohr)
 
-    # testing.assert_equal(f[-1],numpy.array((
-    # (0, 0, -0.00004768),
-    # (0, 0,  0.00003912),
-    # (0, 0,  0.00041843),
-    # (0, 0,  0.00000000),
-    # (0, 0, -0.00041843),
-    # (0, 0, -0.00003912),
-    # (0, 0,  0.00004768),
-    # ))*numericalunits.Ry/numericalunits.aBohr)
+        testing.assert_equal(f[-1], numpy.array((
+            (0, 0, -0.00004768),
+            (0, 0,  0.00003912),
+            (0, 0,  0.00041843),
+            (0, 0,  0.00000000),
+            (0, 0, -0.00041843),
+            (0, 0, -0.00003912),
+            (0, 0,  0.00004768),
+        )) * numericalunits.Ry / numericalunits.aBohr)
 
     def test_force(self):
         f = self.parser.force()

@@ -330,14 +330,9 @@ class Output(AbstractTextParser, IdentifiableParser):
             return alat * numericalunits.aBohr
 
     @unit_cell
-    def unitCells(self, index=-1):
+    def unitCells(self):
         """
         Retrieves atomic position data.
-
-        Kwargs:
-            index (int or None): index of a band structure or ``None``
-            if all band structures need to be parsed. Supports negative
-            indexing.
 
         Returns:
 

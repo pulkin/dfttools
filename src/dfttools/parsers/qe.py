@@ -348,22 +348,28 @@ class Output(AbstractTextParser, IdentifiableParser):
         else:
             return alat * numericalunits.aBohr
 
-    def __collect_unitCell_meta__(self, energy):
+    def __collect_unitCell_meta__(self, energy, forces, size):
         meta = {}
         if energy:
             try:
                 meta["total-energy"] = self.__next_total__()
             except StopIteration:
                 pass
+        if forces:
+            try:
+                meta["forces"] = self.__next_forces__()[:size]
+            except StopIteration:
+                pass
         return meta
 
     @unit_cell
-    def unitCells(self, tag_energy=True):
+    def unitCells(self, tag_energy=True, tag_forces=True):
         """
         Retrieves atomic position data.
 
         Args:
             tag_energy (bool): include total energy values for each unit cell if possible;
+            tag_forces (bool): include force values for each unit cell if possible;
 
         Returns:
             A set of all unit cells found.
@@ -396,7 +402,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         result.append(CrystalCell(
             shape, coordinates, captions,
             c_basis="cartesian",
-            meta=self.__collect_unitCell_meta__(tag_energy)
+            meta=self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates))
         ))
 
         # Parse MD steps
@@ -431,7 +437,7 @@ class Output(AbstractTextParser, IdentifiableParser):
             coordinates, captions = qe_scf_cell(self.data[self.parser.__position__:], n)
             captions = [bytearray(i).decode() for i in captions]
 
-            meta = self.__collect_unitCell_meta__(tag_energy)
+            meta = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates))
             if units == "crystal":
                 result.append(CrystalCell(shape, coordinates, captions, meta=meta))
             elif units == "alat":

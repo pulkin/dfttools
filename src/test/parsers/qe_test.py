@@ -108,6 +108,11 @@ class Test_output0(unittest.TestCase):
         total = self.parser.total()
         test_total = [i.meta["total-energy"] for i in cells[:-1]]
         testing.assert_equal(total, test_total)
+
+        forces = self.parser.forces()
+        test_forces = [i.meta["forces"] for i in cells[:-1]]
+        testing.assert_equal(forces, test_forces)
+
         assert_standard_crystal_cell(cells[0])
         testing.assert_allclose(cells[0].vectors, numpy.array(
             ((0.580130, 0.000000, 0.814524),
@@ -145,7 +150,7 @@ class Test_output0(unittest.TestCase):
                                 )
 
     def test_unitCells_meta_content(self):
-        cells = self.parser.unitCells(tag_energy=False)
+        cells = self.parser.unitCells(tag_energy=False, tag_forces=False)
         for i in cells:
             self.assertEqual(i.meta, {})
 

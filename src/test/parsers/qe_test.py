@@ -144,6 +144,11 @@ class Test_output0(unittest.TestCase):
                                  (-0.272235154, -0.272235145, -0.272235145))
                                 )
 
+    def test_unitCells_meta_content(self):
+        cells = self.parser.unitCells(tag_energy=False)
+        for i in cells:
+            self.assertEqual(i.meta, {})
+
     def test_bands(self):
         self.assertRaises(Exception, self.parser.bands)
         b = self.parser.bands(index=None, skipVCRelaxException=True)

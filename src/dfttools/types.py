@@ -138,7 +138,7 @@ class Basis(object):
         Basis.__init__(
             self,
             data["vectors"],
-            meta=data["meta"],
+            meta=data["meta"] if "meta" in data else None,
         )
 
     def __eq__(self, another):
@@ -627,7 +627,7 @@ class UnitCell(Basis):
 
     def __setstate__(self, data):
         super(UnitCell, self).__setstate__(data)
-        self.__init__(self, data["coordinates"], data["values"])
+        self.__init__(self, data["coordinates"], data["values"], c_basis=data["c_basis"] if "c_basis" in data else None)
 
     def __eq__(self, another):
         return Basis.__eq__(self, another) and numpy.all(self.coordinates == another.coordinates) and numpy.all(

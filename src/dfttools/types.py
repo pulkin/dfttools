@@ -689,7 +689,7 @@ class UnitCell(Basis):
         return __angle__(vectors_1, vectors_2)
 
     @input_as_list
-    def distances(self, ids, threshold=None, other=None):
+    def distances(self, ids, threshold=None, other=None, ckdtree_kwargs=None):
         """
         Computes distances between points in this cell.
 
@@ -705,6 +705,8 @@ class UnitCell(Basis):
             matrix with entries less than the threshold. Only for empty
             `ids`;
             other (UnitCell): other cell to compute distances to;
+            ckdtree_kwargs (dict): optional keyword arguments to
+            `cKDTree.sparse_distance_matrix` if sparse distances requested;
 
         Returns:
             A numpy array with distances.
@@ -718,12 +720,14 @@ class UnitCell(Basis):
 
         if len(ids) == 0:
             if threshold is not None:
+                if ckdtree_kwargs is None:
+                    ckdtree_kwargs = {}
                 tree = cKDTree(v)
                 if other is None:
                     tree_other = tree
                 else:
                     tree_other = cKDTree(v2)
-                return tree.sparse_distance_matrix(tree_other, max_distance=threshold)
+                return tree.sparse_distance_matrix(tree_other, max_distance=threshold, **ckdtree_kwargs)
             else:
                 return ((v[numpy.newaxis, ...] - v[:, numpy.newaxis, :]) ** 2).sum(axis=-1) ** .5
 

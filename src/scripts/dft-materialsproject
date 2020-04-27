@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 import argparse
 
-parser = argparse.ArgumentParser(description = "Retrieves data from Materials Project")
-parser.add_argument("-v", "--verbose", action = "store_true", help = "Verbose output")
-parser.add_argument("-k", "--key", help = "Materials Project API key")
-parser.add_argument("action", help = "action to perform", choices = ["download-structure"], metavar = "ACTION")
-parser.add_argument("target", help = "target: strucutre ID, etc.", metavar = "TARGET")
-parser.add_argument("output", help = "file name to output", metavar = "FILENAME")
+parser = argparse.ArgumentParser(description="Retrieves data from Materials Project")
+parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+parser.add_argument("-k", "--key", help="Materials Project API key")
+parser.add_argument("action", help="action to perform", choices=["download-structure"], metavar="ACTION")
+parser.add_argument("target", help="target: strucutre ID, etc.", metavar="TARGET")
+parser.add_argument("output", help="file name to output", metavar="FILENAME")
 
 options = parser.parse_args()
 
 if options.key is None:
     print("No key specified")
     raise ValueError("No key specified")
-    
+
 from dfttools.parsers import materialsproject
 from dfttools import formatters
 
@@ -21,7 +21,7 @@ import json
 
 try:
     if options.verbose:
-        print("Verfying the key ...")
+        print("Verifying the key ...")
     materialsproject.check_key(options.key)
 except RuntimeError:
     print("Could not verify the key")
@@ -35,7 +35,7 @@ if options.action == "download-structure":
     except:
         print("Failed to make a request")
         raise
-    
+
     try:
         if options.verbose:
             print("Parsing JSON data ...")
@@ -43,19 +43,19 @@ if options.action == "download-structure":
     except:
         print("Failed to parse the data")
         raise
-        
+
     if len(cells) == 0:
         print("No structures recognized")
         with open("mp-error-response.json", 'w') as f:
             json.dump(parser.json, f, indent=4)
         raise RuntimeError("No structures recognized, the response is written in mp-error-response.json")
-        
+
     if len(cells) > 1:
         if options.verbose:
             print("{:d} structures found, the last one is taken")
-    
+
     cell = cells[-1]
-    
+
     if options.output.endswith(".json"):
         if options.verbose:
             print("Using JSON output format")
@@ -68,7 +68,7 @@ if options.action == "download-structure":
         if options.verbose:
             print("Using JSON output format by default")
         f = formatters.json_structure
-        
+
     if options.verbose:
         print("Writing file ...")
     with open(options.output, 'w') as fl:

@@ -400,7 +400,8 @@ def __format_openmx__(x):
 
 
 def openmx_input(cell, populations, parameters=None, block_parameters=None,
-                 l=None, r=None, tolerance=1e-10, indent=4, pseudos=None):
+                 l=None, r=None, tolerance=1e-10, indent=4, pseudos=None,
+                 bands=None):
     """
     Generates OpenMX minimal input file with atomic structure.
     Args:
@@ -414,6 +415,7 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
         unit cells can be stacked;
         indent (int): size of indent;
         pseudos (dict): a collection of pseudopotential/basis strings;
+        bands (list): a list of k-points to calculate bands along;
 
     Returns:
 
@@ -480,6 +482,18 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
         species = sorted(target.species().keys())
         block_parameters["definition.of.atomic.species"] = "\n".join("{indent}{key} {value}".format(
             indent=indent, key=i, value=pseudos[i]) for i in species)
+
+    if bands is not None:
+        fstr = "{indent}2 {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} {:.6f} ? ?"
+        parameters["band.dispersion"] = True
+        parameters["band.nkpath"] = int(numpy.ceil(len(bands) / 2))
+        block_parameters["band.kpath"] = list(
+            fstr.format(*i, *j, indent=indent)
+            for i, j in zip(bands[::2], bands[1::2])
+        )
+        if len(block_parameters["band.kpath"]) != parameters["band.nkpath"]:
+            block_parameters["band.kpath"].append(fstr.format(*bands[-1], *bands[-1], indent=indent))
+        block_parameters["band.kpath"] = "\n".join(block_parameters["band.kpath"])
 
     result = []
     for k in sorted(chain(parameters.keys(), block_parameters.keys())):

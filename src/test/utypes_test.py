@@ -11,6 +11,9 @@ from numpy import testing
 def assert_standard_crystal_cell(c):
     assert isinstance(c, CrystalCell)
     assert c.vectors.units == "angstrom"
+    for k in "total-energy", "forces":
+        if k in c.meta and not isinstance(c.meta[k], ArrayWithUnits):
+            raise AssertionError("Missing units in cell.meta['{}']".format(k))
 
 
 def assert_standard_real_space_grid(c):

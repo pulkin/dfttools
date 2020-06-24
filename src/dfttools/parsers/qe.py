@@ -254,7 +254,11 @@ class Output(AbstractTextParser, IdentifiableParser):
 
     def __next_forces__(self):
         self.parser.skip("Forces acting on atoms")
-        return self.parser.next_float("Total force").reshape(-1, 5)[:, 2:] * numericalunits.Ry / numericalunits.aBohr
+        self.parser.skip("atom")
+        return ArrayWithUnits(
+            self.parser.next_float("Total force").reshape(-1, 5)[:, 2:] * numericalunits.Ry / numericalunits.aBohr,
+            units="Ry/aBohr",
+        )
 
     def forces(self):
         """

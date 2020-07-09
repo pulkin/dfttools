@@ -1,20 +1,12 @@
 """
 This submodule enhances `ndarray` with units from `numericalunits` package.
 """
-import re
 import json
 
 import numericalunits
 import numpy
-
-
-def __iter_nu__(s):
-    match = re.match(r'\s*\w*((\s*[*/]\s*\w*)*)\s*$', s)
-    if match is None:
-        raise ValueError("Not a valid numericalunits expression: {}".format(s))
-
-    for i in re.finditer(r"([*/])\s*(\w*)", "*" + s):
-        yield i.groups()
+import ast
+import operator as op
 
 
 def eval_nu(s):
@@ -27,23 +19,19 @@ def eval_nu(s):
     Returns:
         The result of the evaluation.
     """
-    result = 1.
+    operators = {ast.Mult: op.mul, ast.Div: op.truediv, ast.Pow: op.pow, ast.USub: op.neg}
 
-    for op, name in __iter_nu__(s):
-        name = str(name)
-        if name == "1":
-            val = 1.
-        elif name in dir(numericalunits):
-            val = getattr(numericalunits, name)
+    def _eval(node):
+        if isinstance(node, ast.Num):
+            return node.n
+        elif isinstance(node, ast.BinOp):  # <left> <operator> <right>
+            return operators[type(node.op)](_eval(node.left), _eval(node.right))
+        elif isinstance(node, ast.Name):
+            return getattr(numericalunits, node.id)
         else:
-            raise ValueError("'{}' not found in numericalunits".format(name))
+            raise TypeError(node)
 
-        if op == "*":
-            result *= val
-        else:
-            result /= val
-
-    return result
+    return _eval(ast.parse(s, mode='eval').body)
 
 
 def invert_nu(s):
@@ -55,13 +43,7 @@ def invert_nu(s):
     Returns:
         The inverted expression.
     """
-    i = {"*": "/", "/": "*"}
-    result = "".join(i[op] + name for op, name in __iter_nu__(s)).replace("/1", "").replace("*1", "")
-    if result.startswith("/"):
-        result = "1" + result
-    elif result.startswith("*"):
-        result = result[1:]
-    return result
+    return "1/(" + s + ")"
 
 
 def array_to_json(a):

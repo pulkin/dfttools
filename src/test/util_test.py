@@ -15,28 +15,28 @@ from dfttools.util import eval_nu, invert_nu, array, dumps, loads, dump, load, a
 class EvalNUTest(unittest.TestCase):
 
     def test_nu(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(SyntaxError):
             eval_nu("")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AttributeError):
             eval_nu("nonexistent_unit")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(KeyError):
             eval_nu("a+b")
         testing.assert_equal(eval_nu("angstrom"), numericalunits.angstrom)
         eva = numericalunits.eV / numericalunits.angstrom
-        for i in ("eV/angstrom", "eV /angstrom", "eV/ angstrom", "eV / angstrom", "eV/angstrom ", " eV/angstrom",
-                  " eV  /   angstrom  "):
+        for i in ("eV/angstrom", "eV /angstrom", "eV/ angstrom", "eV / angstrom", "eV/angstrom ",
+                  "eV  /   angstrom  ", "eV / angstrom ** 1"):
             testing.assert_equal(eval_nu(i), eva)
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(AttributeError):
             eval_nu("eV/nonexistent_unit")
         testing.assert_equal(eval_nu("1/angstrom"), 1./numericalunits.angstrom)
 
     def test_invert(self):
-        testing.assert_equal(invert_nu("angstrom"), "1/angstrom")
-        testing.assert_equal(invert_nu("1/angstrom"), "angstrom")
-        testing.assert_equal(invert_nu("angstrom/eV"), "1/angstrom*eV")
-        testing.assert_equal(invert_nu("angstrom/eV/Hartree"), "1/angstrom*eV*Hartree")
-        testing.assert_equal(invert_nu("1/1/angstrom/eV/Hartree"), "angstrom*eV*Hartree")
+        testing.assert_allclose(eval_nu(invert_nu("angstrom")), eval_nu("1/angstrom"))
+        testing.assert_allclose(eval_nu(invert_nu("1/angstrom")), eval_nu("angstrom"))
+        testing.assert_allclose(eval_nu(invert_nu("angstrom/eV")), eval_nu("1/angstrom*eV"))
+        testing.assert_allclose(eval_nu(invert_nu("angstrom/eV/Hartree")), eval_nu("1/angstrom*eV*Hartree"))
+        testing.assert_allclose(eval_nu(invert_nu("1/1/angstrom/eV/Hartree")), eval_nu("angstrom*eV*Hartree"))
 
 
 class ArrayUnitsTest(unittest.TestCase):

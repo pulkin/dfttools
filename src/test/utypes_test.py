@@ -4,7 +4,7 @@ import unittest
 import numericalunits
 
 from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis, RealSpaceBasis
-from dfttools.util import dumps, loads, ArrayWithUnits, angstrom
+from dfttools.util import dumps, loads, ArrayWithUnits, angstrom, eval_nu
 from numpy import testing
 
 
@@ -45,7 +45,7 @@ class CommonTests(unittest.TestCase):
         b = RealSpaceBasis(ArrayWithUnits([1, 1, 1, 0, 0, 0], units="nm"), kind="triclinic")
         testing.assert_equal(b.vectors.units, "nm")
         c = b.reciprocal()
-        testing.assert_equal(c.vectors.units, "1/nm")
+        testing.assert_equal(eval_nu(c.vectors.units), eval_nu("1/nm"))
 
 
 class CellTest(unittest.TestCase):

@@ -53,7 +53,7 @@ def __angle__(v1, v2, axis=-1):
 def __xyz2i__(i):
     try:
         return {'x': 0, 'y': 1, 'z': 2}[i]
-    except KeyError:
+    except (KeyError, TypeError):
         return i
 
 

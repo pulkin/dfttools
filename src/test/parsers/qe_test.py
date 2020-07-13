@@ -911,3 +911,17 @@ class Test_input1(unittest.TestCase):
             (5.7237733311114, 3.1858694074166, 19.9999973260228)
         ) * numericalunits.angstrom, rtol=1e-10, atol=1e-15)
         testing.assert_array_equal(cell.values, ('s', 'mo', 's') * 2)
+
+
+class Test_input2(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.input.2.testcase"), 'r') as f:
+            self.parser = input(f.read())
+
+    def test_cell(self):
+        cell = self.parser.unitCell()
+        testing.assert_allclose(cell.vectors, numpy.array([
+            [1.85636040599457e+01, - 3.67528106382461e-02, - 1.79093134290208e-01],
+            [- 3.67528106382461e-02, 1.81538954826120e+01, - 5.81588660596537e-02],
+            [- 1.79093134290208e-01, - 5.81588660596537e-02, 1.85441928301205e+01],
+        ]) * numericalunits.angstrom)

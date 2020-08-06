@@ -352,8 +352,14 @@ class Output(AbstractTextParser, IdentifiableParser):
         else:
             return alat * numericalunits.aBohr
 
-    def __collect_unitCell_meta__(self, energy, forces, size):
+    def __collect_source_meta__(self):
         meta = {}
+        if self.file is not None:
+            meta["source-file-name"] = self.file.name
+        return meta
+
+    def __collect_unitCell_meta__(self, energy, forces, size, n):
+        meta = self.__collect_source_meta__()
         if energy:
             try:
                 meta["total-energy"] = self.__next_total__()
@@ -364,6 +370,8 @@ class Output(AbstractTextParser, IdentifiableParser):
                 meta["forces"] = self.__next_forces__()[:size]
             except StopIteration:
                 pass
+        if n is not None:
+            meta["source-index"] = int(n)
         return meta
 
     @unit_cell
@@ -406,7 +414,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         result.append(CrystalCell(
             shape, coordinates, captions,
             c_basis="cartesian",
-            meta=self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates))
+            meta=self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates), 0)
         ))
 
         # Parse MD steps
@@ -441,7 +449,7 @@ class Output(AbstractTextParser, IdentifiableParser):
             coordinates, captions = qe_scf_cell(self.data[self.parser.__position__:], n)
             captions = [bytearray(i).decode() for i in captions]
 
-            meta = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates))
+            meta = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates), len(result))
             if units == "crystal":
                 result.append(CrystalCell(shape, coordinates, captions, meta=meta))
             elif units == "alat":

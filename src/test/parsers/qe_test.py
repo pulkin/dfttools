@@ -52,7 +52,7 @@ class Test_output0(unittest.TestCase):
 
     def setUp(self):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.output.0.testcase"), 'r') as f:
-            self.parser = output(f.read())
+            self.parser = output(f)
 
     def test_success(self):
         assert self.parser.success()
@@ -151,8 +151,8 @@ class Test_output0(unittest.TestCase):
 
     def test_unitCells_meta_content(self):
         cells = self.parser.unitCells(tag_energy=False, tag_forces=False)
-        for i in cells:
-            self.assertEqual(i.meta, {})
+        for i, c in enumerate(cells):
+            self.assertEqual(c.meta, {"source-index": i, "source-file-name": self.parser.file.name})
 
     def test_bands(self):
         self.assertRaises(Exception, self.parser.bands)

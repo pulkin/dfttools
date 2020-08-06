@@ -478,10 +478,12 @@ class Output(AbstractTextParser, IdentifiableParser):
 
             energies.append(sub_energies)
 
+        meta = self.__collect_source_meta__()
         if parseMode_kp == 0:
-            c = BandsPath(vectors, kpoints, energies, fermi=fermi)
+            c = BandsPath(vectors, kpoints, energies, fermi=fermi, meta=meta)
         else:
-            c = BandsPath(vectors, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian", fermi=fermi)
+            c = BandsPath(vectors, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian", fermi=fermi,
+                          meta=meta)
 
         return c
 

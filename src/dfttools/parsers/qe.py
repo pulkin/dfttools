@@ -276,7 +276,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         return ArrayWithUnits(result, units="Ry/aBohr")
 
     def __next_total__(self):
-        c = self.parser.match_closest(("!    total energy", "final energy"))
+        c = self.parser.match_closest(("!    total energy", "final energy", "energy   new"))
         if c == 0:
             self.parser.skip("!    total energy")
             return eV(self.parser.next_float() * numericalunits.Ry)

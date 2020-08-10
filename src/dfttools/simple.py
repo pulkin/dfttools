@@ -158,12 +158,11 @@ def parse(f, tag, *args):
     if len(candidates) == 0:
         raise ParseError("Unidentified data: no parser match")
 
-    data = f.read()
-
     attempted = []
 
     for parser_class in candidates:
-        parser = parser_class(data)
+        f.seek(0)
+        parser = parser_class(f)
         for a in dir(parser):
             attr = getattr(parser, a)
             if "__tags__" in dir(attr) and tag in attr.__tags__:

@@ -83,11 +83,13 @@ class AbstractJSONParser(object):
     A root class for JSON parsers.
     
     Args:
-        data (str, dict): JSON data to parse;
+        data (str, dict, file): JSON data to parse;
     """
     loads = staticmethod(json.loads)
 
     def __init__(self, data):
+        if hasattr(data, "read"):
+            data = data.read()
         if isinstance(data, dict):
             self.json = data
         else:

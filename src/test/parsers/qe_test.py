@@ -558,12 +558,15 @@ class Test_proj0(unittest.TestCase):
     def test_weights_space(self):
         data = self.parser.data.replace('[# ', '[#').replace('[# ', '[#').replace('[# ', '[#')
         parser = proj(data)
-        c = self.parser.weights()
-        c2 = self.parser._weights()
+        c = parser.weights()
+        c2 = parser._weights()
         testing.assert_allclose(c, c2)
 
     def test_valid_header(self):
         assert proj.valid_header(self.parser.parser.string[:1000])
+
+    def test_lowdin(self):
+        testing.assert_allclose(self.parser.lowdin(), [3.9441, 3.9441])
 
 
 class Test_proj1(unittest.TestCase):
@@ -591,6 +594,9 @@ class Test_proj1(unittest.TestCase):
         m2 = (-1.5, -.5, .5, 1.5)
         m3 = (-2.5, -1.5, -.5, .5, 1.5, 2.5)
         testing.assert_array_equal(b["m_j"], m1 * 3 + m2 + m1 + m2 * 2 + m3 + m1 * 2 + m2 + m1 * 2 + m2)
+
+    def test_lowdin(self):
+        testing.assert_allclose(self.parser.lowdin(), [14.4516, 5.7039, 5.7039])
 
 
 class Test_cond0(unittest.TestCase):

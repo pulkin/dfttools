@@ -760,6 +760,26 @@ class Proj(AbstractTextParser, IdentifiableParser):
 
         return numpy.array(projections)
 
+    def lowdin(self):
+        """
+        Lowdin occupations.
+
+        Returns:
+            A 1D array with Lowdin occupations per each atom.
+        """
+        self.parser.reset()
+        self.parser.skip("Lowdin Charges:")
+        i = 1
+        result = []
+        while True:
+            try:
+                self.parser.skip(f"Atom #{i: 4d}")
+                result.append(self.parser.next_float())
+                i += 1
+            except StopIteration:
+                break
+        return numpy.array(result)
+
 
 class Cond(AbstractTextParser, IdentifiableParser):
     """

@@ -604,6 +604,25 @@ class Output(AbstractTextParser, IdentifiableParser):
     def __bands_silent__(self):
         return self.bands(skipVCRelaxException=True)
 
+    def valence(self):
+        """
+        Retrieves valence electron count per each specimen.
+
+        Returns:
+            A dict with electron counts.
+        """
+        self.parser.reset()
+        self.parser.skip("valence")
+        self.parser.next_line()
+        result = {}
+        while self.parser.match_closest(("\n", cre_var_name)) == 1:
+            name = self.parser.next_match(cre_var_name)
+            value = self.parser.next_float()
+            self.parser.next_line()
+            result[name] = value
+
+        return result
+
 
 class Proj(AbstractTextParser, IdentifiableParser):
     """

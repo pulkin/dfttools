@@ -253,6 +253,9 @@ class Test_output0(unittest.TestCase):
     def test_valid_header(self):
         assert output.valid_header(self.parser.parser.string[:1000])
 
+    def test_valence(self):
+        self.assertEqual(self.parser.valence(), {"As": 5.0})
+
 
 class Test_output1(unittest.TestCase):
 

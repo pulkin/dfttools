@@ -400,8 +400,8 @@ def __format_openmx__(x):
 
 
 def openmx_input(cell, populations, parameters=None, block_parameters=None,
-                 l=None, r=None, tolerance=1e-10, indent=4, pseudos=None,
-                 bands=None):
+                 relax_mask=None, l=None, r=None, tolerance=1e-10, indent=4,
+                 pseudos=None, bands=None):
     """
     Generates OpenMX minimal input file with atomic structure.
     Args:
@@ -409,6 +409,7 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
         populations (dict): a dict with initial electronic populations data;
         parameters (dict): a dict with parameters;
         block_parameters (dict): a dict with block parameters;
+        relax_mask (array,int): array with triggers for relaxation;
         l (UnitCell): left lead for transport calculations;
         r (UnitCell): right lead for transport calculations;
         tolerance (float): tolerance for checking whether left-center-right
@@ -441,6 +442,13 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
 
     else:
         raise ValueError("Only one of 'left' and 'right' unit cells specified")
+
+    if relax_mask is not None:
+        relax_mask = numpy.array(relax_mask, dtype=bool).astype(int)
+        block_parameters["md.fixed.xyz"] = "\n".join(
+            "{indent}{:d} {:d} {:d}".format(*i, indent=indent)
+            for i in relax_mask
+        )
 
     c = target.cartesian() / numericalunits.angstrom
     v = target.values

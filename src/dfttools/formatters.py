@@ -133,7 +133,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
         A string with Quantum Espresso input.
     """
     indent = ' ' * indent
-    special = ("control", "system", "electrons", "ions", "cell", "inputpp", "plot")
+    special = ("control", "system", "electrons", "ions", "cell", "inputpp", "plot", "projwfc")
 
     if parameters is None:
         parameters = {}

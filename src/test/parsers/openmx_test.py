@@ -2,6 +2,7 @@ import unittest
 
 from dfttools.parsers.openmx import *
 from dfttools.utypes import CrystalCell
+from dfttools.util import ArrayWithUnits
 from ..utypes_test import assert_standard_crystal_cell, assert_standard_bands_path
 import numpy
 from numpy import testing
@@ -278,6 +279,7 @@ class Test_output0(unittest.TestCase):
 
     def test_total(self):
         e = self.parser.total()
+        assert isinstance(e, ArrayWithUnits)
 
         testing.assert_allclose(e, numpy.array((
             -89.989525394506, -89.991070546406, -89.992311708479,
@@ -286,6 +288,26 @@ class Test_output0(unittest.TestCase):
             -89.996799134762, -89.996801452498, -89.996801529672,
             -89.996801486036, -89.996801501449,
         )) * numericalunits.Hartree)
+
+    def test_forces(self):
+        f = self.parser.forces()
+        assert isinstance(f, ArrayWithUnits)
+
+        testing.assert_equal(f.shape, (14, 3, 3))
+        testing.assert_allclose(f[0], numpy.array((
+            [0, 0, 0],
+            [0, 0, -0.0294],
+            [0, 0, 0.0294]
+        )) * numericalunits.Hartree / numericalunits.aBohr)
+        testing.assert_allclose(f[-1], numpy.array((
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        )) * numericalunits.Hartree / numericalunits.aBohr)
+
+    def test_md_drivers(self):
+        d = self.parser.md_driver()
+        testing.assert_equal(d, ["Steepest_Descent"] * 4 + ["BFGS"] * 10)
 
     def test_unitCells(self):
         vecs = numpy.array((

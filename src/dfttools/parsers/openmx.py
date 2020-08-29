@@ -15,6 +15,7 @@ from .generic import cre_var_name, cre_word, cre_non_space, re_int, cre_int, cre
 from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, tag_method
 from ..utypes import CrystalCell, BandsPath
+from ..util import eV, eV_angstrom
 
 
 def populations(s):
@@ -422,6 +423,10 @@ class Output(AbstractTextParser, IdentifiableParser):
         self.parser.skip(re.compile("Welcome to OpenMX\s+Ver\."))
         return self.parser.next_match(cre_var_name, n="\n")[0]
 
+    def __next_total__(self):
+        self.parser.skip("Utot  =")
+        return eV(self.parser.next_float() * numericalunits.Hartree)
+
     def total(self):
         """
         Retrieves total energy calculated.
@@ -434,9 +439,43 @@ class Output(AbstractTextParser, IdentifiableParser):
         result = []
 
         while self.parser.present("Utot  ="):
-            self.parser.skip("Utot  =")
-            result.append(self.parser.next_float() * numericalunits.Hartree)
+            result.append(self.__next_total__())
 
+        return eV(result)
+
+    def __next_forces__(self):
+        self.parser.skip("MD or geometry opt. at")
+        self.parser.skip("atom=")
+        return eV_angstrom(self.parser.next_float("***").reshape(-1, 7)[:, -3:] * numericalunits.Hartree / numericalunits.aBohr)
+
+    def forces(self):
+        """
+        Retrieves atomic forces.
+
+        Returns:
+
+            An array with forces acting n atoms.
+        """
+        self.parser.reset()
+        result = []
+        while self.parser.present("MD or geometry opt. at"):
+            result.append(self.__next_forces__())
+        return eV_angstrom(result)
+
+    def md_driver(self):
+        """
+        Collects molecular dynamics drivers at each step.
+
+        Returns:
+
+            An array with driver titles.
+        """
+        self.parser.reset()
+        result = []
+        while self.parser.present("MD or geometry opt. at"):
+            self.parser.skip("MD or geometry opt. at")
+            self.parser.skip("<")
+            result.append(self.parser.next_match(cre_var_name))
         return numpy.array(result)
 
     def nat(self):

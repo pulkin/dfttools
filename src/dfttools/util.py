@@ -152,6 +152,16 @@ def inv_angstrom(x):
     return array(x, units="1/angstrom")
 
 
+def eV_angstrom(x):
+    """A shortcut to adding units to atomic forces."""
+    return array(x, units="eV/angstrom")
+
+
+def K(x):
+    """A shortcut to adding Kelvin units to temperature."""
+    return array(x, units="K")
+
+
 def cast_units(destination, source, inv=False):
     """
     Casts units from one array to another.

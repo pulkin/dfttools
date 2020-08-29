@@ -13,7 +13,7 @@ from .native_qe import qe_proj_weights, qe_scf_cell
 from ..simple import band_structure, unit_cell, tag_method
 from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
 from ..types import element_type
-from ..util import eV, ArrayWithUnits
+from ..util import eV, eV_angstrom, K
 
 
 class Bands(AbstractTextParser, IdentifiableParser):
@@ -248,17 +248,14 @@ class Output(AbstractTextParser, IdentifiableParser):
 
         while self.parser.present("Total force ="):
             self.parser.skip("Total force =")
-            result.append(self.parser.next_float())
+            result.append(self.parser.next_float() * numericalunits.Ry / numericalunits.aBohr)
 
-        return ArrayWithUnits(result, units="Ry/aBohr") * numericalunits.Ry / numericalunits.aBohr
+        return eV_angstrom(result)
 
     def __next_forces__(self):
         self.parser.skip("Forces acting on atoms")
         self.parser.skip("atom")
-        return ArrayWithUnits(
-            self.parser.next_float("Total force").reshape(-1, 5)[:, 2:] * numericalunits.Ry / numericalunits.aBohr,
-            units="Ry/aBohr",
-        )
+        return eV_angstrom(self.parser.next_float("Total force").reshape(-1, 5)[:, 2:] * numericalunits.Ry / numericalunits.aBohr)
 
     def forces(self):
         """
@@ -273,7 +270,7 @@ class Output(AbstractTextParser, IdentifiableParser):
                 result.append(self.__next_forces__())
         except StopIteration:
             pass
-        return ArrayWithUnits(result, units="Ry/aBohr")
+        return eV_angstrom(result)
 
     def __next_total__(self):
         c = self.parser.match_closest(("!    total energy", "final energy", "energy   new"))

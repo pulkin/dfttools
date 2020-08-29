@@ -497,7 +497,29 @@ class Output(AbstractTextParser, IdentifiableParser):
 
         return n
 
-    def unitCells(self, startingCell, noraise=False):
+    def __collect_source_meta__(self):
+        meta = {}
+        if self.file is not None:
+            meta["source-file-name"] = self.file.name
+        return meta
+
+    def __collect_unitCell_meta__(self, energy, forces, n):
+        meta = self.__collect_source_meta__()
+        if energy:
+            try:
+                meta["total-energy"] = self.__next_total__()
+            except StopIteration:
+                pass
+        if forces:
+            try:
+                meta["forces"] = self.__next_forces__()
+            except StopIteration:
+                pass
+        if n is not None:
+            meta["source-index"] = int(n)
+        return meta
+
+    def unitCells(self, startingCell, noraise=False, tag_energy=True, tag_forces=True):
         """
         Retrieves atomic positions data for relax calculation.
         
@@ -506,7 +528,9 @@ class Output(AbstractTextParser, IdentifiableParser):
             startingCell (qetools.cell.Cell): a unit cell from the input
             file. It is required since no chemical captions are written
             in the output.
-            
+            tag_energy (bool): include total energy values for each unit cell if possible;
+            tag_forces (bool): include force values for each unit cell if possible;
+
         Kwargs:
         
             noraise (bool): retirieves as much structures as possible
@@ -526,6 +550,7 @@ class Output(AbstractTextParser, IdentifiableParser):
                 self.parser.skip("lattice vectors (bohr)")
                 shape = self.parser.next_float((3, 3)) * numericalunits.aBohr
 
+                self.parser.save()
                 self.parser.skip("MD or geometry opt. at MD")
                 self.parser.skip("maximum force")
                 coordinates = []
@@ -534,11 +559,14 @@ class Output(AbstractTextParser, IdentifiableParser):
                     self.parser.skip("XYZ(ang)")
                     coordinates.append(self.parser.next_float(3) * numericalunits.angstrom)
 
+                self.parser.pop()
+                meta = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(cells))
                 cells.append(CrystalCell(
                     shape,
                     coordinates,
                     startingCell.values,
                     c_basis="cartesian",
+                    meta=meta,
                 ))
 
             except:

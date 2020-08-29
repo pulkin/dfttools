@@ -269,7 +269,7 @@ class Test_output0(unittest.TestCase):
     def setUp(self):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/openmx.output.0.testcase/output"),
                   'r') as f:
-            self.parser = output(f.read())
+            self.parser = output(f)
 
     def test_valid_header(self):
         assert output.valid_header(self.parser.parser.string[:1000])
@@ -328,7 +328,7 @@ class Test_output0(unittest.TestCase):
 
         assert len(c) == 14
 
-        for cc in c:
+        for i_cc, cc in enumerate(c):
             assert cc.coordinates.shape[0] == 3
             assert_standard_crystal_cell(cc)
 
@@ -337,6 +337,8 @@ class Test_output0(unittest.TestCase):
             assert cc.values[0] == "mo"
             assert cc.values[1] == "se"
             assert cc.values[2] == "se"
+            assert cc.meta["source-file-name"] == self.parser.file.name
+            assert cc.meta["source-index"] == i_cc
 
         testing.assert_allclose(c[0].cartesian(), numpy.array((
             (1.8773, 1.0838, 50.0000),
@@ -349,6 +351,9 @@ class Test_output0(unittest.TestCase):
             (3.7545, 2.1677, 48.4420),
             (3.7545, 2.1677, 51.5580),
         )) * numericalunits.angstrom)
+
+        testing.assert_allclose(tuple(i.meta["total-energy"] for i in c), self.parser.total())
+        testing.assert_allclose(tuple(i.meta["forces"] for i in c), self.parser.forces())
 
     def test_populations(self):
         p = self.parser.populations()

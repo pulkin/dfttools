@@ -88,6 +88,12 @@ class Test_output0(unittest.TestCase):
         assert a[0] == -25.44012222 * numericalunits.Ry
         assert a[-1] == -25.49951614 * numericalunits.Ry
 
+    def test_total_force(self):
+        f = self.parser.force()
+        assert f.shape == (19,)
+        assert f[0] == 0.179036 * numericalunits.Ry / numericalunits.aBohr
+        assert f[-1] == 0.000101 * numericalunits.Ry / numericalunits.aBohr
+
     def test_threads(self):
         assert self.parser.threads() == 1
 

@@ -7,6 +7,7 @@ import numpy
 from dfttools.parsers.generic import ParseError
 from dfttools.parsers.qe import bands, output, cond, input, proj
 from dfttools.types import Basis
+from dfttools.util import array
 from ..utypes_test import assert_standard_crystal_cell, assert_standard_bands_path
 from numpy import testing
 
@@ -78,18 +79,21 @@ class Test_output0(unittest.TestCase):
 
     def test_fermi(self):
         a = self.parser.fermi()
+        assert isinstance(a, array)
         assert a.shape == (19,)
         assert a[0] == 10.0033 * numericalunits.eV
         assert a[-1] == 8.2525 * numericalunits.eV
 
     def test_total(self):
         a = self.parser.total()
+        assert isinstance(a, array)
         assert a.shape == (19,)
         assert a[0] == -25.44012222 * numericalunits.Ry
         assert a[-1] == -25.49951614 * numericalunits.Ry
 
     def test_total_force(self):
         f = self.parser.force()
+        assert isinstance(f, array)
         assert f.shape == (19,)
         assert f[0] == 0.179036 * numericalunits.Ry / numericalunits.aBohr
         assert f[-1] == 0.000101 * numericalunits.Ry / numericalunits.aBohr

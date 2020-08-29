@@ -232,7 +232,7 @@ class Output(AbstractTextParser, IdentifiableParser):
             else:
                 break
 
-        return numpy.array(result)
+        return eV(result)
 
     def force(self):
         """
@@ -250,7 +250,7 @@ class Output(AbstractTextParser, IdentifiableParser):
             self.parser.skip("Total force =")
             result.append(self.parser.next_float())
 
-        return numpy.array(result) * numericalunits.Ry / numericalunits.aBohr
+        return ArrayWithUnits(result, units="Ry/aBohr") * numericalunits.Ry / numericalunits.aBohr
 
     def __next_forces__(self):
         self.parser.skip("Forces acting on atoms")

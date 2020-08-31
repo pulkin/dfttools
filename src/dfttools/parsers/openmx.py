@@ -443,10 +443,11 @@ class Output(AbstractTextParser, IdentifiableParser):
 
         return eV(result)
 
-    def __next_forces__(self):
+    def __next_forces_and_coordinates__(self):
         self.parser.skip("MD or geometry opt. at")
         self.parser.skip("atom=")
-        return eV_angstrom(self.parser.next_float("***").reshape(-1, 7)[:, -3:] * numericalunits.Hartree / numericalunits.aBohr)
+        a = self.parser.next_float("***").reshape(-1, 7)
+        return eV_angstrom(a[:, -3:] * numericalunits.Hartree / numericalunits.aBohr), a[:, 1:4] * numericalunits.angstrom
 
     def forces(self):
         """
@@ -459,7 +460,8 @@ class Output(AbstractTextParser, IdentifiableParser):
         self.parser.reset()
         result = []
         while self.parser.present("MD or geometry opt. at"):
-            result.append(self.__next_forces__())
+            f, _ = self.__next_forces_and_coordinates__()
+            result.append(f)
         return eV_angstrom(result)
 
     def md_driver(self):
@@ -542,11 +544,8 @@ class Output(AbstractTextParser, IdentifiableParser):
                 meta["total-energy"] = self.__next_total__()
             except StopIteration:
                 pass
-        if forces:
-            try:
-                meta["forces"] = self.__next_forces__()
-            except StopIteration:
-                pass
+        if forces is not None:
+            meta["forces"] = forces
         if n is not None:
             meta["source-index"] = int(n)
         return meta
@@ -583,19 +582,12 @@ class Output(AbstractTextParser, IdentifiableParser):
                 shape = self.parser.next_float((3, 3)) * numericalunits.aBohr
 
                 self.parser.save()
-                self.parser.skip("MD or geometry opt. at MD")
-                self.parser.skip("maximum force")
-                coordinates = []
-
-                while self.parser.match_closest(("XYZ(ang)", "***")) == 0:
-                    self.parser.skip("XYZ(ang)")
-                    coordinates.append(self.parser.next_float(3) * numericalunits.angstrom)
-
+                f, c = self.__next_forces_and_coordinates__()
                 self.parser.pop()
-                meta = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(cells))
+                meta = self.__collect_unitCell_meta__(tag_energy, f if tag_forces else None, len(cells))
                 cells.append(CrystalCell(
                     shape,
-                    coordinates,
+                    c,
                     startingCell.values,
                     c_basis="cartesian",
                     meta=meta,

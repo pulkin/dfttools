@@ -497,6 +497,38 @@ class Output(AbstractTextParser, IdentifiableParser):
 
         return n
 
+    def __next_populations__(self):
+        self.parser.skip(re.compile(r"\*{19} MD=\s*\d*\s*SCF=\s*\d*\s*\*{19}"))
+        self.parser.goto(re.compile(r"\n\s*" + re_int))
+        self.parser.next_line()
+
+        c = []
+
+        while self.parser.match_closest(("Sum of MulP", cre_int)) == 1:
+            self.parser.skip("sum")
+            c.append(self.parser.next_float())
+            self.parser.next_line()
+
+        return numpy.array(c)
+
+    def populations(self):
+        """
+        Retrieves Mulliken populations during scf process.
+
+        Returns:
+
+            A numpy array where the first index corresponds to
+            iteration number and the second one is atomic ID.
+        """
+        self.parser.reset()
+        result = []
+
+        while self.parser.present("NormRD"):
+            result.append(self.__next_populations__())
+            self.parser.skip("NormRD")
+
+        return numpy.array(result)
+
     def __collect_source_meta__(self):
         meta = {}
         if self.file is not None:
@@ -594,41 +626,6 @@ class Output(AbstractTextParser, IdentifiableParser):
                             pass
 
         raise ParseError("Could not locate corresponding input file")
-
-    def populations(self):
-        """
-        Retrieves Mulliken populations during scf process.
-        
-        Returns:
-        
-            A numpy array where the first index corresponds to
-            iteration number and the second one is atomic ID. The
-            populations are renormalized to reproduce the total charge.
-        """
-        self.parser.reset()
-        result = []
-
-        while self.parser.present("NormRD"):
-
-            self.parser.skip(re.compile(r"\*{19} MD=\s*\d*\s*SCF=\s*\d*\s*\*{19}"))
-            self.parser.goto(re.compile(r"\n\s*" + re_int))
-            self.parser.next_line()
-
-            c = []
-
-            while self.parser.match_closest(("Sum of MulP", cre_int)) == 1:
-                self.parser.skip("sum")
-                c.append(self.parser.next_float())
-                self.parser.next_line()
-
-            self.parser.skip("total=")
-            total = self.parser.next_float()
-
-            self.parser.skip("NormRD")
-            c = numpy.array(c)
-            result.append(c * total / sum(c))
-
-        return numpy.array(result)
 
     def neutral_charge(self):
         """

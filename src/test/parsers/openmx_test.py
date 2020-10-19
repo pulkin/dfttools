@@ -493,3 +493,65 @@ class Test_JSON_DOS(unittest.TestCase):
                                 rtol=1e-5)
         testing.assert_equal(self.parser.ky(), numpy.linspace(-0.49, 0.49, 50))
         testing.assert_equal(self.parser.kz(), [0])
+
+
+class Test_MD(unittest.TestCase):
+    def setUp(self):
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/openmx.md.0.testcase"), 'r') as f:
+            self.parser = MD(f.read())
+
+    def test_cells(self):
+        cells = self.parser.unitCells()
+        self.assertEqual(len(cells), 23)
+
+        testing.assert_allclose(cells[0].vectors, numpy.array((
+            [-4.20546, -0.00576,  0.00951],
+            [-2.10777, -3.63912,  0.00783],
+            [-0.00324, -0.00179, 30.07408],
+        )) * numericalunits.angstrom)
+        testing.assert_allclose(cells[0].cartesian(), numpy.array((
+            [-2.11459, - 1.21948, 16.52081],
+            [-2.09637, -1.21147,  3.54001],
+            [-2.10004, -1.21247, 22.00568],
+            [-2.11410, -1.22031, 28.12935],
+            [-4.21094, -2.43104, 20.06092],
+            [-4.22007, -2.43503, 26.55127],
+            [-4.20234, -2.42622,  1.96204],
+            [-4.21621, -2.43399,  8.08565],
+            [-2.11096, -3.64080, 30.08184],
+            [-0.00901, -0.00384,  6.49021],
+            [-6.30773, -3.64170, 11.99240],
+            [-6.30734, -3.64261, 23.60103],
+            [-0.00857, -0.00474, 18.09889],
+            [-4.20179, -2.42696, 13.57038],
+            [-2.10535, -1.21538, 10.03028],
+        )) * numericalunits.angstrom)
+        testing.assert_allclose(cells[0].meta["total-energy"], -545.39242 * numericalunits.Hartree)
+
+        for c in cells:
+            testing.assert_equal(c.values, ["Se", "Se", "Bi", "Bi", "Se", "Se", "Bi", "Bi", "Se", "Se", "Bi", "Se",
+                                            "Bi", "Se", "Se"])
+
+        testing.assert_allclose(cells[-1].vectors, numpy.array((
+            [-4.37570, -0.00772, -0.00165],
+            [-2.19454, -3.78541, -0.00081],
+            [-0.00190, -0.00124, 28.99901],
+        )) * numericalunits.angstrom)
+        testing.assert_allclose(cells[-1].cartesian(), numpy.array((
+            [-2.18629, -1.26238, 15.712521],
+            [-2.19590, -1.26712,  3.61734],
+            [-2.18998, -1.26167, 21.30495],
+            [-2.18806, -1.26703, 27.02944],
+            [-4.38027, -2.52822, 19.33211],
+            [-4.37528, -2.52882, 25.38036],
+            [-4.38221, -2.52984,  1.96845],
+            [-4.38427, -2.53067,  7.69188],
+            [-2.19585, -3.78730, 28.99883],
+            [ 0.00036,  0.00063,  6.04525],
+            [-6.57242, -3.79460, 11.63538],
+            [-6.57427, -3.79341, 22.95187],
+            [ 0.00033,  0.00023, 17.36118],
+            [-4.38631, -2.53184, 13.28410],
+            [-2.19306, -1.26523,  9.66469],
+        )) * numericalunits.angstrom)
+        testing.assert_allclose(cells[-1].meta["total-energy"], -545.42815 * numericalunits.Hartree)

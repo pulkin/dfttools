@@ -669,6 +669,50 @@ class Output(AbstractTextParser, IdentifiableParser):
         return numpy.array(result)
 
 
+class MD(AbstractTextParser, IdentifiableParser):
+    """
+    Class for parsing the molecular dynamics output.
+
+    Args:
+
+        data (string): contents of OpenMX output file
+    """
+
+    @staticmethod
+    def valid_header(header):
+        return "time=" in header and "Energy=" in header and "Cell_Vectors=" in header
+
+    @staticmethod
+    def valid_filename(name):
+        return name.endswith(".md")
+
+    @unit_cell
+    def unitCells(self):
+        self.parser.reset()
+
+        result = []
+        while self.parser.present("Energy="):
+            nat = self.parser.next_int()
+            self.parser.skip("Energy=")
+            energy = eV(self.parser.next_float() * numericalunits.Hartree)
+            self.parser.skip("Cell_Vectors=")
+            vectors = self.parser.next_float(9).reshape(3, 3) * numericalunits.angstrom
+            values_and_coordinates = self.parser.next_match(cre_non_space, nat * 14).reshape(-1, 14)
+            coordinates = values_and_coordinates[:, 1:4].astype(float) * numericalunits.angstrom
+            values = values_and_coordinates[:, 0]
+            self.parser.next_line()
+
+            result.append(CrystalCell(
+                vectors,
+                coordinates,
+                values,
+                c_basis="cartesian",
+                meta={"total-energy": energy},
+            ))
+
+        return result
+
+
 class Bands(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing band structure from openmx.Band file.
@@ -847,3 +891,4 @@ input = Input
 output = Output
 bands = Bands
 transmission = Transmission
+md = MD

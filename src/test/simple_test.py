@@ -21,6 +21,7 @@ class Test_methods(unittest.TestCase):
             ("openmx.output.0.testcase/output", openmx.Output),
             ("openmx.tran.0.testcase", openmx.Transmission),
             ("openmx.tran.1.testcase", openmx.Transmission),
+            ("openmx.md.0.testcase", openmx.MD),
             ("qe.bands.0.testcase", qe.Bands),
             ("qe.cond.0.testcase", qe.Cond),
             ("qe.cond.1.testcase", qe.Cond),

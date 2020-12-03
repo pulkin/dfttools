@@ -544,11 +544,12 @@ class Output(AbstractTextParser, IdentifiableParser):
                 meta["total-energy"] = self.__next_total__()
             except StopIteration:
                 pass
-        if forces is not None:
-            meta["forces"] = forces
+        this_forces, next_coordinates = self.__next_forces_and_coordinates__()
+        if forces:
+            meta["forces"] = this_forces
         if n is not None:
             meta["source-index"] = int(n)
-        return meta
+        return meta, next_coordinates
 
     def unitCells(self, startingCell, noraise=False, tag_energy=True, tag_forces=True):
         """
@@ -574,6 +575,8 @@ class Output(AbstractTextParser, IdentifiableParser):
         self.parser.reset()
         cells = []
 
+        coords = startingCell.cartesian()
+
         while self.parser.present("lattice vectors (bohr)"):
 
             try:
@@ -581,17 +584,16 @@ class Output(AbstractTextParser, IdentifiableParser):
                 self.parser.skip("lattice vectors (bohr)")
                 shape = self.parser.next_float((3, 3)) * numericalunits.aBohr
 
-                self.parser.save()
-                f, c = self.__next_forces_and_coordinates__()
-                self.parser.pop()
-                meta = self.__collect_unitCell_meta__(tag_energy, f if tag_forces else None, len(cells))
+                meta, future_coords = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(cells))
                 cells.append(CrystalCell(
                     shape,
-                    c,
+                    coords,
                     startingCell.values,
                     c_basis="cartesian",
                     meta=meta,
                 ))
+
+                coords = future_coords
 
             except:
                 if not noraise:

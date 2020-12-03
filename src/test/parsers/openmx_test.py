@@ -316,7 +316,7 @@ class Test_output0(unittest.TestCase):
             (0.0, 0.0, 100)
         )) * numericalunits.angstrom
 
-        c = self.parser.unitCells(CrystalCell(
+        input_cell = CrystalCell(
             vecs,
             (
                 (0.33333333333353, 0.33333333333331, 0.50000000000001),
@@ -324,7 +324,9 @@ class Test_output0(unittest.TestCase):
                 (0.66666666666614, 0.66666666666674, 0.51686889613927),
             ),
             ("mo", "se", "se"),
-        ))
+        )
+
+        c = self.parser.unitCells(input_cell)
 
         assert len(c) == 14
 
@@ -340,11 +342,12 @@ class Test_output0(unittest.TestCase):
             assert cc.meta["source-file-name"] == self.parser.file.name
             assert cc.meta["source-index"] == i_cc
 
-        testing.assert_allclose(c[0].cartesian(), numpy.array((
-            (1.8773, 1.0838, 50.0000),
-            (3.7545, 2.1677, 48.3278),
-            (3.7545, 2.1677, 51.6722),
-        )) * numericalunits.angstrom)
+        # Test first cell corresponds to input
+        testing.assert_allclose(c[0].vectors, input_cell.vectors)
+        testing.assert_allclose(c[0].cartesian() / numericalunits.angstrom,
+                                input_cell.cartesian() / numericalunits.angstrom)
+        testing.assert_equal(c[0].values, input_cell.values)
+        testing.assert_allclose(c[0].meta["total-energy"] / numericalunits.Hartree, -89.989525394506)
 
         testing.assert_allclose(c[-1].cartesian(), numpy.array((
             (1.8773, 1.0838, 50.0000),

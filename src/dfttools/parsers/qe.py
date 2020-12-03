@@ -349,12 +349,6 @@ class Output(AbstractTextParser, IdentifiableParser):
         else:
             return alat * numericalunits.aBohr
 
-    def __collect_source_meta__(self):
-        meta = {}
-        if self.file is not None:
-            meta["source-file-name"] = self.file.name
-        return meta
-
     def __collect_unitCell_meta__(self, energy, forces, size, n):
         meta = self.__collect_source_meta__()
         if energy:

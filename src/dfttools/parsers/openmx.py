@@ -390,7 +390,8 @@ class Input(AbstractTextParser, IdentifiableParser):
             shape,
             coordinates,
             values,
-            c_basis=None if units.lower() == "frac" else "cartesian"
+            c_basis=None if units.lower() == "frac" else "cartesian",
+            meta=self.__collect_source_meta__(),
         )
 
 
@@ -530,12 +531,6 @@ class Output(AbstractTextParser, IdentifiableParser):
             self.parser.skip("NormRD")
 
         return numpy.array(result)
-
-    def __collect_source_meta__(self):
-        meta = {}
-        if self.file is not None:
-            meta["source-file-name"] = self.file.name
-        return meta
 
     def __collect_unitCell_meta__(self, energy, forces, n):
         meta = self.__collect_source_meta__()

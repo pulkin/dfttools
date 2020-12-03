@@ -77,6 +77,12 @@ class AbstractTextParser(object):
             self.data = f
         self.parser = parse(self.data)
 
+    def __collect_source_meta__(self):
+        meta = {}
+        if self.file is not None:
+            meta["source-file-name"] = self.file.name
+        return meta
+
 
 class AbstractJSONParser(object):
     """

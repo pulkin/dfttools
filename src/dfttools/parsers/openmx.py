@@ -445,7 +445,6 @@ class Output(AbstractTextParser, IdentifiableParser):
         return eV(result)
 
     def __next_forces_and_coordinates__(self):
-        self.parser.skip("MD or geometry opt. at")
         self.parser.skip("atom=")
         a = self.parser.next_float("***").reshape(-1, 7)
         return eV_angstrom(a[:, -3:] * numericalunits.Hartree / numericalunits.aBohr), a[:, 1:4] * numericalunits.angstrom
@@ -460,7 +459,8 @@ class Output(AbstractTextParser, IdentifiableParser):
         """
         self.parser.reset()
         result = []
-        while self.parser.present("MD or geometry opt. at"):
+        while self.parser.present("atom="):
+            self.parser.skip("MD or geometry opt. at")
             f, _ = self.__next_forces_and_coordinates__()
             result.append(f)
         return eV_angstrom(result)
@@ -475,10 +475,11 @@ class Output(AbstractTextParser, IdentifiableParser):
         """
         self.parser.reset()
         result = []
-        while self.parser.present("MD or geometry opt. at"):
+        while self.parser.present("atom="):
             self.parser.skip("MD or geometry opt. at")
             self.parser.skip("<")
             result.append(self.parser.next_match(cre_var_name))
+            self.__next_forces_and_coordinates__()
         return numpy.array(result)
 
     def nat(self):
@@ -539,9 +540,13 @@ class Output(AbstractTextParser, IdentifiableParser):
                 meta["total-energy"] = self.__next_total__()
             except StopIteration:
                 pass
-        this_forces, next_coordinates = self.__next_forces_and_coordinates__()
-        if forces:
-            meta["forces"] = this_forces
+        if self.parser.present("atom="):
+            self.parser.skip("MD or geometry opt. at")
+            this_forces, next_coordinates = self.__next_forces_and_coordinates__()
+            if forces:
+                meta["forces"] = this_forces
+        else:
+            next_coordinates = None
         if n is not None:
             meta["source-index"] = int(n)
         return meta, next_coordinates

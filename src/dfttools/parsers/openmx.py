@@ -5,6 +5,7 @@ import json
 import os
 import re
 from itertools import chain
+from pathlib import Path
 
 import numericalunits
 import numpy
@@ -606,11 +607,10 @@ class Output(AbstractTextParser, IdentifiableParser):
     @tag_method("unit-cell", take_file=True)
     def __unit_cells_silent__(self, f):
         # Search for an input file
-        directory = os.path.dirname(f.name)
-        file_names = list(os.path.join(directory, i) for i in os.listdir(directory))
-        for name in file_names:
-            if os.path.isfile(name):
-                with open(name, "r") as f:
+        this = Path(f.name)
+        for other in this.parent.glob("*"):
+            if this != other and other.is_file():
+                with open(other, "r") as f:
                     if Input in guess_parser(f):
                         try:
                             c = Input(f.read()).unitCell()

@@ -240,7 +240,7 @@ def svgwrite_unit_cell(
             "y": (0, -1, 0),
             "z": (0, 0, -1),
         }[camera]
-    except KeyError:
+    except (KeyError, TypeError):
         pass
     camera = numpy.array(camera, dtype=numpy.float64)
 

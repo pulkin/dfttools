@@ -175,7 +175,7 @@ def cast_units(destination, source, inv=False):
         A new array with data from `destination`
         and units from `source`.
     """
-    if not isinstance(source, array):
+    if not isinstance(source, array) or source.units is None:
         return destination
 
     if not inv:

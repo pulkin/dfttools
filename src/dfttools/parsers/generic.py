@@ -104,6 +104,20 @@ class AbstractJSONParser(object):
     def __set_units__(self, field, units):
         self.json[field] = numpy.array(self.json[field]) * units
 
+    @staticmethod
+    def valid_filename(name):
+        """
+        Checks whether the file name is an expected one. Used in
+        automatic determination of file format.
+
+        Args:
+            name (str): the file name;
+
+        Returns:
+            True if the name is as expected.
+        """
+        return name.endswith(".json")
+
 
 class StringParser(object):
     """

@@ -1450,7 +1450,7 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
 
         size (tuple): size of the inserted image;
 
-        embed (str): the embedding method: either 'loose' (the plot is
+        method (str): the embedding method: either 'loose' (the plot is
         rasterized) or 'firm' (the plot's svg is embedded via <svg> tag);
 
     Kwargs:

@@ -87,7 +87,7 @@ class Structure(AbstractTextParser):
     
     Args:
     
-        data (string): contents of OUTCAR file
+        data (string): contents of POSCAR file
     """
 
     def unitCell(self, names):

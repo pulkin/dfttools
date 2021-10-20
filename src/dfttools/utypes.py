@@ -151,7 +151,7 @@ class FermiMixin(object):
         """The band gap."""
         return self.cbb - self.vbt
 
-    def stick_fermi(self, value=0, epsilon=1e-12):
+    def stick_fermi(self, value, epsilon=1e-12):
         """
         Shifts the the Fermi level.
         Args:

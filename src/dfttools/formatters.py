@@ -3,13 +3,15 @@ This submodule contains routines presenting data (unit cell) in various
 text formats.
 """
 from .data import element_number, element_mass
-from .util import dumps
+from .util import dump
 from .types import Basis
 
 import numpy
 import numericalunits
 
 from itertools import chain
+from collections.abc import Iterable
+from io import StringIO
 
 
 def __xsf_structure__(cell, tag=None, indent=4):
@@ -555,24 +557,42 @@ def pyscf_cell(cell, **kwargs):
     return c
 
 
-def json_structure(cell, **kwargs):
+def json_structure(cell, destination=None, **kwargs):
     """
     Outputs the unit cell into JSON string.
     Args:
-        cell (UnitCell): a unit cell or multiple unit cells
-        to serialize;
+        cell (UnitCell, Iterable): a unit cell or
+        multiple unit cells to serialize;
+        destination (file): optional destination;
 
     Returns:
-        A string with serialized unit cell.
+        A string with serialized unit cell or None
+        if file destination was specified.
     """
     default = dict(indent=2)
     default.update(kwargs)
 
-    if isinstance(cell, Basis):
-        return dumps(cell.to_json(), **default)
+    if destination is None:
+        rtn_str = True
+        destination = StringIO()
+    else:
+        rtn_str = False
 
-    elif isinstance(cell, (list, tuple)):
-        return dumps(tuple(i.to_json() for i in cell), **default)
+    if isinstance(cell, Basis):
+        dump(cell.to_json(), destination, **default)
+
+    elif isinstance(cell, Iterable):
+        destination.write("[")
+        cnt = False
+        for i in cell:
+            if cnt:
+                destination.write(",")
+            dump(i.to_json(), destination, **default)
+            cnt = True
+        destination.write("]")
 
     else:
         raise ValueError("Unknown input: {}".format(cell))
+
+    if rtn_str:
+        return destination.getvalue()

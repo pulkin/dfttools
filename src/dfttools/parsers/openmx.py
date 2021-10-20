@@ -693,6 +693,7 @@ class MD(AbstractTextParser, IdentifiableParser):
         self.parser.reset()
 
         result = []
+        meta = self.__collect_source_meta__()
         while self.parser.present("Energy="):
             nat = self.parser.next_int()
             self.parser.skip("Energy=")
@@ -704,12 +705,14 @@ class MD(AbstractTextParser, IdentifiableParser):
             values = values_and_coordinates[:, 0]
             self.parser.next_line()
 
+            _meta = meta.copy()
+            _meta["total-energy"] = energy
             result.append(CrystalCell(
                 vectors,
                 coordinates,
                 values,
                 c_basis="cartesian",
-                meta={"total-energy": energy},
+                meta=_meta,
             ))
 
         return result

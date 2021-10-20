@@ -286,11 +286,11 @@ def wannier90_input(cell=None, kpts=None, kp_grid=None, parameters=None, block_p
 
     if cell is not None:
         block_parameters["atoms_frac"] = tuple(
-            "{atom} {x:.7f} {y:.7f} {z:.7f}".format(atom=a, x=x, y=y, z=z)
+            "{atom} {x:.10f} {y:.10f} {z:.10f}".format(atom=a, x=x, y=y, z=z)
             for a, (x, y, z) in zip(cell.values, cell.coordinates)
         )
         block_parameters["unit_cell_cart"] = tuple(
-            "{x:.7f} {y:.7f} {z:.7f}".format(x=x, y=y, z=z)
+            "{x:.10f} {y:.10f} {z:.10f}".format(x=x, y=y, z=z)
             for x, y, z in cell.vectors / numericalunits.angstrom
         )
 
@@ -299,7 +299,7 @@ def wannier90_input(cell=None, kpts=None, kp_grid=None, parameters=None, block_p
 
     if kpts is not None:
         block_parameters["kpoints"] = tuple(
-            "{x:.7f} {y:.7f} {z:.7f}".format(x=x, y=y, z=z)
+            "{x:.10f} {y:.10f} {z:.10f}".format(x=x, y=y, z=z)
             for x, y, z in kpts
         )
 

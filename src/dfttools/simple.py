@@ -96,22 +96,26 @@ def guess_parser(f, debug=False):
     result = []
 
     # Guess by contents
-    f.seek(0)
-    header = f.read(1024 * 1024)
-    for parser_class in get_all_parsers():
-        if debug:
-            print("Attempting {}".format(parser_class))
-        try:
-            if parser_class.valid_header(header):
-                if debug:
-                    print("  accepted")
-                result.append(parser_class)
-            elif debug:
-                print("  rejected")
-        except NotImplementedError:
+    try:
+        f.seek(0)
+        header = f.read(1024 * 1024)
+    except Exception:
+        pass
+    else:
+        for parser_class in get_all_parsers():
             if debug:
-                print("  \"by header\" not implemented")
-    f.seek(0)
+                print("Attempting {}".format(parser_class))
+            try:
+                if parser_class.valid_header(header):
+                    if debug:
+                        print("  accepted")
+                    result.append(parser_class)
+                elif debug:
+                    print("  rejected")
+            except NotImplementedError:
+                if debug:
+                    print("  \"by header\" not implemented")
+        f.seek(0)
 
     # Guess by name
     if "name" in dir(f) and isinstance(f.name, str):

@@ -353,7 +353,13 @@ class Output(AbstractTextParser, IdentifiableParser):
         meta = self.__collect_source_meta__()
         if energy:
             try:
+                accuracy = None
+                while self.parser.match_closest(("End of self-consistent calculation", "estimated scf accuracy")) == 1:
+                    self.parser.skip("estimated scf accuracy")
+                    accuracy = self.parser.next_float()
                 meta["total-energy"] = self.__next_total__()
+                if accuracy is not None:
+                    meta["total-energy-error"] = eV(accuracy * numericalunits.Ry)
             except StopIteration:
                 pass
         if forces:

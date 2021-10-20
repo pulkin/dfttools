@@ -302,6 +302,28 @@ class Output(AbstractTextParser, IdentifiableParser):
             pass
         return eV(result)
 
+    def __next_temperature__(self):
+        self.parser.skip("temperature           =")
+        return K(self.parser.next_float() * numericalunits.K)
+
+    def temperature(self):
+        """
+        Retrieves temperature values.
+
+        Returns:
+
+            A numpy array with temperature values across the whole calculation.
+        """
+        self.parser.reset()
+        result = []
+
+        try:
+            while True:
+                result.append(self.__next_temperature__())
+        except StopIteration:
+            pass
+        return K(result)
+
     def threads(self):
         """
         Retrieves the number of MPI threads.

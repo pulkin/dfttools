@@ -160,9 +160,9 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
 
     if cell is not None:
 
-        if isinstance(relax_mask, (int, float)):
-            relax_mask = ((relax_mask,) * 3,) * cell.size
-        relax_mask = numpy.array(relax_mask, dtype=float)
+        if isinstance(relax_mask, int):
+            relax_mask = numpy.full((cell.size, 3), relax_mask)
+        relax_mask = numpy.array(relax_mask, dtype=int)
         if relax_mask.ndim == 1:
             relax_mask = numpy.repeat(relax_mask[:, numpy.newaxis], 3, axis=1)
 
@@ -185,7 +185,7 @@ def qe_input(cell=None, relax_mask=0, parameters=None, inline_parameters=None,
 
         # Atomic coordinates
         parameters["ATOMIC_POSITIONS"] = "\n".join(
-            "{indent}{name:>2s} {x:16.14f} {y:16.14f} {z:16.14f} {fx:f} {fy:f} {fz:f}".format(
+            "{indent}{name:>2s} {x:16.14f} {y:16.14f} {z:16.14f} {fx:d} {fy:d} {fz:d}".format(
                 indent=indent,
                 name=cell.values[i],
                 x=cell.coordinates[i, 0],

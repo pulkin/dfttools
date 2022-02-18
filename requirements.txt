@@ -1,1 +1,8 @@
-src/requirements.txt
+scipy
+numpy
+numericalunits
+matplotlib
+svgwrite
+requests
+pycoordinates
+attrs

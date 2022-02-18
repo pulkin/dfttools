@@ -1,0 +1,257 @@
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage report</title>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    
+    <script type="text/javascript" src="jquery.min.js"></script>
+    <script type="text/javascript" src="jquery.ba-throttle-debounce.min.js"></script>
+    <script type="text/javascript" src="jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="jquery.hotkeys.js"></script>
+    <script type="text/javascript" src="coverage_html.js"></script>
+    <script type="text/javascript">
+        jQuery(document).ready(coverage.index_ready);
+    </script>
+</head>
+<body class="indexfile">
+
+<div id="header">
+    <div class="content">
+        <h1>Coverage report:
+            <span class="pc_cov">95%</span>
+        </h1>
+
+        <img id="keyboard_icon" src="keybd_closed.png" alt="Show keyboard shortcuts" />
+
+        <form id="filter_container">
+            <input id="filter" type="text" value="" placeholder="filter..." />
+        </form>
+    </div>
+</div>
+
+<div class="help_panel">
+    <img id="panel_icon" src="keybd_open.png" alt="Hide keyboard shortcuts" />
+    <p class="legend">Hot-keys on this page</p>
+    <div>
+    <p class="keyhelp">
+        <span class="key">n</span>
+        <span class="key">s</span>
+        <span class="key">m</span>
+        <span class="key">x</span>
+        
+        <span class="key">c</span> &nbsp; change column sorting
+    </p>
+    </div>
+</div>
+
+<div id="index">
+    <table class="index">
+        <thead>
+            
+            <tr class="tablehead" title="Click to sort">
+                <th class="name left headerSortDown shortkey_n">Module</th>
+                <th class="shortkey_s">statements</th>
+                <th class="shortkey_m">missing</th>
+                <th class="shortkey_x">excluded</th>
+                
+                <th class="right shortkey_c">coverage</th>
+            </tr>
+        </thead>
+        
+        <tfoot>
+            <tr class="total">
+                <td class="name left">Total</td>
+                <td>3436</td>
+                <td>184</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="3252 3436">95%</td>
+            </tr>
+        </tfoot>
+        <tbody>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools___init___py.html">dfttools/__init__.py</a></td>
+                <td>0</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="0 0">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_data_py.html">dfttools/data.py</a></td>
+                <td>21</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="21 21">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_formatters_py.html">dfttools/formatters.py</a></td>
+                <td>208</td>
+                <td>11</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="197 208">95%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers___init___py.html">dfttools/parsers/__init__.py</a></td>
+                <td>4</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="4 4">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_elk_py.html">dfttools/parsers/elk.py</a></td>
+                <td>136</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="136 136">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_generic_py.html">dfttools/parsers/generic.py</a></td>
+                <td>185</td>
+                <td>2</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="183 185">99%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_materialsproject_py.html">dfttools/parsers/materialsproject.py</a></td>
+                <td>58</td>
+                <td>20</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="38 58">66%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_openmx_py.html">dfttools/parsers/openmx.py</a></td>
+                <td>329</td>
+                <td>8</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="321 329">98%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_qe_py.html">dfttools/parsers/qe.py</a></td>
+                <td>519</td>
+                <td>5</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="514 519">99%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_structure_py.html">dfttools/parsers/structure.py</a></td>
+                <td>202</td>
+                <td>17</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="185 202">92%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_tools_py.html">dfttools/parsers/tools.py</a></td>
+                <td>55</td>
+                <td>8</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="47 55">85%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_vasp_py.html">dfttools/parsers/vasp.py</a></td>
+                <td>61</td>
+                <td>46</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="15 61">25%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_parsers_wannier90_py.html">dfttools/parsers/wannier90.py</a></td>
+                <td>18</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="18 18">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_presentation_py.html">dfttools/presentation.py</a></td>
+                <td>669</td>
+                <td>52</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="617 669">92%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_simple_py.html">dfttools/simple.py</a></td>
+                <td>90</td>
+                <td>12</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="78 90">87%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_types_py.html">dfttools/types.py</a></td>
+                <td>657</td>
+                <td>0</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="657 657">100%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_util_py.html">dfttools/util.py</a></td>
+                <td>111</td>
+                <td>2</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="109 111">98%</td>
+            </tr>
+            
+            <tr class="file">
+                <td class="name left"><a href="dfttools_utypes_py.html">dfttools/utypes.py</a></td>
+                <td>113</td>
+                <td>1</td>
+                <td>0</td>
+                
+                <td class="right" data-ratio="112 113">99%</td>
+            </tr>
+            
+        </tbody>
+    </table>
+
+    <p id="no_rows">
+        No items found using the specified filter.
+    </p>
+</div>
+
+<div id="footer">
+    <div class="content">
+        <p>
+            <a class="nav" href="https://coverage.readthedocs.io">coverage.py v4.5.4</a>,
+            created at 2020-04-27 12:42
+        </p>
+    </div>
+</div>
+
+</body>
+</html>

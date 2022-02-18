@@ -7,7 +7,7 @@ from .generic import AbstractJSONParser, IdentifiableParser, ParseError
 from ..util import loads
 from ..simple import unit_cell, band_structure
 
-valid_containers = ("dfttools.types.Basis", "dfttools.types.UnitCell", "dfttools.types.Grid",
+valid_containers = ("dfttools.types.Basis", "dfttools.types.Cell", "dfttools.types.Grid",
                     "dfttools.utypes.RealSpaceBasis", "dfttools.utypes.ReciprocalSpaceBasis",
                     "dfttools.utypes.CrystalCell", "dfttools.utypes.CrystalGrid", "dfttools.utypes.BandsPath",
                     "dfttools.utypes.BandsGrid")
@@ -71,7 +71,7 @@ class JSONStorage(AbstractJSONParser, IdentifiableParser):
         return self.__pick_class__(data).from_state_dict(data)
 
     @unit_cell
-    def unitCells(self, index=None):
+    def cells(self, index=None):
         """
         Retrieves the atomic structure data.
         Args:

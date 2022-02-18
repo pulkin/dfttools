@@ -47,7 +47,7 @@ class ReciprocalSpaceBasis(UnitsMixin, types.Basis):
 
 
 @attrs(frozen=True, eq=False)
-class CrystalCell(UnitsMixin, types.UnitCell):
+class CrystalCell(UnitsMixin, types.Cell):
     """
     A unit cell of a crystal.
     """
@@ -184,10 +184,10 @@ class FermiMixin:
 
 
 @attrs(frozen=True, eq=False)
-class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
+class BandsPath(FermiMixin, UnitsMixin, types.Cell):
     """
      A class describing a band structure along a path.
-     See `dfttools.types.UnitCell` and `dfttools.utypes.FermiMixin` for arguments.
+     See `dfttools.types.Cell` and `dfttools.utypes.FermiMixin` for arguments.
      """
 
     default_units = dict(vectors="1/angstrom", values="eV", fermi="eV")
@@ -200,12 +200,12 @@ class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
             g.values,
             fermi=self.fermi,
         )
-    as_grid.__doc__ = types.UnitCell.as_grid.__doc__
+    as_grid.__doc__ = types.Cell.as_grid.__doc__
 
     def interpolate(self, *args, **kwargs):
         result = super(BandsPath, self).interpolate(*args, **kwargs)
         return BandsPath(result.vectors, result.coordinates, result.values, meta=result.meta, fermi=self.fermi)
-    interpolate.__doc__ = types.UnitCell.interpolate.__doc__
+    interpolate.__doc__ = types.Cell.interpolate.__doc__
 
 
 @attrs(frozen=True, eq=False)

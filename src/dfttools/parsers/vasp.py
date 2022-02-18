@@ -56,7 +56,7 @@ class Output(AbstractTextParser, IdentifiableParser):
             
         Returns:
         
-            A UnitCells with the band structure.
+            Cell with the band structure.
         """
         self.parser.reset()
         basis = self.__reciprocal__()
@@ -76,8 +76,8 @@ class Output(AbstractTextParser, IdentifiableParser):
             basis,
             k,
             e,
+            fermi=fermi,
         )
-        result.fermi = fermi
         return result
 
 
@@ -90,7 +90,7 @@ class Structure(AbstractTextParser):
         data (string): contents of POSCAR file
     """
 
-    def unitCell(self, names):
+    def cell(self, names):
         self.parser.reset()
         self.parser.next_line()
         scale = self.parser.next_float()

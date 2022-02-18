@@ -88,7 +88,7 @@ class JSONResponse(AbstractJSONParser):
             raise ValueError("The response is invalid, message: {}".format(text))
 
     @unit_cell
-    def unitCells(self, root=None):
+    def cells(self, root=None):
         self.test_error()
         if root is None:
             root = self.json
@@ -97,7 +97,7 @@ class JSONResponse(AbstractJSONParser):
 
         if isinstance(root, list):
             for i in root:
-                result += self.unitCells(root=i)
+                result += self.cells(root=i)
 
         elif isinstance(root, dict):
             if "structure" in root and "@class" in root["structure"] and root["structure"]["@class"] == "Structure":
@@ -116,7 +116,7 @@ class JSONResponse(AbstractJSONParser):
 
             else:
                 for k, v in root.items():
-                    result += self.unitCells(root=v)
+                    result += self.cells(root=v)
 
         return result
 

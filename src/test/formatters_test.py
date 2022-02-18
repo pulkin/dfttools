@@ -2,7 +2,7 @@ import unittest
 
 from dfttools.formatters import *
 from dfttools.parsers import structure, qe, openmx
-from dfttools.types import Basis, UnitCell, Grid
+from dfttools.types import Basis, Cell, Grid
 from numpy import testing
 from numericalunits import angstrom
 from pycoordinates import uniform_grid
@@ -13,7 +13,7 @@ from json import loads
 class Tests(unittest.TestCase):
 
     def setUp(self):
-        self.cell = UnitCell(
+        self.cell = Cell(
             Basis.triclinic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), (0, 0, .5)),
             (
                 (1. / 3, 1. / 3, .5),
@@ -34,7 +34,7 @@ class Tests(unittest.TestCase):
 
     def test_xsf_back_forth(self):
         c1 = self.cell
-        cells = structure.xsf(xsf_structure(c1)).unitCells()
+        cells = structure.xsf(xsf_structure(c1)).cells()
         assert len(cells) == 1
         c2 = cells[0]
         assert c1.size == c2.size
@@ -47,7 +47,7 @@ class Tests(unittest.TestCase):
         for i in range(10):
             c = self.cell.copy(coordinates=self.cell.coordinates + (numpy.random.rand(*self.cell.coordinates.shape) - .5) / 10)
             c1.append(c)
-        c2 = structure.xsf(xsf_structure(*c1)).unitCells()
+        c2 = structure.xsf(xsf_structure(*c1)).cells()
 
         for i, j in zip(c1, c2):
             assert i.size == j.size
@@ -61,7 +61,7 @@ class Tests(unittest.TestCase):
         testing.assert_allclose(self.grid.values, g.values, atol=1e-7)
 
     def test_qe_input(self):
-        cell = UnitCell(Basis.orthorhombic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom)),
+        cell = Cell(Basis.orthorhombic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom)),
             (
                 (1. / 3, 1. / 3, .5),
                 (2. / 3, 2. / 3, .5),
@@ -139,7 +139,7 @@ class Tests(unittest.TestCase):
         _g = (2, 3, 2)
         self.maxDiff = None
         grid = uniform_grid(_g).reshape(-1, 3)
-        cell = UnitCell(Basis.orthorhombic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom)),
+        cell = Cell(Basis.orthorhombic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom)),
             (
                 (1. / 3, 1. / 3, .5),
                 (2. / 3, 2. / 3, .5),
@@ -191,7 +191,7 @@ class Tests(unittest.TestCase):
         c2 = qe.input(qe_input(
             cell=c1,
             pseudopotentials={"C": "C.UPF"},
-        )).unitCell()
+        )).cell()
         assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates)
@@ -205,7 +205,7 @@ class Tests(unittest.TestCase):
         c2 = openmx.input(openmx_input(
             c1,
             populations={"C": "2 2"},
-        )).unitCell()
+        )).cell()
         assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)
@@ -218,7 +218,7 @@ class Tests(unittest.TestCase):
             l=c1,
             r=c1,
             populations={"C": "2 2"},
-        )).unitCell(l=c1, r=c1)
+        )).cell(l=c1, r=c1)
         assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)
@@ -233,7 +233,7 @@ class Tests(unittest.TestCase):
             l=l,
             r=r,
             populations={"C": "2 2"},
-        )).unitCell(l=l, r=r)
+        )).cell(l=l, r=r)
         assert c1.size == c2.size
         testing.assert_allclose(c1.vectors / angstrom, c2.vectors / angstrom, atol=1e-6)
         testing.assert_allclose(c1.coordinates, c2.coordinates, rtol=1e-6)

@@ -1,4 +1,4 @@
-from dfttools.types import Basis, UnitCell
+from dfttools.types import Basis, Cell
 from dfttools.presentation import svgwrite_unit_cell
 
 from numericalunits import angstrom as a
@@ -9,7 +9,7 @@ graphene_basis = Basis(
 )
 
 # Unit cell
-graphene_cell = UnitCell(graphene_basis, (
+graphene_cell = Cell(graphene_basis, (
     (1./3,1./3,.5),
     (2./3,2./3,.5),
 ), ('C','C'))

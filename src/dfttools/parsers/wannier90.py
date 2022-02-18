@@ -26,7 +26,7 @@ class Input(AbstractTextParser, IdentifiableParser):
         return name.endswith(".win")
 
     @unit_cell
-    def unitCell(self):
+    def cell(self):
         """
         Retrieves atomic position data.
         Returns:

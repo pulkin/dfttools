@@ -18,8 +18,8 @@ class Test_xsf0(unittest.TestCase):
     def test_valid_header(self):
         assert xsf.valid_header(self.parser.parser.string[:1000])
 
-    def test_unitCells(self):
-        c = self.parser.unitCells()
+    def test_cells(self):
+        c = self.parser.cells()
 
         assert len(c) == 1
         c = c[0]
@@ -49,8 +49,8 @@ class Test_xsf1(unittest.TestCase):
                   'r') as f:
             self.parser = xsf(f.read())
 
-    def test_unitCells(self):
-        c = self.parser.unitCells()
+    def test_cells(self):
+        c = self.parser.cells()
 
         assert len(c) == 2
 
@@ -85,8 +85,8 @@ class Test_xsf2(unittest.TestCase):
     def test_valid_header(self):
         assert xsf.valid_header(self.parser.parser.string[:1000])
 
-    def test_unitCells(self):
-        c = self.parser.unitCells()
+    def test_cells(self):
+        c = self.parser.cells()
 
         assert len(c) == 2
 
@@ -241,8 +241,8 @@ class Test_cube0(unittest.TestCase):
         testing.assert_equal(c.coordinates[1], numpy.linspace(0, 1, 5, endpoint=False))
         testing.assert_equal(c.coordinates[2], numpy.linspace(0, 1, 6, endpoint=False))
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
 
         assert_standard_crystal_cell(c)
         testing.assert_allclose(c.cartesian, numpy.array((
@@ -269,8 +269,8 @@ class Test_cube1(unittest.TestCase):
 
         testing.assert_allclose(c.vectors, numpy.diag((4., 5., 6.)) * 0.283459 * numericalunits.angstrom, rtol=1e-12)
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
 
         assert_standard_crystal_cell(c)
         testing.assert_allclose(c.cartesian, numpy.array((
@@ -291,8 +291,8 @@ class Test_cif0(unittest.TestCase):
                   'r') as f:
             self.parser = cif(f.read())
 
-    def test_unitCell(self):
-        cells = self.parser.unitCells()
+    def test_cell(self):
+        cells = self.parser.cells()
         assert len(cells) == 1
         cell = cells[0]
 
@@ -326,8 +326,8 @@ class Test_cif1(unittest.TestCase):
                   'r') as f:
             self.parser = cif(f.read())
 
-    def test_unitCell(self):
-        cells = self.parser.unitCells()
+    def test_cell(self):
+        cells = self.parser.cells()
         assert len(cells) == 1
         cell = cells[0]
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from dfttools.simple import parse
-from dfttools.types import UnitCell
+from dfttools.types import Cell
 from dfttools.formatters import xsf_structure
 
 import argparse
@@ -27,14 +27,14 @@ def xcrysden(source, verbose=0):
     Parse and open a structure in xcrysden.
 
     Args:
-        source (UnitCell, file, str): structure or the file containing the structure to display;
+        source (Cell, file, str): structure or the file containing the structure to display;
         verbose (bool): verbose output;
     """
     def v(text):
         if verbose:
             print(text)
 
-    if isinstance(source, UnitCell):
+    if isinstance(source, Cell):
         pass
 
     elif isinstance(source, str):
@@ -46,7 +46,7 @@ def xcrysden(source, verbose=0):
         cell = parse(source, "unit-cell")
 
     v("Opening ...")
-    if isinstance(cell, UnitCell):
+    if isinstance(cell, Cell):
         run_xcrysden(cell)
     else:
         run_xcrysden(*cell)

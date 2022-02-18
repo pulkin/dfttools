@@ -1,4 +1,4 @@
-from dfttools.types import Basis, UnitCell
+from dfttools.types import Basis, Cell
 from dfttools import presentation
 
 from matplotlib import pyplot
@@ -11,8 +11,8 @@ basis = Basis((1,1,1,0,0,-0.5), kind = 'triclinic', meta = {"Fermi": 0})
 # G-K path
 kp = numpy.linspace(0,1,100)[:,numpy.newaxis] * numpy.array(((1./3,2./3,0),))
 
-# A dummy grid UnitCell with correct kp-path
-bands = UnitCell(
+# A dummy grid Cell with correct kp-path
+bands = Cell(
     basis,
     kp,
     numpy.zeros((100,2), dtype = numpy.float64),

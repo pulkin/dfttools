@@ -14,7 +14,7 @@ from ..types import Basis
 from ..util import array
 
 
-class UnitCellsParser(AbstractTextParser, IdentifiableParser):
+class CellsParser(AbstractTextParser, IdentifiableParser):
     """
     Class for parsing elk GEOMETRY_OPT.OUT.
     
@@ -87,7 +87,7 @@ class UnitCellsParser(AbstractTextParser, IdentifiableParser):
         )
 
     @unit_cell
-    def unitCells(self):
+    def cells(self):
         """
         Retrives the geometry optimization steps as unit cells.
         
@@ -108,7 +108,7 @@ class UnitCellsParser(AbstractTextParser, IdentifiableParser):
         return result
 
 
-class Input(UnitCellsParser, IdentifiableParser):
+class Input(CellsParser, IdentifiableParser):
     """
     Class for parsing elk.in input file.
     
@@ -126,8 +126,8 @@ class Input(UnitCellsParser, IdentifiableParser):
         l = header.lower()
         return "avec" in l and "atoms" in l and "ngridk" in l
 
-    # No need to place @unit_cell here: inherits UnitCellsParser.unitCells()
-    def unitCell(self):
+    # inherits @unit_cell
+    def cell(self):
         """
         Retrieves the unit cell specified in the input file.
         
@@ -203,7 +203,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         return "+----------------------------+" in header and "Elk version" in header
 
     @unit_cell
-    def unitCell(self):
+    def cell(self):
         """
         Retrieves the unit cell.
         
@@ -279,7 +279,7 @@ class Bands(AbstractTextParser, IdentifiableParser):
     @band_structure
     def bands(self):
         """
-        Retrieves the band structure and stores it into a flattened UnitCell.
+        Retrieves the band structure and stores it into a flattened Cell.
         
         Returns:
         
@@ -305,4 +305,4 @@ class Bands(AbstractTextParser, IdentifiableParser):
 input = Input
 bands = Bands
 output = Output
-unitcells = UnitCellsParser
+cells = CellsParser

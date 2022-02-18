@@ -7,7 +7,7 @@ from xml.etree import ElementTree
 from itertools import product
 from tempfile import NamedTemporaryFile
 
-from .types import Basis, UnitCell, Grid
+from .types import Basis, Cell, Grid
 from .data import element_number, element_size, element_color_convention
 
 import numpy
@@ -106,7 +106,7 @@ def svgwrite_unit_cell(
 
     Args:
 
-        cell (UnitCell): the cell to be visualized;
+        cell (Cell): the cell to be visualized;
 
         svg (str, svgwrite.Drawing): either file name to save the drawing
         to or an ``svgwrite.Drawing`` object to draw with.
@@ -703,7 +703,7 @@ def __guess_energy_range__(cell, bands=10, window=0.05, center_fermi=True):
 
     Args:
 
-        cell (UnitCell): cell with the band structure;
+        cell (Cell): cell with the band structure;
         bands (int): number of bands to focus;
         window (float): relative size of the gaps below and above
         selected energy range;
@@ -1117,7 +1117,7 @@ def matplotlib_bands_density(
             pass
         elif isinstance(cell, Grid):
             method = "tetrahedron"
-        elif isinstance(cell, UnitCell):
+        elif isinstance(cell, Cell):
             grid = cell.as_grid()
             if grid.size == cell.size:
                 cell = grid
@@ -1279,7 +1279,7 @@ def matplotlib_scalar(
             raise ValueError("For color plot [isolines=None], the number of data dimensions "
                              "of the grid should be 3, found: {:d}".format(grid.values.ndim))
 
-    elif isinstance(grid, UnitCell):
+    elif isinstance(grid, Cell):
         if grid.values.ndim != 1 and isolines is None:
             raise ValueError("For color plot [isolines=None], the number of data dimensions "
                              "of the cell should be 1, found: {:d}".format(grid.values.ndim))

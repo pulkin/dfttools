@@ -66,7 +66,7 @@ def xsf_grid(grid, cell, npl=6):
 
         grid (Grid): data on the grid;
 
-        cell (UnitCell): structural data;
+        cell (Cell): structural data;
 
     Kwargs:
 
@@ -326,7 +326,7 @@ def siesta_input(cell, indent=4):
 
     Args:
 
-        cell (UnitCell): input unit cell;
+        cell (Cell): input unit cell;
 
     Kwargs:
 
@@ -407,13 +407,13 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
     """
     Generates OpenMX minimal input file with atomic structure.
     Args:
-        cell (UnitCell): input unit cell;
+        cell (Cell): input unit cell;
         populations (dict): a dict with initial electronic populations data;
         parameters (dict): a dict with parameters;
         block_parameters (dict): a dict with block parameters;
         relax_mask (array,int): array with triggers for relaxation;
-        l (UnitCell): left lead for transport calculations;
-        r (UnitCell): right lead for transport calculations;
+        l (Cell): left lead for transport calculations;
+        r (Cell): right lead for transport calculations;
         tolerance (float): tolerance for checking whether left-center-right
         unit cells can be stacked;
         indent (int): size of indent;
@@ -521,7 +521,7 @@ def pyscf_cell(cell, **kwargs):
 
     Args:
 
-        cell (UnitCell): a unit cell object to convert from;
+        cell (Cell): a unit cell object to convert from;
 
     Kwargs are passed to pyscf.pbc.gto.M.
 
@@ -561,7 +561,7 @@ def json_structure(cell, destination=None, **kwargs):
     """
     Outputs the unit cell into JSON string.
     Args:
-        cell (UnitCell, Iterable): a unit cell or
+        cell (Cell, Iterable): a unit cell or
         multiple unit cells to serialize;
         destination (file): optional destination;
 

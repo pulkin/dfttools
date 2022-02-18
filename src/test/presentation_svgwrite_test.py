@@ -15,7 +15,7 @@ from matplotlib.testing.decorators import cleanup
 
 import svgwrite
 
-from dfttools.types import Basis, UnitCell
+from dfttools.types import Basis, Cell
 from dfttools.data import element_color_convention
 from dfttools.presentation import svgwrite_unit_cell, matplotlib2svgwrite
 
@@ -23,7 +23,7 @@ from dfttools.presentation import svgwrite_unit_cell, matplotlib2svgwrite
 class CellSVGTest(unittest.TestCase):
 
     def setUp(self):
-        self.cell = UnitCell(
+        self.cell = Cell(
             Basis.triclinic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), (0, 0, .5)),
             (
                 (1. / 3, 1. / 3, .5),
@@ -32,7 +32,7 @@ class CellSVGTest(unittest.TestCase):
             ['C'] * 2,
         ).repeated(2, 2, 2)
 
-        self.cell2 = UnitCell(
+        self.cell2 = Cell(
             Basis.triclinic((3.9 * angstrom / 2, 3.9 * angstrom / 2, 3.9 * angstrom / 2), (.5, .5, .5)),
             (0, 0, 0),
             ['Si'],
@@ -125,7 +125,7 @@ class CellSVGVisualTest(unittest.TestCase):
     """
 
     def setUp(self):
-        self.cell = UnitCell(
+        self.cell = Cell(
             Basis((3.19 * angstrom, 3.19 * angstrom, 10 * angstrom, 0, 0, .5), kind='triclinic'),
             (
                 (1. / 3, 1. / 3, .5),

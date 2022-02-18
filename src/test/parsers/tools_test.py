@@ -14,7 +14,7 @@ class Test_Structure0(unittest.TestCase):
             self.parser = jsons(f.read())
 
     def test_structure(self):
-        cell = self.parser.unitCells()
+        cell = self.parser.cells()
         assert_standard_crystal_cell(cell)
 
         a = 4.138

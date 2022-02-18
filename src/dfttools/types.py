@@ -1,4 +1,4 @@
-from pycoordinates import Basis, Cell as UnitCell, Grid
+from pycoordinates import Basis, Cell, Grid
 import numpy
 
 

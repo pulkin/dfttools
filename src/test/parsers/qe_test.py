@@ -110,8 +110,8 @@ class Test_output0(unittest.TestCase):
     def test_alat(self):
         assert self.parser.alat() == 7.0103 * numericalunits.aBohr
 
-    def test_unitCells(self):
-        cells = self.parser.unitCells()
+    def test_cells(self):
+        cells = self.parser.cells()
         assert len(cells) == 20
         for i in range(20):
             testing.assert_equal(cells[i].values, ('As', 'As'))
@@ -159,8 +159,8 @@ class Test_output0(unittest.TestCase):
                                  (-0.272235154, -0.272235145, -0.272235145))
                                 )
 
-    def test_unitCells_meta_content(self):
-        cells = self.parser.unitCells(tag_energy=False, tag_forces=False)
+    def test_cells_meta_content(self):
+        cells = self.parser.cells(tag_energy=False, tag_forces=False)
         for i, c in enumerate(cells):
             self.assertEqual(c.meta, {"source-index": i, "source-file-name": self.parser.file.name})
 
@@ -273,8 +273,8 @@ class Test_output1(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.output.1.testcase"), 'r') as f:
             self.parser = output(f.read())
 
-    def test_unitCells(self):
-        cells = self.parser.unitCells()
+    def test_cells(self):
+        cells = self.parser.cells()
         assert len(cells) == 6
         for i in range(6):
             assert_standard_crystal_cell(cells[i])
@@ -304,8 +304,8 @@ class Test_output2(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.output.2.testcase"), 'r') as f:
             self.parser = output(f.read())
 
-    def test_unitCells(self):
-        cells = self.parser.unitCells()
+    def test_cells(self):
+        cells = self.parser.cells()
         assert len(cells) == 14
         for i in range(14):
             assert_standard_crystal_cell(cells[i])
@@ -477,8 +477,8 @@ class Test_output5(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.output.5.testcase"), 'r') as f:
             self.parser = output(f.read())
 
-    def test_unitCells(self):
-        cells = self.parser.unitCells()
+    def test_cells(self):
+        cells = self.parser.cells()
         assert len(cells) == 4
         for i in range(4):
             testing.assert_equal(cells[i].values, ('W', 'Se', 'Se', 'W', 'Se', 'Se'))
@@ -899,8 +899,8 @@ class Test_input0(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.input.0.testcase"), 'r') as f:
             self.parser = input(f.read())
 
-    def test_unitCell(self):
-        cell = self.parser.unitCell()
+    def test_cell(self):
+        cell = self.parser.cell()
         assert_standard_crystal_cell(cell)
 
         testing.assert_allclose(cell.vectors,
@@ -922,8 +922,8 @@ class Test_input1(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/qe.input.1.testcase"), 'r') as f:
             self.parser = input(f.read())
 
-    def test_unitCell(self):
-        cell = self.parser.unitCell()
+    def test_cell(self):
+        cell = self.parser.cell()
         assert_standard_crystal_cell(cell)
 
         testing.assert_allclose(cell.vectors, numpy.diag(
@@ -938,7 +938,7 @@ class Test_input2(unittest.TestCase):
             self.parser = input(f.read())
 
     def test_cell(self):
-        cell = self.parser.unitCell()
+        cell = self.parser.cell()
         testing.assert_allclose(cell.vectors, numpy.array([
             [1.85636040599457e+01, - 3.67528106382461e-02, - 1.79093134290208e-01],
             [- 3.67528106382461e-02, 1.81538954826120e+01, - 5.81588660596537e-02],

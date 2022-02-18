@@ -15,8 +15,8 @@ class Test_structure0(unittest.TestCase):
                                "cases/materialsproject.unitcells.0.testcase"), 'r') as f:
             self.parser = jsonr(f.read())
 
-    def test_unitCells(self):
-        cells = self.parser.unitCells()
+    def test_cells(self):
+        cells = self.parser.cells()
 
         assert len(cells) == 34
 

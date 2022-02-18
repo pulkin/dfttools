@@ -27,7 +27,7 @@ class XSF(AbstractTextParser, IdentifiableParser):
         return "primvec" in l and "primcoord" in l
 
     @unit_cell
-    def unitCells(self):
+    def cells(self):
         """
         Retrieves unit cells.
         
@@ -204,7 +204,7 @@ class GaussianCube(AbstractTextParser, IdentifiableParser):
         )
 
     @unit_cell
-    def unitCell(self):
+    def cell(self):
         """
         Retrieves a unit cell.
         
@@ -271,7 +271,7 @@ class XYZ(AbstractTextParser, IdentifiableParser):
         return name.lower().endswith(".xyz")
 
     @unit_cell
-    def unitCell(self):
+    def cell(self):
         """
         Retrieves a unit cell.
         
@@ -341,7 +341,7 @@ class CIF(AbstractTextParser, IdentifiableParser):
         return RealSpaceBasis.triclinic(vecs[:3], vecs[3:])
 
     @unit_cell
-    def unitCells(self):
+    def cells(self):
         """
         Retrieves the unit cell.
 

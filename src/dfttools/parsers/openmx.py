@@ -2,14 +2,12 @@
 Parsing `OpenMX <http://openmx-square.org/>`_ files.
 """
 import json
-import os
 import re
 from itertools import chain
 from pathlib import Path
 
 import numericalunits
 import numpy
-import os.path
 
 from .generic import cre_var_name, cre_word, cre_non_space, re_int, cre_int, cre_float, AbstractTextParser, \
     AbstractJSONParser, IdentifiableParser, ParseError
@@ -269,13 +267,13 @@ class Input(AbstractTextParser, IdentifiableParser):
         return self.parser.int_after(parameter)
 
     @unit_cell
-    def unitCell(self, l=None, r=None, tolerance=1e-12):
+    def cell(self, l=None, r=None, tolerance=1e-12):
         """
         Retrieves atomic position data.
         
         Kwargs:
         
-            l,r (UnitCell): left lead and right lead cells.
+            l,r (Cell): left lead and right lead cells.
             This information is required for parsing the cell from NEGF
             calculation input file;
             
@@ -542,7 +540,7 @@ class Output(AbstractTextParser, IdentifiableParser):
 
         return numpy.array(result)
 
-    def __collect_unitCell_meta__(self, energy, forces, n):
+    def __collect_cell_meta__(self, energy, forces, n):
         meta = self.__collect_source_meta__()
         if energy:
             try:
@@ -560,13 +558,13 @@ class Output(AbstractTextParser, IdentifiableParser):
             meta["source-index"] = int(n)
         return meta, next_coordinates
 
-    def unitCells(self, startingCell, noraise=False, tag_energy=True, tag_forces=True):
+    def cells(self, starting_cell, noraise=False, tag_energy=True, tag_forces=True):
         """
         Retrieves atomic positions data for relax calculation.
         
         Args:
         
-            startingCell (qetools.cell.Cell): a unit cell from the input
+            starting_cell (Cell): a unit cell from the input
             file. It is required since no chemical captions are written
             in the output.
             tag_energy (bool): include total energy values for each unit cell if possible;
@@ -584,7 +582,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         self.parser.reset()
         cells = []
 
-        coords = startingCell.cartesian
+        coords = starting_cell.cartesian
 
         while self.parser.present("lattice vectors (bohr)"):
 
@@ -593,11 +591,11 @@ class Output(AbstractTextParser, IdentifiableParser):
                 self.parser.skip("lattice vectors (bohr)")
                 shape = self.parser.next_float((3, 3)) * numericalunits.aBohr
 
-                meta, future_coords = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(cells))
+                meta, future_coords = self.__collect_cell_meta__(tag_energy, tag_forces, len(cells))
                 cells.append(CrystalCell.from_cartesian(
                     shape,
                     coords,
-                    startingCell.values,
+                    starting_cell.values,
                     meta=meta,
                 ))
 
@@ -620,9 +618,9 @@ class Output(AbstractTextParser, IdentifiableParser):
                 with open(other, "r") as f:
                     if Input in guess_parser(f):
                         try:
-                            c = Input(f.read()).unitCell()
+                            c = Input(f.read()).cell()
                             if c.size == self.nat():
-                                return self.unitCells(c, noraise=True)
+                                return self.cells(c, noraise=True)
                         except:
                             pass
 
@@ -696,7 +694,7 @@ class MD(AbstractTextParser, IdentifiableParser):
         return name.endswith(".md")
 
     @unit_cell
-    def unitCells(self):
+    def cells(self):
         self.parser.reset()
 
         result = []
@@ -794,7 +792,7 @@ class Bands(AbstractTextParser, IdentifiableParser):
         
         Returns:
         
-            A UnitCell object with band energies.
+            A Cell object with band energies.
         """
         fermi = self.fermi()
 

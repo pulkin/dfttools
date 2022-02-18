@@ -15,8 +15,8 @@ class Test_input0(unittest.TestCase):
             data = f.read()
             self.parser = input(data)
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
         assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((

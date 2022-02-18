@@ -39,7 +39,7 @@ if options.action == "download-structure":
     try:
         if options.verbose:
             print("Parsing JSON data ...")
-        cells = parser.unitCells()
+        cells = parser.cells()
     except:
         print("Failed to parse the data")
         raise

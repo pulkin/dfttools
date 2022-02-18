@@ -353,7 +353,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         else:
             return alat * numericalunits.aBohr
 
-    def __collect_unitCell_meta__(self, energy, forces, size, n):
+    def __collect_cell_meta__(self, energy, forces, size, n):
         meta = self.__collect_source_meta__()
         if energy:
             try:
@@ -376,7 +376,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         return meta
 
     @unit_cell
-    def unitCells(self, tag_energy=True, tag_forces=True):
+    def cells(self, tag_energy=True, tag_forces=True):
         """
         Retrieves atomic position data.
 
@@ -414,7 +414,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         coordinates *= alat
         result.append(CrystalCell.from_cartesian(
             shape, coordinates, captions,
-            meta=self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates), 0)
+            meta=self.__collect_cell_meta__(tag_energy, tag_forces, len(coordinates), 0)
         ))
 
         # Parse MD steps
@@ -449,7 +449,7 @@ class Output(AbstractTextParser, IdentifiableParser):
             coordinates, captions = qe_scf_cell(self.data[self.parser.__position__:], n)
             captions = [bytearray(i).decode() for i in captions]
 
-            meta = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates), len(result))
+            meta = self.__collect_cell_meta__(tag_energy, tag_forces, len(coordinates), len(result))
             if units == "crystal":
                 result.append(CrystalCell(shape, coordinates, captions, meta=meta))
             elif units == "alat":
@@ -1091,7 +1091,7 @@ class Input(AbstractTextParser, IdentifiableParser):
         return result
 
     @unit_cell
-    def unitCell(self):
+    def cell(self):
         """
         Retrieves a unit cell from this input file.
 

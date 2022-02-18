@@ -4,7 +4,7 @@ import unittest
 
 import numericalunits
 import numpy
-from dfttools.parsers.elk import input, output, bands, unitcells
+from dfttools.parsers.elk import input, output, bands, cells
 from ..utypes_test import assert_standard_crystal_cell
 from numpy import testing
 
@@ -15,8 +15,8 @@ class Test_input0(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/elk.input.0.testcase"), 'r') as f:
             self.parser = input(f.read())
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
         assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((
@@ -46,8 +46,8 @@ class Test_input1(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/elk.input.1.testcase"), 'r') as f:
             self.parser = input(f.read())
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
         assert_standard_crystal_cell(c)
 
         testing.assert_allclose(c.vectors, numpy.array((
@@ -77,15 +77,15 @@ class Test_input1(unittest.TestCase):
         testing.assert_allclose(kpp[:, 2], numpy.zeros(100))
 
 
-class Test_unitcells0(unittest.TestCase):
+class Test_cells0(unittest.TestCase):
 
     def setUp(self):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/elk.unitcells.0.testcase"),
                   'r') as f:
-            self.parser = unitcells(f.read())
+            self.parser = cells(f.read())
 
-    def test_unitCells(self):
-        c = self.parser.unitCells()
+    def test_cells(self):
+        c = self.parser.cells()
         assert len(c) == 13
 
         assert_standard_crystal_cell(c[0])
@@ -125,7 +125,7 @@ class Test_unitcells0(unittest.TestCase):
         testing.assert_equal(c[-1].values, ("W", "W", "Se", "Se", "Se", "Se"))
 
     def test_valid_header(self):
-        assert unitcells.valid_header(self.parser.parser.string[:1000])
+        assert cells.valid_header(self.parser.parser.string[:1000])
 
 
 class Test_output0(unittest.TestCase):
@@ -134,8 +134,8 @@ class Test_output0(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/elk.output.0.testcase"), 'r') as f:
             self.parser = output(f.read())
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
         assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((

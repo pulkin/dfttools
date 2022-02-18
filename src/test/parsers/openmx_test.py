@@ -135,8 +135,8 @@ class Test_input0(unittest.TestCase):
     def test_getInt(self):
         assert self.parser.getInt("scf.maxIter") == 100
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
         assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((
@@ -157,8 +157,8 @@ class Test_input0(unittest.TestCase):
         assert c.values[1] == "Se"
         assert c.values[2] == "Se"
 
-    def test_unitCell_au(self):
-        c = self.parser_au.unitCell()
+    def test_cell_au(self):
+        c = self.parser_au.cell()
         assert_standard_crystal_cell(c)
         testing.assert_equal(c.vectors, numpy.array((
             (3.288, 0.0, 0.0),
@@ -179,8 +179,8 @@ class Test_input1(unittest.TestCase):
         with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "cases/openmx.input.1.testcase"), 'r') as f:
             self.parser = input(f.read())
 
-    def test_unitCell(self):
-        c = self.parser.unitCell()
+    def test_cell(self):
+        c = self.parser.cell()
         assert_standard_crystal_cell(c)
 
         testing.assert_equal(c.vectors, numpy.array((
@@ -219,12 +219,12 @@ class Test_input2(unittest.TestCase):
             self.l = input(data)
             self.l_au = input(data.replace("Ang", "AU"))
 
-    def test_unitCell(self):
+    def test_cell(self):
         with self.assertRaises(ValueError):
-            self.s.unitCell()
+            self.s.cell()
 
-        l = self.l.unitCell()
-        s = self.s.unitCell(l=l, r=l)
+        l = self.l.cell()
+        s = self.s.cell(l=l, r=l)
         assert_standard_crystal_cell(l)
         assert_standard_crystal_cell(s)
 
@@ -232,12 +232,12 @@ class Test_input2(unittest.TestCase):
         testing.assert_allclose(l.coordinates, s.coordinates)
         self.assertSequenceEqual(tuple(l.values), tuple(s.values))
 
-    def test_unitCell_au(self):
+    def test_cell_au(self):
         with self.assertRaises(ValueError):
-            self.s_au.unitCell()
+            self.s_au.cell()
 
-        l = self.l_au.unitCell()
-        s = self.s_au.unitCell(l=l, r=l)
+        l = self.l_au.cell()
+        s = self.s_au.cell(l=l, r=l)
         assert_standard_crystal_cell(l)
         assert_standard_crystal_cell(s)
 
@@ -246,14 +246,14 @@ class Test_input2(unittest.TestCase):
         self.assertSequenceEqual(tuple(l.values), tuple(s.values))
 
     def test_tolerance(self):
-        l = self.l.unitCell()
+        l = self.l.cell()
         c = l.coordinates.copy()
         c[2, 2] += 1e-6
         l = l.copy(coordinates=c)
         with self.assertRaises(ValueError):
-            self.s.unitCell(l=l, r=l)
+            self.s.cell(l=l, r=l)
 
-        self.s.unitCell(l=l, r=l, tolerance=0.01)
+        self.s.cell(l=l, r=l, tolerance=0.01)
 
 
 class Test_output_invalid(unittest.TestCase):
@@ -311,7 +311,7 @@ class Test_output0(unittest.TestCase):
         d = self.parser.md_driver()
         testing.assert_equal(d, ["Steepest_Descent"] * 4 + ["BFGS"] * 10)
 
-    def test_unitCells(self):
+    def test_cells(self):
         vecs = numpy.array((
             (3.7545085, 0.0, 0.0),
             (1.87725425, 3.25149973972460681892, 0.0),
@@ -328,7 +328,7 @@ class Test_output0(unittest.TestCase):
             ("mo", "se", "se"),
         )
 
-        c = self.parser.unitCells(input_cell)
+        c = self.parser.cells(input_cell)
 
         assert len(c) == 14
 
@@ -506,7 +506,7 @@ class Test_MD(unittest.TestCase):
             self.parser = MD(f.read())
 
     def test_cells(self):
-        cells = self.parser.unitCells()
+        cells = self.parser.cells()
         self.assertEqual(len(cells), 23)
 
         testing.assert_allclose(cells[0].vectors, numpy.array((

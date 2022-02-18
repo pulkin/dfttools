@@ -13,7 +13,7 @@ class Test_methods(unittest.TestCase):
             ("elk.input.0.testcase", elk.Input),
             ("elk.input.1.testcase", elk.Input),
             ("elk.output.0.testcase", elk.Output),
-            ("elk.unitcells.0.testcase", elk.UnitCellsParser),
+            ("elk.unitcells.0.testcase", elk.CellsParser),
             ("openmx.input.0.testcase", openmx.Input),
             ("openmx.input.1.testcase", openmx.Input),
             ("openmx.input.2.lead.testcase", openmx.Input),
@@ -57,7 +57,7 @@ class Test_methods(unittest.TestCase):
     def test_parse_0(self):
         path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "parsers/cases/qe.output.0.testcase")
         with open(path, 'r') as f:
-            c1 = qe.output(f.read()).unitCells()
+            c1 = qe.output(f.read()).cells()
             c2 = parse(f, "unit-cell")
 
         for i, j in zip(c1, c2):
@@ -70,7 +70,7 @@ class Test_methods(unittest.TestCase):
         with open(p2, 'r') as f:
             c = parse(f, "unit-cell")
         with open(path, 'r') as f:
-            c1 = openmx.output(f.read()).unitCells(c)
+            c1 = openmx.output(f.read()).cells(c)
             c2 = parse(f, "unit-cell")
 
         for i, j in zip(c1, c2):

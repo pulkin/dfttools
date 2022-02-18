@@ -77,7 +77,7 @@ automatically (OpenMX input file).
 Example: Moire pattern
 -------------------------------
 
-The Moire pattern is obtained using ``UnitCell.supercell``.
+The Moire pattern is obtained using ``Cell.supercell``.
 
 .. plot:: examples/atomic-structure/3-graphene/plot.py
       :include-source:
@@ -129,9 +129,9 @@ Example: K-point grids: density of states and interpolation
 -----------------------------------------------------------
 
 They key point of presenting the density of states from a file is
-converting the band structure to grid via ``UnitCell.as_grid``. This
+converting the band structure to grid via ``Cell.as_grid``. This
 only works if you indeed calculated band energies on a grid. Note
-that while both ``Grid`` and ``UnitCell`` can be used for DoS, the
+that while both ``Grid`` and ``Cell`` can be used for DoS, the
 former one is considerably more accurate.
 
 .. plot:: examples/band-structure/3-mos2/plot.py

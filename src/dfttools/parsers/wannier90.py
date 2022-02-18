@@ -3,10 +3,9 @@ Parsing `wannier90 <http://www.wannier.org/>`_ files.
 """
 import numericalunits
 
-from .generic import cre_var_name, cre_word, cre_non_space, re_int, cre_int, cre_float, AbstractTextParser, \
-    IdentifiableParser
+from .generic import cre_non_space, AbstractTextParser, IdentifiableParser
 from ..simple import unit_cell
-from ..utypes import CrystalCell
+from ..types import CrystalCell
 
 
 class Input(AbstractTextParser, IdentifiableParser):

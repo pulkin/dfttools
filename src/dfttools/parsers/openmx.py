@@ -13,7 +13,7 @@ from .generic import cre_var_name, cre_word, cre_non_space, re_int, cre_int, cre
     AbstractJSONParser, IdentifiableParser, ParseError
 from .native_openmx import openmx_bands_bands
 from ..simple import band_structure, unit_cell, guess_parser, tag_method
-from ..utypes import CrystalCell, BandsPath
+from ..types import CrystalCell, BandsPath
 from ..util import eV, eV_angstrom
 
 

@@ -14,7 +14,7 @@ from matplotlib.lines import Line2D
 from matplotlib.collections import LineCollection, PolyCollection
 from matplotlib.image import AxesImage
 
-from dfttools.utypes import BandsPath, BandsGrid, CrystalGrid, RealSpaceBasis
+from dfttools.types import BandsPath, BandsGrid, CrystalGrid, RealSpaceBasis
 from dfttools.presentation import matplotlib_bands, matplotlib_scalar, matplotlib_bands_density, __covering_range__
 
 

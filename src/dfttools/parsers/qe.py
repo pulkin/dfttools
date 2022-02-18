@@ -11,8 +11,7 @@ from .generic import parse, cre_var_name, cre_word, cre_float, cre_quotedText, c
     AbstractTextParser, IdentifiableParser
 from .native_qe import qe_proj_weights, qe_scf_cell
 from ..simple import band_structure, unit_cell, tag_method
-from ..utypes import CrystalCell, BandsPath, RealSpaceBasis
-from ..types import element_type
+from ..types import CrystalCell, BandsPath, RealSpaceBasis, element_type
 from ..util import eV, eV_angstrom, K
 
 

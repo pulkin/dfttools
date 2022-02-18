@@ -1,7 +1,7 @@
 import unittest
 
 from dfttools.parsers.openmx import *
-from dfttools.utypes import CrystalCell
+from dfttools.types import CrystalCell
 from dfttools.util import ArrayWithUnits
 from ..utypes_test import assert_standard_crystal_cell, assert_standard_bands_path
 import numpy

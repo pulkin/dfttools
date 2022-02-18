@@ -8,11 +8,11 @@ from ..util import loads
 from ..simple import unit_cell, band_structure
 
 valid_containers = ("dfttools.types.Basis", "dfttools.types.Cell", "dfttools.types.Grid",
-                    "dfttools.utypes.RealSpaceBasis", "dfttools.utypes.ReciprocalSpaceBasis",
-                    "dfttools.utypes.CrystalCell", "dfttools.utypes.CrystalGrid", "dfttools.utypes.BandsPath",
-                    "dfttools.utypes.BandsGrid")
-valid_containers_uc = ("dfttools.utypes.CrystalCell",)
-valid_containers_bands = ("dfttools.utypes.BandsPath", "dfttools.utypes.BandsGrid")
+                    "dfttools.types.RealSpaceBasis", "dfttools.types.ReciprocalSpaceBasis",
+                    "dfttools.types.CrystalCell", "dfttools.types.CrystalGrid", "dfttools.types.BandsPath",
+                    "dfttools.types.BandsGrid")
+valid_containers_uc = ("dfttools.types.CrystalCell",)
+valid_containers_bands = ("dfttools.types.BandsPath", "dfttools.types.BandsGrid")
 
 lookup_container = {}
 lookup_type_string = {}

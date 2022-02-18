@@ -9,8 +9,7 @@ import numpy
 
 from .generic import cre_non_space, cre_float, cre_word, AbstractTextParser, IdentifiableParser
 from ..simple import band_structure, unit_cell
-from ..utypes import CrystalCell, BandsPath
-from ..types import Basis
+from ..types import Basis, CrystalCell, BandsPath
 from ..util import array
 
 

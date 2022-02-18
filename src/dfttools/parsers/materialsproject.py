@@ -8,7 +8,7 @@ import numpy
 
 from .generic import AbstractJSONParser
 from ..simple import unit_cell
-from ..utypes import CrystalCell
+from ..types import CrystalCell
 
 GATEWAY = "https://www.materialsproject.org/rest/v1/"
 

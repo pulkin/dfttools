@@ -1,5 +1,5 @@
 {
-  "type": "dfttools.utypes.CrystalCell", 
+  "type": "dfttools.types.CrystalCell",
   "meta": {}, 
   "values": {
     "units": null, 

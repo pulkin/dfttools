@@ -5,7 +5,7 @@ import numericalunits
 
 from .generic import AbstractTextParser, IdentifiableParser
 from ..simple import band_structure
-from ..utypes import CrystalCell, BandsPath
+from ..types import CrystalCell, BandsPath
 
 
 class Output(AbstractTextParser, IdentifiableParser):

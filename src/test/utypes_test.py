@@ -3,7 +3,7 @@ import numpy
 import unittest
 import numericalunits
 
-from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis, RealSpaceBasis
+from dfttools.types import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis, RealSpaceBasis
 from dfttools.util import dumps, loads, ArrayWithUnits, angstrom, eV, eval_nu
 from numpy import testing
 from pycoordinates.util import generate_path
@@ -119,7 +119,7 @@ class CellTest(unittest.TestCase):
         testing.assert_equal(serialized, dict(
             vectors=self.co_cell.vectors,
             meta={"length": self.co_cell.meta["length"]},
-            type="dfttools.utypes.CrystalCell",
+            type="dfttools.types.CrystalCell",
             coordinates=self.co_cell.coordinates,
             values=self.co_cell.values,
         ))
@@ -129,7 +129,7 @@ class CellTest(unittest.TestCase):
         testing.assert_equal(serialized, dict(
             vectors=self.bs_cell.vectors,
             meta={},
-            type="dfttools.utypes.BandsPath",
+            type="dfttools.types.BandsPath",
             coordinates=self.bs_cell.coordinates,
             values=self.bs_cell.values,
             fermi=self.bs_cell.fermi,
@@ -244,7 +244,7 @@ class GridTest(unittest.TestCase):
         testing.assert_equal(serialized, dict(
             vectors=self.bs_grid.vectors,
             meta={},
-            type="dfttools.utypes.BandsGrid",
+            type="dfttools.types.BandsGrid",
             coordinates=self.bs_grid.coordinates,
             values=self.bs_grid.values,
             fermi=self.bs_grid.fermi,

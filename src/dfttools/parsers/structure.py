@@ -7,8 +7,7 @@ import numpy
 from .generic import cre_word, cre_non_space, AbstractTextParser, IdentifiableParser
 from ..data import element_for_number
 from ..simple import unit_cell
-from ..utypes import CrystalCell, CrystalGrid, RealSpaceBasis
-from ..types import element_type
+from ..types import CrystalCell, CrystalGrid, RealSpaceBasis, element_type
 
 
 class XSF(AbstractTextParser, IdentifiableParser):

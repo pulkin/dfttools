@@ -4,7 +4,7 @@ import os
 from dfttools.parsers.tools import jsons
 from ..utypes_test import assert_standard_crystal_cell
 from numpy import testing
-from numericalunits import angstrom
+import numericalunits
 
 
 class Test_Structure0(unittest.TestCase):
@@ -22,7 +22,7 @@ class Test_Structure0(unittest.TestCase):
         mu = 0.399
         nu = 0.206
 
-        testing.assert_allclose(cell.vectors / angstrom, (
+        testing.assert_allclose(cell.vectors / numericalunits.angstrom, (
             (-a / 2, -3. ** .5 * a / 6, c / 3),
             (a / 2, -3. ** .5 * a / 6, c / 3),
             (0, -3. ** .5 * a / 3, c / 3),

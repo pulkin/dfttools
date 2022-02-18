@@ -153,7 +153,7 @@ class Input(UnitCellsParser, IdentifiableParser):
         """
         self.parser.reset()
         if basis is None:
-            basis = self.__next_unit_cell__().reciprocal()
+            basis = self.__next_unit_cell__().reciprocal
 
         # Read data from input
         self.parser.skip('plot1d\n')
@@ -295,7 +295,7 @@ class Bands(AbstractTextParser, IdentifiableParser):
             coordinates = a[::2]
 
         return BandsPath(
-            (1,),
+            [(1,)],
             coordinates[:, numpy.newaxis],
             numpy.array(values).swapaxes(0, 1),
         )

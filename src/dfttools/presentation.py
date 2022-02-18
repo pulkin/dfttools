@@ -7,7 +7,7 @@ from xml.etree import ElementTree
 from itertools import product
 from tempfile import NamedTemporaryFile
 
-from .types import Basis, UnitCell, Grid, __xyz2i__
+from .types import Basis, UnitCell, Grid
 from .data import element_number, element_size, element_color_convention
 
 import numpy
@@ -17,6 +17,9 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
+
+
+__xyz2i__ = {'x': 0, 'y': 1, 'z': 2, 0: 0, 1: 1, 2: 2}
 
 
 def __fadeout_z__(color, z, mx, mn, strength, bg):
@@ -297,9 +300,9 @@ def svgwrite_unit_cell(
         # Project unit cell edges ...
         if isinstance(invisible, str) and invisible == 'auto':
             projected_edges = projection.transform_from_cartesian(
-                initial_cell.edges() + initial_cell.vectors.sum(axis=0)[numpy.newaxis, :])
+                initial_cell.edges + initial_cell.vectors.sum(axis=0)[numpy.newaxis, :])
         else:
-            projected_edges = projection.transform_from_cartesian(cell.edges())
+            projected_edges = projection.transform_from_cartesian(cell.edges)
 
         # ... and modify boundaries
         b_min = numpy.minimum(b_min, projected_edges.reshape(-1, projected_edges.shape[-1]).min(axis=0))
@@ -448,7 +451,7 @@ def svgwrite_unit_cell(
                 obj.append(g)
                 obj_z.append(projected[i, 2])
 
-    d = cell.distances(threshold=2*e_covsize.max())
+    d = cell.distances(cutoff=2*e_covsize.max())
 
     if show_bonds:
 
@@ -764,7 +767,7 @@ def matplotlib_bands(
     Plots basic band structure using pyplot.
 
     Args:
-        cell (UnitCell): cell with the band structure;
+        cell (BandsPath): cell with the band structure;
         axes (matplotlib.axes.Axes): axes to plot on;
         show_fermi (bool): shows the Fermi level if specified;
         fermi_origin (bool): shift the energy origin to the Fermi level;
@@ -834,9 +837,7 @@ def matplotlib_bands(
 
     # Move the origin to the Fermi level
     if fermi_origin and cell.fermi is not None:
-        cell = cell.copy()
-        cell.values -= cell.fermi
-        cell.fermi = 0
+        cell = cell.canonize_fermi()
 
     # Set energy range
     if energy_range is None:
@@ -854,7 +855,7 @@ def matplotlib_bands(
         ))
     elif ls == "--":
         defaults["linestyles"] = (0, (1, 2))
-    elif ls == ".":
+    elif ls in ".:":
         defaults["linestyles"] = "dotted"
     elif ls == "-.":
         defaults["linestyles"] = "dashdot"
@@ -1024,6 +1025,7 @@ def matplotlib_bands_density(
         axes,
         energies,
         show_fermi=True,
+        fermi_origin=False,
         energy_range=None,
         units="eV",
         units_name=None,
@@ -1041,7 +1043,7 @@ def matplotlib_bands_density(
     The cell values are considered to be band energies.
 
     Args:
-        cell (Grid, UnitCell): a unit cell with the band structure,
+        cell (BandsPath, BandsGrid): a unit cell with the band structure,
         possibly on the grid;
         axes (matplotlib.axes.Axes): axes to plot on;
         energies (int,array): energies to calculate density at. The
@@ -1049,6 +1051,7 @@ def matplotlib_bands_density(
         the range ``energy_range``. Otherwise the units of energy are
         defined by the ``units`` keyword;
         show_fermi (bool): shows the Fermi level if specified;
+        fermi_origin (bool): shift the energy origin to the Fermi level;
         energy_range (array): 2 floats defining plot energy range. The
         units of energy are defined by the ``units`` keyword;
         units (str, float): either a field from ``numericalunits``
@@ -1064,7 +1067,7 @@ def matplotlib_bands_density(
         gaussian_spread (float): the gaussian spread for the density of
         states. This value is used only if the provided ``cell`` is not
         a Grid;
-        method (bool): method to calculate density: 'default', 'gaussian'
+        method (str): method to calculate density: 'default', 'gaussian'
         or 'optimal';
         postproc (Callable): a post-processing function accepting density
         and energy values (in final units) and returning density values;
@@ -1081,6 +1084,10 @@ def matplotlib_bands_density(
     if isinstance(units, str):
         units_name = units
         units = getattr(numericalunits, units)
+
+    # Move the origin to the Fermi level
+    if fermi_origin and cell.fermi is not None:
+        cell = cell.canonize_fermi()
 
     # Set energy range
     if energy_range is None:
@@ -1190,7 +1197,7 @@ def matplotlib_bands_density(
         axes.set_xlim(energy_range)
 
         if not units_name is None:
-            axes.set_ylabel('Density (electrons per unit cell per {})'.format(units_name))
+            axes.set_ylabel('Density (states per unit cell per {})'.format(units_name))
             axes.set_xlabel('Energy ({})'.format(units_name))
 
         else:
@@ -1286,7 +1293,7 @@ def matplotlib_scalar(
 
     origin = grid.transform_to_cartesian(origin)[numpy.newaxis, :]
 
-    plane = __xyz2i__(plane)
+    plane = __xyz2i__[plane]
     otherVectors = list(range(3))
     del otherVectors[plane]
 
@@ -1295,10 +1302,10 @@ def matplotlib_scalar(
     v3 = grid.vectors[plane]
     v2 = numpy.cross(v3, v1)
     basis = Basis((v1, v2, v3))
-    basis.vectors /= ((basis.vectors ** 2).sum(axis=-1) ** .5)[:, numpy.newaxis]
+    basis = Basis(basis.vectors / basis.vectors_len[:, None])
 
     # Calculate in-plane coordinates of the grid edges
-    edges_inplane = basis.transform_from_cartesian(grid.vertices() - origin)
+    edges_inplane = basis.transform_from_cartesian(grid.vertices - origin)
     if window is None:
         mn = edges_inplane.min(axis=0)
         mx = edges_inplane.max(axis=0)
@@ -1348,7 +1355,7 @@ def matplotlib_scalar(
     else:
         interpolated = grid.interpolate(points_lattice)
 
-    interpolated_values = interpolated.values
+    interpolated_values = interpolated.values.copy()
     if interpolated_values.ndim == 1:
         interpolated_values = interpolated_values.reshape(*dims)
     else:
@@ -1386,7 +1393,7 @@ def matplotlib_scalar(
 
     if show_cell:
 
-        edges = basis.transform_from_cartesian(grid.edges() - origin) / units
+        edges = basis.transform_from_cartesian(grid.edges - origin) / units
         for e in edges:
             axes.plot([e[0, 0], e[1, 0]], [e[0, 1], e[1, 1]], color="black")
 
@@ -1460,7 +1467,7 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
     if image_format is None:
         image_format = dict(loose="png", firm="svg")[method]
     if method == "firm" and image_format != "svg":
-        raise ValueError("Only SVG images may be embedded with the 'firm' method")
+        raise ValueError("Only SVG images can be embedded with the 'firm' method")
     if method == "firm" and svg._parameter.profile != "full":
         raise ValueError("'firm' method requires a full svg profile")
 
@@ -1486,7 +1493,7 @@ def matplotlib2svgwrite(fig, svg, insert, size=None, method="firm", image_format
         svg.add(esvg)
 
     else:
-        raise ValueError("Illegal 'embed' value")
+        raise ValueError("Illegal 'method' value")
 
 
 def notebook_unit_cell(cell, **kwargs):

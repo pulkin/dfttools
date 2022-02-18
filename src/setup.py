@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 from setuptools import setup
 from setuptools.extension import Extension
-from Cython.Build import cythonize
 import numpy
 
-ext_modules = cythonize([
-    Extension("dfttools.blochl", ["cython/blochl.pyx"], include_dirs=[numpy.get_include()]),
-]) + [
+ext_modules = [
     Extension("dfttools.parsers.native_openmx", ["c/generic-parser.c", "c/native_openmx.c"], include_dirs=[numpy.get_include(), "c/"]),
     Extension("dfttools.parsers.native_qe", ["c/generic-parser.c", "c/native_qe.c"], include_dirs=[numpy.get_include(), "c/"]),
 ]

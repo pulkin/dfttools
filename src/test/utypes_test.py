@@ -4,8 +4,9 @@ import unittest
 import numericalunits
 
 from dfttools.utypes import CrystalCell, CrystalGrid, BandsPath, BandsGrid, ReciprocalSpaceBasis, RealSpaceBasis
-from dfttools.util import dumps, loads, ArrayWithUnits, angstrom, eval_nu
+from dfttools.util import dumps, loads, ArrayWithUnits, angstrom, eV, eval_nu
 from numpy import testing
+from pycoordinates.util import generate_path
 
 
 def assert_standard_crystal_cell(c):
@@ -30,22 +31,22 @@ def assert_standard_bands_path(c):
 
 class CommonTests(unittest.TestCase):
 
-    def test_units_remain_unchanged(self):
-        b = RealSpaceBasis((1, 1), kind="orthorhombic")
+    def test_units(self):
+        b = RealSpaceBasis.orthorhombic((1, 1))
         testing.assert_equal(b.vectors.units, "angstrom")
 
         b = RealSpaceBasis(ArrayWithUnits(([1, 0], [0, 1]), units="nm"))
-        testing.assert_equal(b.vectors.units, "nm")
+        testing.assert_equal(b.vectors.units, "angstrom")
 
-        b = RealSpaceBasis(ArrayWithUnits([1, 1], units="nm"), kind="orthorhombic")
-        testing.assert_equal(b.vectors.units, "nm")
+        b = RealSpaceBasis.orthorhombic(ArrayWithUnits([1, 1], units="nm"))
+        testing.assert_equal(b.vectors.units, "angstrom")
         c = RealSpaceBasis(b)
-        testing.assert_equal(c.vectors.units, "nm")
+        testing.assert_equal(c.vectors.units, "angstrom")
 
-        b = RealSpaceBasis(ArrayWithUnits([1, 1, 1, 0, 0, 0], units="nm"), kind="triclinic")
-        testing.assert_equal(b.vectors.units, "nm")
-        c = b.reciprocal()
-        testing.assert_equal(eval_nu(c.vectors.units), eval_nu("1/nm"))
+        b = RealSpaceBasis.triclinic(ArrayWithUnits([1, 1, 1], units='nm'), [0, 0, 0])
+        testing.assert_equal(b.vectors.units, "angstrom")
+        c = b.reciprocal
+        testing.assert_equal(eval_nu(c.vectors.units), eval_nu("1/angstrom"))
 
 
 class CellTest(unittest.TestCase):
@@ -56,7 +57,7 @@ class CellTest(unittest.TestCase):
         self.co_cell = CrystalCell(
             ((self.a, 0, 0), (.5 * self.a, .5 * self.a * 3. ** .5, 0), (0, 0, self.h)),
             ((0., 0., 0.), (1. / 3., 1. / 3., 0.5)),
-            'Co',
+            ['Co'] * 2,
             meta={"length": angstrom(1 * numericalunits.angstrom)}
         )
         self.ia = 1. / self.a
@@ -64,8 +65,8 @@ class CellTest(unittest.TestCase):
         self.bs_cell = BandsPath(
             ((self.ia, 0, 0), (.5 * self.ia, .5 * self.ia * 3. ** .5, 0), (0, 0, self.ih)),
             ((0., 0., 0.), (1. / 3., 1. / 3., 0.5)),
-            [3 * numericalunits.eV],
-            fermi=1.5 * numericalunits.eV,
+            [3 * numericalunits.eV] * 2,
+            fermi=eV(1.5 * numericalunits.eV),
         )
 
     def test_save_load(self):
@@ -101,9 +102,9 @@ class CellTest(unittest.TestCase):
     def test_save_load_json(self):
         cell = self.bs_cell
 
-        data = dumps(cell.to_json())
+        data = dumps(cell.state_dict())
         numericalunits.reset_units()
-        x = BandsPath.from_json(loads(data))
+        x = BandsPath.from_state_dict(loads(data))
 
         # Assert object is the same wrt numericalunits
         self.setUp()
@@ -114,7 +115,7 @@ class CellTest(unittest.TestCase):
         testing.assert_allclose(x.fermi, cell2.fermi)
 
     def test_serialization_cry(self):
-        serialized = self.co_cell.to_json()
+        serialized = self.co_cell.state_dict()
         testing.assert_equal(serialized, dict(
             vectors=self.co_cell.vectors,
             meta={"length": self.co_cell.meta["length"]},
@@ -124,7 +125,7 @@ class CellTest(unittest.TestCase):
         ))
 
     def test_serialization_bs(self):
-        serialized = self.bs_cell.to_json()
+        serialized = self.bs_cell.state_dict()
         testing.assert_equal(serialized, dict(
             vectors=self.bs_cell.vectors,
             meta={},
@@ -136,23 +137,20 @@ class CellTest(unittest.TestCase):
 
     def test_interpolate(self):
         c = self.bs_cell.interpolate(([.1, .2, .3], [.4, .5, .6]))
+        assert isinstance(c, BandsPath)
         assert isinstance(c.values, ArrayWithUnits)
         testing.assert_equal(c.values.units, self.bs_cell.values.units)
 
     def test_fermi(self):
         assert self.bs_cell.fermi.units == "eV"
-        self.bs_cell.fermi = 3
-        assert self.bs_cell.fermi.units == "eV"
-        with self.assertRaises(ValueError):
-            self.bs_cell.fermi = 'x'
 
     def test_fermi2(self):
-        b = ReciprocalSpaceBasis((1./numericalunits.angstrom,) * 3, kind="orthorhombic")
-        coords = b.generate_path((
+        b = ReciprocalSpaceBasis.orthorhombic((1./numericalunits.angstrom,) * 3)
+        coords = b.transform_from_cartesian(generate_path(b.transform_to_cartesian((
             (0, 0, 0),
             (0, 0, .5),
             (.5, .5, .5),
-        ), 100)
+        )), 100))
         bands = (numpy.linalg.norm(coords, axis=-1) ** 2 + 1)[:, numpy.newaxis] * [[-2, 1]]
         bands = BandsPath(b, coords, bands, fermi=-1)
         self.assertEqual(bands.nocc, 1)
@@ -162,19 +160,19 @@ class CellTest(unittest.TestCase):
         self.assertEqual(bands.cbb, 1)
         self.assertEqual(bands.gap, 3)
 
-        bands.stick_fermi("vbt")
-        testing.assert_allclose(bands.vbt, bands.fermi)
+        b = bands.stick_fermi("vbt")
+        testing.assert_allclose(b.vbt, b.fermi)
 
-        bands.stick_fermi("cbb")
-        testing.assert_allclose(bands.cbb, bands.fermi)
+        b = bands.stick_fermi("cbb")
+        testing.assert_allclose(b.cbb, b.fermi)
 
-        bands.stick_fermi("midgap")
-        testing.assert_allclose(.5 * (bands.vbt + bands.cbb), bands.fermi)
+        b = bands.stick_fermi("midgap")
+        testing.assert_allclose(.5 * (b.vbt + b.cbb), b.fermi)
 
-        bands.canonize_fermi()
-        testing.assert_allclose(bands.fermi, 0)
-        testing.assert_allclose(bands.vbt, -1.5)
-        testing.assert_allclose(bands.cbb, 1.5)
+        b = bands.canonize_fermi()
+        testing.assert_allclose(b.fermi, 0)
+        testing.assert_allclose(b.vbt, -1.5)
+        testing.assert_allclose(b.cbb, 1.5)
 
 
 class GridTest(unittest.TestCase):
@@ -186,7 +184,7 @@ class GridTest(unittest.TestCase):
         xx, yy, zz = numpy.meshgrid(x, y, z, indexing='ij')
         data = (xx ** 2 + yy ** 2 + zz ** 2) * numericalunits.eV
         self.bs_grid = BandsGrid(
-            ReciprocalSpaceBasis(numpy.array((1, 2, 3)) / numericalunits.angstrom, kind='orthorhombic'),
+            ReciprocalSpaceBasis.orthorhombic(numpy.array((1, 2, 3)) / numericalunits.angstrom),
             (x, y, z),
             data,
             fermi=1.5 * numericalunits.eV,
@@ -210,9 +208,9 @@ class GridTest(unittest.TestCase):
     def test_save_load_json(self):
         grid = self.bs_grid
 
-        data = dumps(grid.to_json())
+        data = dumps(grid.state_dict())
         numericalunits.reset_units()
-        x = BandsGrid.from_json(loads(data))
+        x = BandsGrid.from_state_dict(loads(data))
 
         # Assert object is the same wrt numericalunits
         self.setUp()
@@ -225,9 +223,9 @@ class GridTest(unittest.TestCase):
     def test_save_load_json_with_conversion(self):
         grid = self.bs_grid
 
-        data = dumps(grid.as_cell().to_json())
+        data = dumps(grid.as_cell().state_dict())
         numericalunits.reset_units()
-        x = BandsPath.from_json(loads(data)).as_grid()
+        x = BandsPath.from_state_dict(loads(data)).as_grid()
 
         # Assert object is the same wrt numericalunits
         self.setUp()
@@ -242,7 +240,7 @@ class GridTest(unittest.TestCase):
         testing.assert_allclose(x.fermi, grid2.fermi)
 
     def test_serialization(self):
-        serialized = self.bs_grid.to_json()
+        serialized = self.bs_grid.state_dict()
         testing.assert_equal(serialized, dict(
             vectors=self.bs_grid.vectors,
             meta={},
@@ -253,10 +251,6 @@ class GridTest(unittest.TestCase):
         ))
 
     def test_interpolate(self):
-        a = self.bs_grid.interpolate_to_array(([.1, .2, .3], [.4, .5, .6]))
-        assert isinstance(a, ArrayWithUnits)
-        testing.assert_equal(a.units, self.bs_grid.values.units)
-
         a = self.bs_grid.interpolate_to_cell(([.1, .2, .3], [.4, .5, .6]))
         assert isinstance(a, BandsPath)
         assert isinstance(a.values, ArrayWithUnits)

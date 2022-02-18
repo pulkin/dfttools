@@ -17,7 +17,7 @@ from io import StringIO
 def __xsf_structure__(cell, tag=None, indent=4):
     indent = " " * indent
     cell_vectors = ((indent + " {:14.10f}" * 3 + "\n") * 3).format(*numpy.reshape(cell.vectors / numericalunits.angstrom, -1))
-    cartesian = cell.cartesian() / numericalunits.angstrom
+    cartesian = cell.cartesian / numericalunits.angstrom
     coords = ''.join(
         (indent + '{:>2} {:14.10f} {:14.10f} {:14.10f}\n'.format(cell.values[i], cartesian[i, 0], cartesian[i, 1],
                                                                  cartesian[i, 2]))
@@ -435,7 +435,7 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
     right = r
 
     if left is not None and right is not None:
-        target = left.stack(cell, right, vector='x', tolerance=tolerance)
+        target = left.stack(cell, right, vector=0, tolerance=tolerance)
         frac = False
 
     elif left is None and right is None:
@@ -452,7 +452,7 @@ def openmx_input(cell, populations, parameters=None, block_parameters=None,
             for i in relax_mask
         )
 
-    c = target.cartesian() / numericalunits.angstrom
+    c = target.cartesian / numericalunits.angstrom
     v = target.values
 
     parameters["atoms.number"] = cell.size
@@ -538,11 +538,11 @@ def pyscf_cell(cell, **kwargs):
         kwargs["unit"] = "Angstrom"
 
     if kwargs["unit"] == "Angstrom":
-        geometry = zip(cell.values, cell.cartesian() / numericalunits.angstrom)
+        geometry = zip(cell.values, cell.cartesian / numericalunits.angstrom)
         vectors = cell.vectors / numericalunits.angstrom
 
     elif kwargs["unit"] == "Bohr":
-        geometry = zip(cell.values, cell.cartesian() / numericalunits.aBohr)
+        geometry = zip(cell.values, cell.cartesian / numericalunits.aBohr)
         vectors = cell.vectors / numericalunits.aBohr
 
     if "dimension" not in kwargs:
@@ -579,7 +579,7 @@ def json_structure(cell, destination=None, **kwargs):
         rtn_str = False
 
     if isinstance(cell, Basis):
-        dump(cell.to_json(), destination, **default)
+        dump(cell.state_dict(), destination, **default)
 
     elif isinstance(cell, Iterable):
         destination.write("[")
@@ -587,7 +587,7 @@ def json_structure(cell, destination=None, **kwargs):
         for i in cell:
             if cnt:
                 destination.write(",")
-            dump(i.to_json(), destination, **default)
+            dump(i.state_dict(), destination, **default)
             cnt = True
         destination.write("]")
 

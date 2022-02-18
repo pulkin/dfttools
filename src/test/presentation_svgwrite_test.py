@@ -24,18 +24,18 @@ class CellSVGTest(unittest.TestCase):
 
     def setUp(self):
         self.cell = UnitCell(
-            Basis((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom, 0, 0, .5), kind='triclinic'),
+            Basis.triclinic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), (0, 0, .5)),
             (
                 (1. / 3, 1. / 3, .5),
                 (2. / 3, 2. / 3, .5),
             ),
-            'C',
+            ['C'] * 2,
         ).repeated(2, 2, 2)
 
         self.cell2 = UnitCell(
-            Basis((3.9 * angstrom / 2, 3.9 * angstrom / 2, 3.9 * angstrom / 2, .5, .5, .5), kind='triclinic'),
+            Basis.triclinic((3.9 * angstrom / 2, 3.9 * angstrom / 2, 3.9 * angstrom / 2), (.5, .5, .5)),
             (0, 0, 0),
-            'Si',
+            ['Si'],
         )
 
     def __check_svg__(self, svg, cell, **kwargs):

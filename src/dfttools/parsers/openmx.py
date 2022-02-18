@@ -358,11 +358,11 @@ class Input(AbstractTextParser, IdentifiableParser):
                 coordinatesl *= numericalunits.aBohr
                 coordinatesr *= numericalunits.aBohr
 
-            dl = (l.cartesian() - coordinatesl).sum(axis=0) / l.size
-            delta_l = abs(l.cartesian() - coordinatesl - dl).max()
+            dl = (l.cartesian - coordinatesl).sum(axis=0) / l.size
+            delta_l = abs(l.cartesian - coordinatesl - dl).max()
 
-            dr = (r.cartesian() - coordinatesr).sum(axis=0) / r.size
-            delta_r = abs(r.cartesian() - coordinatesr - dr).max()
+            dr = (r.cartesian - coordinatesr).sum(axis=0) / r.size
+            delta_r = abs(r.cartesian - coordinatesr - dr).max()
 
             if delta_l / numericalunits.aBohr > tolerance:
                 raise ValueError(
@@ -387,13 +387,21 @@ class Input(AbstractTextParser, IdentifiableParser):
             elif units_cell == "au":
                 shape *= numericalunits.aBohr
 
-        return CrystalCell(
-            shape,
-            coordinates,
-            values,
-            c_basis=None if units.lower() == "frac" else "cartesian",
-            meta=self.__collect_source_meta__(),
-        )
+        if units.lower() == "frac":
+            return CrystalCell(
+                shape,
+                coordinates,
+                values,
+                meta=self.__collect_source_meta__(),
+            )
+        else:
+            return CrystalCell.from_cartesian(
+                shape,
+                coordinates,
+                values,
+                meta=self.__collect_source_meta__(),
+            )
+
 
 
 class Output(AbstractTextParser, IdentifiableParser):
@@ -576,7 +584,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         self.parser.reset()
         cells = []
 
-        coords = startingCell.cartesian()
+        coords = startingCell.cartesian
 
         while self.parser.present("lattice vectors (bohr)"):
 
@@ -586,11 +594,10 @@ class Output(AbstractTextParser, IdentifiableParser):
                 shape = self.parser.next_float((3, 3)) * numericalunits.aBohr
 
                 meta, future_coords = self.__collect_unitCell_meta__(tag_energy, tag_forces, len(cells))
-                cells.append(CrystalCell(
+                cells.append(CrystalCell.from_cartesian(
                     shape,
                     coords,
                     startingCell.values,
-                    c_basis="cartesian",
                     meta=meta,
                 ))
 
@@ -707,11 +714,10 @@ class MD(AbstractTextParser, IdentifiableParser):
 
             _meta = meta.copy()
             _meta["total-energy"] = energy
-            result.append(CrystalCell(
+            result.append(CrystalCell.from_cartesian(
                 vectors,
                 coordinates,
                 values,
-                c_basis="cartesian",
                 meta=_meta,
             ))
 

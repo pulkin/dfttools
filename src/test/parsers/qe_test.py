@@ -129,12 +129,12 @@ class Test_output0(unittest.TestCase):
              (-0.290065, 0.502407, 0.814524),
              (-0.290065, -0.502407, 0.814524))
         ) * 7.0103 * numericalunits.aBohr)
-        testing.assert_allclose(cells[0].reciprocal().vectors, numpy.array(
+        testing.assert_allclose(cells[0].reciprocal.vectors, numpy.array(
             ((1.149169, 0.000000, 0.409237),
              (-0.574584, 0.995209, 0.409237),
              (-0.574584, -0.995209, 0.409237))
         ) / 7.0103 / numericalunits.aBohr, rtol=1e-5, atol=1)
-        testing.assert_allclose(cells[0].cartesian(), numpy.array(
+        testing.assert_allclose(cells[0].cartesian, numpy.array(
             ((0.0000001, 0.0000000, 0.7086605),
              (-0.0000001, 0.0000000, -0.7086605))
         ) * 7.0103 * numericalunits.aBohr, atol=1)
@@ -177,7 +177,7 @@ class Test_output0(unittest.TestCase):
                  (-0.574584, -0.995209, 0.409237))
             ) * units)
 
-        testing.assert_allclose(b[0].cartesian() / units, numpy.array(
+        testing.assert_allclose(b[0].cartesian / units, numpy.array(
             ((0.0000, 0.0000, 0.1535),
              (-0.1436, -0.2488, 0.2558),
              (0.2873, 0.4976, -0.0512),
@@ -201,7 +201,7 @@ class Test_output0(unittest.TestCase):
              (-5.8586, 0.8361, 5.8840, 5.8840, 7.4114, 10.0627, 10.0627, 12.1191, 17.3944),
              (-4.8492, -0.0498, 2.4338, 4.7831, 7.5088, 11.6828, 12.0642, 14.4760, 17.7700))
         ) * numericalunits.eV)
-        testing.assert_allclose(b[-1].cartesian() / units, numpy.array(
+        testing.assert_allclose(b[-1].cartesian / units, numpy.array(
             ((0.0000, -0.0000, 0.1436),
              (-0.1404, -0.2431, 0.2393),
              (0.2807, 0.4863, -0.0479),
@@ -284,15 +284,15 @@ class Test_output1(unittest.TestCase):
                  (0.0, 1.0, 0.0),
                  (0.0, 0.0, 1.0))
             ) * 12.0 * numericalunits.aBohr)
-        testing.assert_allclose(cells[0].cartesian(), numpy.array(
+        testing.assert_allclose(cells[0].cartesian, numpy.array(
             ((0.1880000, 0.0000000, 0.0000000),
              (0.0000000, 0.0000000, 0.0000000))
         ) * 12 * numericalunits.aBohr)
-        testing.assert_allclose(cells[1].cartesian(), numpy.array(
+        testing.assert_allclose(cells[1].cartesian, numpy.array(
             ((2.040132676, 0.0, 0.0),
              (0.0, 0.0, 0.0))
         ) * numericalunits.aBohr)
-        testing.assert_allclose(cells[-1].cartesian(), numpy.array(
+        testing.assert_allclose(cells[-1].cartesian, numpy.array(
             ((2.140073906, 0.0, 0.0),
              (0.0, 0.0, 0.0))
         ) * numericalunits.aBohr)
@@ -315,7 +315,7 @@ class Test_output2(unittest.TestCase):
                  (0.0, 1.0, 0.0),
                  (0.0, 0.0, 8.0))
             ) * 5.3033 * numericalunits.aBohr)
-        testing.assert_allclose(cells[0].cartesian(), numpy.array(
+        testing.assert_allclose(cells[0].cartesian, numpy.array(
             ((0.5000000, 0.5000000, -2.1213200),
              (0.0000000, 0.0000000, -1.4142130),
              (0.5000000, 0.5000000, -0.7071070),
@@ -324,7 +324,7 @@ class Test_output2(unittest.TestCase):
              (0.0000000, 0.0000000, 1.4142130),
              (0.5000000, 0.5000000, 2.1213200))
         ) * 5.3033 * numericalunits.aBohr)
-        testing.assert_allclose(cells[1].cartesian(), numpy.array(
+        testing.assert_allclose(cells[1].cartesian, numpy.array(
             ((0.500000000, 0.500000000, -2.119426840),
              (0.000000000, 0.000000000, -1.414423364),
              (0.500000000, 0.500000000, -0.706630354),
@@ -333,7 +333,7 @@ class Test_output2(unittest.TestCase):
              (0.000000000, 0.000000000, 1.414423364),
              (0.500000000, 0.500000000, 2.119426840))
         ) * 5.3033 * numericalunits.aBohr)
-        testing.assert_allclose(cells[-1].cartesian(), numpy.array(
+        testing.assert_allclose(cells[-1].cartesian, numpy.array(
             ((0.500000000, 0.500000000, -2.062079273),
              (0.000000000, 0.000000000, -1.379793410),
              (0.500000000, 0.500000000, -0.689092900),
@@ -408,7 +408,7 @@ class Test_output3(unittest.TestCase):
              (-1., 1., -1.))
         ) * 2 * math.pi / 10.2 / numericalunits.aBohr)
         assert b.size == 28
-        crds = b.cartesian()
+        crds = b.cartesian
         testing.assert_allclose(crds[:, 0] / units, numpy.array(
             (0.,) * 22 + \
             tuple(0.1 * i for i in range(6))

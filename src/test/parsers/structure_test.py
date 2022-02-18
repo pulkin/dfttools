@@ -31,7 +31,7 @@ class Test_xsf0(unittest.TestCase):
             (0., 2.71, 2.71),
         )) * numericalunits.angstrom)
 
-        testing.assert_allclose(c.cartesian(), numpy.array((
+        testing.assert_allclose(c.cartesian, numpy.array((
             (0, 0, 0),
             (1.355, -1.355, -1.355)
         )) * numericalunits.angstrom)
@@ -64,12 +64,12 @@ class Test_xsf1(unittest.TestCase):
 
             testing.assert_array_equal(cc.values[:2], ("16", "30"))
 
-        testing.assert_allclose(c[0].cartesian(), numpy.array((
+        testing.assert_allclose(c[0].cartesian, numpy.array((
             (0, 0, 0),
             (1.355, -1.355, -1.355)
         )) * numericalunits.angstrom)
 
-        testing.assert_allclose(c[1].cartesian(), numpy.array((
+        testing.assert_allclose(c[1].cartesian, numpy.array((
             (0, 0, 0),
             (1.255, -1.255, -1.255)
         )) * numericalunits.angstrom)
@@ -106,12 +106,12 @@ class Test_xsf2(unittest.TestCase):
             (0., 2.981, 2.981),
         )) * numericalunits.angstrom)
 
-        testing.assert_allclose(c[0].cartesian(), numpy.array((
+        testing.assert_allclose(c[0].cartesian, numpy.array((
             (0, 0, 0),
             (1.355, -1.355, -1.355)
         )) * numericalunits.angstrom)
 
-        testing.assert_allclose(c[1].cartesian(), numpy.array((
+        testing.assert_allclose(c[1].cartesian, numpy.array((
             (0, 0, 0),
             (1.5905, -1.5905, -1.5905)
         )) * numericalunits.angstrom)
@@ -245,7 +245,7 @@ class Test_cube0(unittest.TestCase):
         c = self.parser.unitCell()
 
         assert_standard_crystal_cell(c)
-        testing.assert_allclose(c.cartesian(), numpy.array((
+        testing.assert_allclose(c.cartesian, numpy.array((
             (5.570575, 5.669178, 5.593517),
             (5.562867, 5.669178, 7.428055),
             (7.340606, 5.669178, 5.111259)
@@ -273,7 +273,7 @@ class Test_cube1(unittest.TestCase):
         c = self.parser.unitCell()
 
         assert_standard_crystal_cell(c)
-        testing.assert_allclose(c.cartesian(), numpy.array((
+        testing.assert_allclose(c.cartesian, numpy.array((
             (5.570575, 5.669178, 5.593517),
             (5.562867, 5.669178, 7.428055),
             (7.340606, 5.669178, 5.111259)

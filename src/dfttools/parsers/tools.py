@@ -66,9 +66,9 @@ class JSONStorage(AbstractJSONParser, IdentifiableParser):
         data = self.json
         if isinstance(self.json, list):
             if index is None:
-                return list(self.__pick_class__(i).from_json(i) for i in self.json)
+                return list(self.__pick_class__(i).from_state_dict(i) for i in self.json)
             data = self.json[index]
-        return self.__pick_class__(data).from_json(data)
+        return self.__pick_class__(data).from_state_dict(data)
 
     @unit_cell
     def unitCells(self, index=None):

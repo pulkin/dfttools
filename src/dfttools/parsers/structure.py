@@ -58,11 +58,10 @@ class XSF(AbstractTextParser, IdentifiableParser):
                     self.parser.next_line()
                     values[i] = self.parser.next_match(cre_word)
                     coordinates[i, :] = self.parser.next_float(3) * numericalunits.angstrom
-                result.append(CrystalCell(
+                result.append(CrystalCell.from_cartesian(
                     shape,
                     coordinates,
                     values,
-                    c_basis='cartesian'
                 ))
 
             else:
@@ -253,7 +252,7 @@ class GaussianCube(AbstractTextParser, IdentifiableParser):
             else:
                 c.append(ac * numericalunits.aBohr)
 
-        return CrystalCell(shape, c, v, c_basis="cartesian")
+        return CrystalCell.from_cartesian(shape, c, v)
 
 
 class XYZ(AbstractTextParser, IdentifiableParser):
@@ -298,7 +297,7 @@ class XYZ(AbstractTextParser, IdentifiableParser):
         mn = c.min(axis=0)
         shape = mx - mn + XYZ.vacuum_size
 
-        return CrystalCell(RealSpaceBasis(shape, kind='orthorhombic'), c, v, c_basis="cartesian")
+        return CrystalCell.from_cartesian(RealSpaceBasis.orthorhombic(shape), c, v)
 
 
 class CIF(AbstractTextParser, IdentifiableParser):
@@ -339,7 +338,7 @@ class CIF(AbstractTextParser, IdentifiableParser):
             raise ValueError("Missing the following tokens: {}".format(", ".join(
                 t for i, t in zip(vecs, tokens) if i is None
             )))
-        return RealSpaceBasis(vecs, kind="triclinic")
+        return RealSpaceBasis.triclinic(vecs[:3], vecs[3:])
 
     @unit_cell
     def unitCells(self):

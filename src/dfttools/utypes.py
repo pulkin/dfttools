@@ -2,30 +2,33 @@
 This submodule enhances `types.py` with units-aware arrays.
 """
 import numpy
-from numbers import Number
 
+from pycoordinates.util import roarray_copy
+from functools import cached_property
+from attr import attrs, attrib
 from . import types, util
 
 
-class UnitsMixin(object):
+class UnitsMixin:
     """
     A core mixin to work with units.
     """
-
     default_units = {}
 
-    def __init__(self, *args, **kwargs):
-        super(UnitsMixin, self).__init__(*args, **kwargs)
+    def __attrs_post_init__(self):
         for k, v in self.default_units.items():
             if k in dir(self):
                 target = getattr(self, k)
-                if isinstance(target, (numpy.ndarray, Number)):
-                    if not isinstance(target, util.array):
-                        setattr(self, k, util.array(target, units=v))
+                object.__setattr__(self, k, util.array(target, units=v))
+
+    @cached_property
+    def vectors_inv(self):
+        result = super().vectors_inv
+        units = getattr(self.vectors, "units", None)
+        return util.ArrayWithUnits(result, units=None if units is None else f"1/({units})")
 
 
-# TODO: remove most of these classes
-
+@attrs(frozen=True, eq=False)
 class RealSpaceBasis(UnitsMixin, types.Basis):
     """
     Basis in real space.
@@ -34,6 +37,7 @@ class RealSpaceBasis(UnitsMixin, types.Basis):
     default_units = dict(vectors="angstrom")
 
 
+@attrs(frozen=True, eq=False)
 class ReciprocalSpaceBasis(UnitsMixin, types.Basis):
     """
     Basis in reciprocal space.
@@ -42,6 +46,7 @@ class ReciprocalSpaceBasis(UnitsMixin, types.Basis):
     default_units = dict(vectors="1/angstrom")
 
 
+@attrs(frozen=True, eq=False)
 class CrystalCell(UnitsMixin, types.UnitCell):
     """
     A unit cell of a crystal.
@@ -50,6 +55,7 @@ class CrystalCell(UnitsMixin, types.UnitCell):
     default_units = dict(vectors="angstrom", values=None)
 
 
+@attrs(frozen=True, eq=False)
 class CrystalGrid(UnitsMixin, types.Grid):
     """
     A grid in real space.
@@ -70,41 +76,27 @@ class FermiCrossingException(Exception):
     pass
 
 
-class FermiMixin(object):
+def convert_fermi(fermi) -> util.ArrayWithUnits:
+    if fermi is None:
+        return
+    else:
+        return roarray_copy(fermi)
+
+
+def check_fermi(instance, attribute: str, fermi: util.ArrayWithUnits):
+    if fermi is not None and fermi.shape != ():
+        raise ValueError(f"fermi.shape={fermi.shape} is not a scalar")
+
+
+@attrs(frozen=True, eq=False)
+class FermiMixin:
     """
     A mixin to add the Fermi attribute.
 
     Args:
         fermi (float): the Fermi level value;
     """
-    def __init__(self, *args, **kwargs):
-        self.fermi = kwargs.pop("fermi", None)
-        super(FermiMixin, self).__init__(*args, **kwargs)
-
-    def __getstate__(self):
-        state = super(FermiMixin, self).__getstate__()
-        state["fermi"] = self.fermi.copy() if self.fermi is not None else None
-        return state
-
-    def __setstate__(self, state):
-        fermi = state.pop("fermi")
-        super(FermiMixin, self).__setstate__(state)
-        self.fermi = fermi
-
-    @property
-    def fermi(self):
-        return self.__fermi__
-
-    @fermi.setter
-    def fermi(self, v):
-        if isinstance(v, util.ArrayWithUnits):
-            self.__fermi__ = v.copy()
-        elif isinstance(v, Number):
-            self.__fermi__ = util.array(v, units=self.default_units.get("fermi", None))
-        elif v is None:
-            self.__fermi__ = None
-        else:
-            raise ValueError("Only numeric values or None are accepted for the Fermi, found: {}".format(repr(v)))
+    fermi = attrib(converter=convert_fermi, validator=check_fermi, default=None, kw_only=True)
 
     @property
     def nocc(self):
@@ -151,6 +143,22 @@ class FermiMixin(object):
         """The band gap."""
         return self.cbb - self.vbt
 
+    def compute_fermi_level(self, value, epsilon=1e-12):
+        """
+        Computes the Fermi level.
+        Args:
+            value (str): the Fermi level position: one of
+            'midgap', 'cbb', 'vbt';
+            epsilon (float): infinitesimal term to separate
+            the Fermi level and bands in case `value`='cbb'
+            or 'vbt';
+        """
+        return {
+            "midgap": .5 * (self.cbb + self.vbt),
+            "cbb": self.cbb - epsilon,
+            "vbt": self.vbt + epsilon,
+        }[value]
+
     def stick_fermi(self, value, epsilon=1e-12):
         """
         Shifts the the Fermi level.
@@ -161,11 +169,7 @@ class FermiMixin(object):
             the Fermi level and bands in case `value`='cbb'
             or 'vbt';
         """
-        self.fermi = dict(
-            midgap=.5 * (self.cbb + self.vbt),
-            cbb=self.cbb - epsilon,
-            vbt=self.vbt + epsilon,
-        )[value]
+        return self.copy(fermi=self.compute_fermi_level(value, epsilon))
 
     def canonize_fermi(self):
         """
@@ -173,13 +177,13 @@ class FermiMixin(object):
         Shifts the energy scale zero to the Fermi level.
         """
         try:
-            self.stick_fermi("midgap")
+            fermi = self.compute_fermi_level("midgap")
         except FermiCrossingException:
-            pass
-        self.values -= self.fermi
-        self.fermi = 0
+            fermi = self.fermi
+        return self.copy(fermi=0, values=self.values-fermi)
 
 
+@attrs(frozen=True, eq=False)
 class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
     """
      A class describing a band structure along a path.
@@ -204,6 +208,7 @@ class BandsPath(FermiMixin, UnitsMixin, types.UnitCell):
     interpolate.__doc__ = types.UnitCell.interpolate.__doc__
 
 
+@attrs(frozen=True, eq=False)
 class BandsGrid(FermiMixin, UnitsMixin, types.Grid):
     """
      A class describing a band structure on a grid.

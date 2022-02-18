@@ -2,9 +2,10 @@ import unittest
 
 from dfttools.formatters import *
 from dfttools.parsers import structure, qe, openmx
-from dfttools.types import *
+from dfttools.types import Basis, UnitCell, Grid
 from numpy import testing
 from numericalunits import angstrom
+from pycoordinates import uniform_grid
 
 from json import loads
 
@@ -13,12 +14,12 @@ class Tests(unittest.TestCase):
 
     def setUp(self):
         self.cell = UnitCell(
-            Basis((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom, 0, 0, .5), kind='triclinic'),
+            Basis.triclinic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), (0, 0, .5)),
             (
                 (1. / 3, 1. / 3, .5),
                 (2. / 3, 2. / 3, .5),
             ),
-            'C',
+            ['C'] * 2,
         )
 
         coords = (numpy.linspace(0, 1, 11, endpoint=False), numpy.linspace(0, 1, 13, endpoint=False),
@@ -29,7 +30,7 @@ class Tests(unittest.TestCase):
             coords,
             numpy.zeros((11, 13, 17)),
         )
-        self.grid.values = numpy.prod(numpy.sin(self.grid.explicit_coordinates() * 2 * numpy.pi), axis=-1)
+        self.grid = self.grid.copy(values=numpy.prod(numpy.sin(self.grid.explicit_coordinates * 2 * numpy.pi), axis=-1))
 
     def test_xsf_back_forth(self):
         c1 = self.cell
@@ -44,8 +45,7 @@ class Tests(unittest.TestCase):
     def test_xsf_back_forth_multi(self):
         c1 = []
         for i in range(10):
-            c = self.cell.copy()
-            c.coordinates += (numpy.random.rand(*c.coordinates.shape) - .5) / 10
+            c = self.cell.copy(coordinates=self.cell.coordinates + (numpy.random.rand(*self.cell.coordinates.shape) - .5) / 10)
             c1.append(c)
         c2 = structure.xsf(xsf_structure(*c1)).unitCells()
 
@@ -61,12 +61,12 @@ class Tests(unittest.TestCase):
         testing.assert_allclose(self.grid.values, g.values, atol=1e-7)
 
     def test_qe_input(self):
-        cell = UnitCell(Basis((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), kind='orthorhombic'),
+        cell = UnitCell(Basis.orthorhombic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom)),
             (
                 (1. / 3, 1. / 3, .5),
                 (2. / 3, 2. / 3, .5),
             ),
-            'C',
+            ['C'] * 2,
         )
         self.assertEqual(qe_input(
             cell=cell,
@@ -138,13 +138,13 @@ class Tests(unittest.TestCase):
     def test_wan90_input(self):
         _g = (2, 3, 2)
         self.maxDiff = None
-        grid = Grid.uniform(_g).reshape(-1, 3)
-        cell = UnitCell(Basis((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom), kind='orthorhombic'),
+        grid = uniform_grid(_g).reshape(-1, 3)
+        cell = UnitCell(Basis.orthorhombic((2.5 * angstrom, 2.5 * angstrom, 10 * angstrom)),
             (
                 (1. / 3, 1. / 3, .5),
                 (2. / 3, 2. / 3, .5),
             ),
-            'C',
+            ['C'] * 2,
         )
         self.assertEqual(wannier90_input(
             cell=cell,

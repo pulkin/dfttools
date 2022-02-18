@@ -166,7 +166,7 @@ class Test_input0(unittest.TestCase):
             (0.0, 0.0, 100.0),
         )) * numericalunits.aBohr)
 
-        testing.assert_allclose(c.cartesian(), numpy.array((
+        testing.assert_allclose(c.cartesian, numpy.array((
             (0.33333333333353, 0.33333333333331, 0.50000000000001),
             (0.66666666666614, 0.66666666666674, 0.48313110391249),
             (0.66666666666614, 0.66666666666674, 0.51686889613927),
@@ -191,9 +191,9 @@ class Test_input1(unittest.TestCase):
 
         assert c.coordinates.shape[0] == 58
 
-        testing.assert_allclose(c.cartesian()[0],
+        testing.assert_allclose(c.cartesian[0],
                                 numpy.array((0.95982599546579, 0.83123369528605, 50.0)) * numericalunits.angstrom)
-        testing.assert_allclose(c.cartesian()[-1],
+        testing.assert_allclose(c.cartesian[-1],
                                 numpy.array((54.71008174155039, 0.83123369528605, 50.0)) * numericalunits.angstrom)
 
         assert c.values[0] == "mo"
@@ -247,7 +247,9 @@ class Test_input2(unittest.TestCase):
 
     def test_tolerance(self):
         l = self.l.unitCell()
-        l.coordinates[2, 2] += 1e-6
+        c = l.coordinates.copy()
+        c[2, 2] += 1e-6
+        l = l.copy(coordinates=c)
         with self.assertRaises(ValueError):
             self.s.unitCell(l=l, r=l)
 
@@ -344,12 +346,12 @@ class Test_output0(unittest.TestCase):
 
         # Test first cell corresponds to input
         testing.assert_allclose(c[0].vectors, input_cell.vectors)
-        testing.assert_allclose(c[0].cartesian() / numericalunits.angstrom,
-                                input_cell.cartesian() / numericalunits.angstrom)
+        testing.assert_allclose(c[0].cartesian / numericalunits.angstrom,
+                                input_cell.cartesian / numericalunits.angstrom)
         testing.assert_equal(c[0].values, input_cell.values)
         testing.assert_allclose(c[0].meta["total-energy"] / numericalunits.Hartree, -89.989525394506)
 
-        testing.assert_allclose(c[-1].cartesian(), numpy.array((
+        testing.assert_allclose(c[-1].cartesian, numpy.array((
             (1.8773, 1.0838, 50.0000),
             (3.7545, 2.1677, 48.4420),
             (3.7545, 2.1677, 51.5580),
@@ -512,7 +514,7 @@ class Test_MD(unittest.TestCase):
             [-2.10777, -3.63912,  0.00783],
             [-0.00324, -0.00179, 30.07408],
         )) * numericalunits.angstrom)
-        testing.assert_allclose(cells[0].cartesian(), numpy.array((
+        testing.assert_allclose(cells[0].cartesian, numpy.array((
             [-2.11459, - 1.21948, 16.52081],
             [-2.09637, -1.21147,  3.54001],
             [-2.10004, -1.21247, 22.00568],
@@ -540,7 +542,7 @@ class Test_MD(unittest.TestCase):
             [-2.19454, -3.78541, -0.00081],
             [-0.00190, -0.00124, 28.99901],
         )) * numericalunits.angstrom)
-        testing.assert_allclose(cells[-1].cartesian(), numpy.array((
+        testing.assert_allclose(cells[-1].cartesian, numpy.array((
             [-2.18629, -1.26238, 15.712521],
             [-2.19590, -1.26712,  3.61734],
             [-2.18998, -1.26167, 21.30495],

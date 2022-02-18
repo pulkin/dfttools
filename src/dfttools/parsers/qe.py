@@ -61,7 +61,7 @@ class Bands(AbstractTextParser, IdentifiableParser):
         return self.parser.next_int()
 
     @tag_method("basis-dependent")
-    def reciprocal_data(self, basis):
+    def bands(self, basis):
         """
         Retrieves the band structure data.
 
@@ -86,25 +86,7 @@ class Bands(AbstractTextParser, IdentifiableParser):
             coordinates[i, :] = self.parser.next_float(3)
             values[i, :] = self.parser.next_float(ne)
 
-        return BandsPath(basis, coordinates, values)
-
-    def bands(self, basis):
-        """
-        Retrieves the bands.
-
-        Args:
-
-            basis (types.Basis): the reciprocal unit cell of the band
-            structure.
-
-        Returns:
-
-            A unit cell containing band energies.
-        """
-        result = self.reciprocal_data(basis)
-        result.values *= numericalunits.eV
-        result.meta["units-values"] = "eV"
-        return result
+        return BandsPath(basis, coordinates, values * numericalunits.eV)
 
 
 class Output(AbstractTextParser, IdentifiableParser):
@@ -430,9 +412,8 @@ class Output(AbstractTextParser, IdentifiableParser):
             coordinates[i, :] = self.parser.next_float(3)
 
         coordinates *= alat
-        result.append(CrystalCell(
+        result.append(CrystalCell.from_cartesian(
             shape, coordinates, captions,
-            c_basis="cartesian",
             meta=self.__collect_unitCell_meta__(tag_energy, tag_forces, len(coordinates), 0)
         ))
 
@@ -472,10 +453,9 @@ class Output(AbstractTextParser, IdentifiableParser):
             if units == "crystal":
                 result.append(CrystalCell(shape, coordinates, captions, meta=meta))
             elif units == "alat":
-                result.append(CrystalCell(shape, coordinates * alat, captions, c_basis="cartesian", meta=meta))
+                result.append(CrystalCell.from_cartesian(shape, coordinates * alat, captions, meta=meta))
             elif units == "bohr":
-                result.append(CrystalCell(shape, coordinates * numericalunits.aBohr, captions, c_basis="cartesian",
-                                          meta=meta))
+                result.append(CrystalCell.from_cartesian(shape, coordinates * numericalunits.aBohr, captions, meta=meta))
             else:
                 raise ParseError("Unknown units: %s" % units)
 
@@ -501,8 +481,7 @@ class Output(AbstractTextParser, IdentifiableParser):
         if parseMode_kp == 0:
             c = BandsPath(vectors, kpoints, energies, fermi=fermi, meta=meta)
         else:
-            c = BandsPath(vectors, kpoints * 2 * math.pi / alat, energies, c_basis="cartesian", fermi=fermi,
-                          meta=meta)
+            c = BandsPath.from_cartesian(vectors, kpoints * 2 * math.pi / alat, energies, fermi=fermi, meta=meta)
 
         return c
 
@@ -1135,7 +1114,7 @@ class Input(AbstractTextParser, IdentifiableParser):
             shape[0] *= numericalunits.aBohr
             shape[1] *= shape[0]
             shape[2] *= shape[0]
-            basis = RealSpaceBasis(shape, kind='triclinic')
+            basis = RealSpaceBasis.triclinic(shape[:3], shape[3:])
 
         elif ibrav == 0:
 
@@ -1177,11 +1156,11 @@ class Input(AbstractTextParser, IdentifiableParser):
             self.parser.next_line()
 
         if units == "alat":
-            result = CrystalCell(basis, coordinates * units_dict["alat"], values, c_basis="cartesian")
+            result = CrystalCell.from_cartesian(basis, coordinates * units_dict["alat"], values)
         elif units == "bohr":
-            result = CrystalCell(basis, coordinates * numericalunits.aBohr, values, c_basis="cartesian")
+            result = CrystalCell.from_cartesian(basis, coordinates * numericalunits.aBohr, values)
         elif units == "angstrom":
-            result = CrystalCell(basis, coordinates * numericalunits.angstrom, values, c_basis="cartesian")
+            result = CrystalCell.from_cartesian(basis, coordinates * numericalunits.angstrom, values)
         elif units == "crystal":
             result = CrystalCell(basis, coordinates, values)
         else:

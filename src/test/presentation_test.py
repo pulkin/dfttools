@@ -31,7 +31,7 @@ class CommonTest(unittest.TestCase):
 class BandPlotTest(unittest.TestCase):
 
     def setUp(self):
-        basis = RealSpaceBasis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
+        basis = RealSpaceBasis.triclinic((1, 1, 1), (0, 0, -0.5))
 
         kp_gamma = numpy.array((0, 0, 0))[numpy.newaxis, :]
         kp_m = numpy.array((0.5, 0.0, 0))[numpy.newaxis, :]
@@ -145,7 +145,7 @@ class BandPlotTest(unittest.TestCase):
 class BandDensityPlotTest(unittest.TestCase):
 
     def setUp(self):
-        basis = RealSpaceBasis((1, 1, 1, 0, 0, -0.5), kind='triclinic')
+        basis = RealSpaceBasis.triclinic((1, 1, 1), (0, 0, -0.5))
 
         kp_gamma = numpy.array((0, 0, 0))[numpy.newaxis, :]
         kp_m = numpy.array((0.5, 0.0, 0))[numpy.newaxis, :]
@@ -177,11 +177,9 @@ class BandDensityPlotTest(unittest.TestCase):
             numpy.zeros((30, 30, 1, 2), dtype=numpy.float64),
             fermi=0,
         )
-        k = self.grid.cartesian() * math.pi / 3. ** .5 * 2
+        k = self.grid.cartesian * math.pi / 3. ** .5 * 2
         e = (1 + 4 * numpy.cos(k[..., 1]) ** 2 + 4 * numpy.cos(k[..., 1]) * numpy.cos(k[..., 0] * 3. ** .5)) ** .5 * eV
-
-        self.grid.values[..., 0] = -e
-        self.grid.values[..., 1] = e
+        self.grid = self.grid.copy(values=numpy.concatenate([-e[..., None], e[..., None]], axis=-1))
 
     @cleanup
     def test_plot(self):
@@ -275,7 +273,7 @@ class BandDensityPlotTest(unittest.TestCase):
         matplotlib_bands_density(self.cell, pyplot.gca(), 100, units="eV")
 
         assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(eV)")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(electrons per unit cell per eV)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(states per unit cell per eV)")
 
     @cleanup
     def test_custom_units_landscape(self):
@@ -283,7 +281,7 @@ class BandDensityPlotTest(unittest.TestCase):
                                  orientation='landscape')
 
         assert pyplot.gca().get_xaxis().get_label().get_text().endswith("(Hartree)")
-        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(electrons per unit cell per Hartree)")
+        assert pyplot.gca().get_yaxis().get_label().get_text().endswith("(states per unit cell per Hartree)")
 
     @cleanup
     def test_custom_units_portrait(self):
@@ -364,7 +362,7 @@ class ScalarGridPlotTest(unittest.TestCase):
 
     def setUp(self):
         self.grid = CrystalGrid(
-            RealSpaceBasis((1 * angstrom, 1 * angstrom, 1 * angstrom, 0, 0, -0.5), kind='triclinic'),
+            RealSpaceBasis.triclinic((1 * angstrom, 1 * angstrom, 1 * angstrom), (0, 0, -0.5)),
             (
                 numpy.linspace(0, 1, 30, endpoint=False),
                 numpy.linspace(0, 1, 30, endpoint=False),
@@ -372,7 +370,7 @@ class ScalarGridPlotTest(unittest.TestCase):
             ),
             numpy.zeros((30, 30, 30)),
         )
-        self.grid.values = numpy.prod(numpy.sin(self.grid.explicit_coordinates() * 2 * math.pi), axis=-1)
+        self.grid = self.grid.copy(values=numpy.prod(numpy.sin(self.grid.explicit_coordinates * 2 * math.pi), axis=-1))
 
         self.wrong_dims = CrystalGrid(
             RealSpaceBasis(((1 * angstrom, 0), (0, 1 * angstrom))),

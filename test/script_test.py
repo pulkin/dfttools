@@ -8,6 +8,12 @@ def get_fname(self, id):
     return "__" + self.__class__.__name__ + "TEMP" + str(id)
 
 
+script_env = os.environ.copy()
+this = os.path.dirname(os.path.realpath(__file__))
+pypath = ":".join(os.environ.get("PYTHONPATH", "").split(":") + [os.path.join(this, "../")])
+script_env["PYTHONPATH"] = pypath
+
+
 class Test_dft_plot_bands(unittest.TestCase):
 
     def setUp(self):
@@ -19,19 +25,13 @@ class Test_dft_plot_bands(unittest.TestCase):
 
     def test_output(self):
         fname = get_fname(self, "0.pdf")
-        this = os.path.dirname(os.path.realpath(__file__))
-        env = os.environ.copy()
-        env["PYTHONPATH"] = "{}:{}".format(
-            env["PYTHONPATH"],
-            os.path.join(this, "../"),
-        )
         p = subprocess.Popen((
             sys.executable,
             os.path.join(this, "../scripts/dft-plot-bands"),
             os.path.join(this, "parsers/cases/qe.output.0.testcase"),
             "-o",
             fname,
-        ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=script_env)
         output, error = p.communicate("")
         if len(output) > 0:
             print(output)
@@ -52,18 +52,12 @@ class Test_dft_svg_struct(unittest.TestCase):
 
     def test_output(self):
         fname = get_fname(self, "0.svg")
-        this = os.path.dirname(os.path.realpath(__file__))
-        env = os.environ.copy()
-        env["PYTHONPATH"] = "{}:{}".format(
-            env["PYTHONPATH"],
-            os.path.join(this, "../"),
-        )
         p = subprocess.Popen((
             sys.executable,
             os.path.join(this, "../scripts/dft-svg-structure"),
             os.path.join(this, "parsers/cases/qe.output.0.testcase"),
             fname,
-        ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
+        ), stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=script_env)
         output, error = p.communicate("")
         if len(output) > 0:
             print(output)

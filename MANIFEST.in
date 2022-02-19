@@ -1,4 +1,3 @@
 include *.txt
+include c/*.h
 recursive-include test/parsers/cases *
-recursive-include cython *
-

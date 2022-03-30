@@ -8,29 +8,25 @@ ext_modules = [
     Extension("dfttools.parsers.native_qe", ["c/generic-parser.c", "c/native_qe.c"], include_dirs=[numpy.get_include(), "c/"]),
 ]
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setup(
     name='dfttools',
     version='0.1.0',
     author='Artem Pulkin',
     author_email='gpulkin@gmail.com',
-    packages=['dfttools', 'dfttools.parsers'],
-    test_suite="nose.collector",
-    tests_require="nose",
-    url='http://pypi.python.org/pypi/DFTTools/',
+    packages=find_packages(),
+    data_files=["requirements.txt", "test-requirements.txt"],
+    url='https://github.com/pulkin/dfttools',
     license='LICENSE.txt',
-    description='Tools for parsing textual data from modern DFT codes',
+    description='Tools for parsing textual data from modern DFT (quantum chemistry) packages',
     long_description=open('README.md').read(),
     ext_modules=ext_modules,
     setup_requires=[
-        'numpy',
+        'numpy', 'pytest-runner',
     ],
-    install_requires=[
-        'scipy',
-        'numericalunits',
-        'matplotlib',
-        'svgwrite',
-        'requests',
-    ],
+    install_requires=requirements,
     scripts=[
         'scripts/dft-plot-bands',
         'scripts/dft-svg-structure',

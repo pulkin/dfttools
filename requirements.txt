@@ -6,3 +6,4 @@ svgwrite
 requests
 pycoordinates
 attrs
+Cython

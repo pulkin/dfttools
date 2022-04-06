@@ -62,3 +62,7 @@ src/cover/
 
 # venvs
 venv*/
+
+# cython temporary stuff
+cython/*.c
+*.html

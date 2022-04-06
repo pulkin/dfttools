@@ -1,2 +1,4 @@
-include requirements.txt
+include cython/*.pyx
+include cython/*.pxd
+exclude cython/*.c
 prune test

@@ -7,19 +7,18 @@ from .generic import AbstractJSONParser, IdentifiableParser, ParseError
 from ..util import loads
 from ..simple import unit_cell, band_structure
 
-valid_containers = ("dfttools.types.Basis", "dfttools.types.Cell", "dfttools.types.Grid",
+valid_containers = ("pycoordinates.basis.Basis", "pycoordinates.cell.Cell", "pycoordinates.grid.Grid",
                     "dfttools.types.RealSpaceBasis", "dfttools.types.ReciprocalSpaceBasis",
                     "dfttools.types.CrystalCell", "dfttools.types.CrystalGrid", "dfttools.types.BandsPath",
                     "dfttools.types.BandsGrid")
-valid_containers_uc = ("dfttools.types.CrystalCell",)
-valid_containers_bands = ("dfttools.types.BandsPath", "dfttools.types.BandsGrid")
+valid_containers_uc = ("pycoordinates.cell.Cell", "dfttools.types.CrystalCell",)
+valid_containers_bands = ("pycoordinates.cell.Cell", "dfttools.types.BandsPath", "dfttools.types.BandsGrid")
 
 lookup_container = {}
 lookup_type_string = {}
 
 for i in valid_containers:
     _package, _module, _class = i.split(".")
-    assert _package == "dfttools"
     module = importlib.import_module(".".join((_package, _module)))
     lookup_container[i] = getattr(module, _class)
     lookup_type_string[lookup_container[i]] = i

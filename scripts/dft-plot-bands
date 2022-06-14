@@ -69,10 +69,10 @@ for file_name, destination in (
                     raise
 
                 if options.fermi is not None:
-                    bands.fermi = options.fermi
+                    bands = bands.copy(fermi=options.fermi)
 
                 if options.fermi_origin:
-                    bands.canonize_fermi()
+                    bands = bands.canonize_fermi()
 
                 data[destination] = bands
 
